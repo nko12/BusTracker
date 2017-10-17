@@ -1,0 +1,1 @@
+This project represents a Bus Tracker application that covers the city of New York. It includes a NodeJS backend and React frontend. The application is being developed as a class project for UCF's _Processes for Object-Oriented Software Development_ course.
