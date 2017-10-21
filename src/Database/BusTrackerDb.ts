@@ -1,8 +1,10 @@
 import * as mongo from 'mongodb';
 import * as mongoose from 'mongoose';
+
+import * as models from '../Models';
 import { serverConfig } from '../ServerConfig'
-import { Schemas } from './DbSchemas';
-import { Result } from '../Result';
+import * as schema from './DbSchemas'
+import { Result, TypedResult } from '../Result';
 
 /**
  * An object that will perform communications with the MongoDB database, with methods to perform common
@@ -43,7 +45,7 @@ export class BusTrackerDb {
             // For each schema name, there should be a corresponding collection for it. Loop through each schema name, and
             // if a collection does not exist for it, create the collection.
             const pendingCollectionNames: string[] = [];
-            Schemas.schemaNames.forEach((schemaName: string) => {
+            schema.Schemas.schemaNames.forEach((schemaName: string) => {
 
                 if (collectionList.findIndex((collection: mongo.Collection): boolean => {
                     return collection.collectionName === schemaName;
@@ -68,5 +70,46 @@ export class BusTrackerDb {
     
     }
 
+    /**
+     * Checks that a user does not already exist in the system with the specified email address.
+     * @param emailAddress The email address to check.
+     * @returns A true result value if the email is free to use, otherwise false.
+     */
+    public async verifyEmail(emailAddress: string): Promise<TypedResult<boolean>> {
 
+        // Try to find a user who has the given email address.
+        const queryResult = await schema.UserType.findOne({email: emailAddress}).cursor().next();
+
+        // A null result means know user was found in the db with the provided email address. The specified
+        // email address is free to use in that case.
+        if (queryResult == null)
+            return new TypedResult<boolean>(true, true);
+        else
+            return new TypedResult<boolean>(true, false);
+    }
+
+    /**
+     * Registers a new user to the database.
+     * @param user An object representing the user to register.
+     * @returns The result of the operation.
+     */
+    public async registerUser(user: models.User): Promise<Result> {
+
+        // Before adding a new user to the database, verify no other user has their email address.
+        const verifyResult: TypedResult<boolean> = await this.verifyEmail(user.email);
+        if (!verifyResult.success)
+            return new Result(false, 'Failed to verify the new user\'s email address.');
+        if (!verifyResult.data)
+            return new Result(false, 'A user with that email address already exists.');
+        
+        // Add the new user to the database.
+        const newUser = new schema.UserType(user);
+        try {
+            await newUser.save();
+        } catch (err) {
+            return new Result(false, `Failed to create a new user object. ${JSON.stringify(err)}.`);
+        }
+       
+        return new Result(true, '');
+    }
 }

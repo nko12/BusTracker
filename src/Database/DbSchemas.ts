@@ -1,11 +1,13 @@
 import * as mongoose from 'mongoose';
 
-// A class that contains the various database schemas.
+/**
+ * Contains the various database schemas used by the BusTrackerDb.
+ */
 export class Schemas {
 
     // The User schema.
     public static userSchema: mongoose.Schema = new mongoose.Schema({
-        id: {type: Number, index: true},
+        id: { type: Number, index: true },
         firstName: String,
         lastName: String,
         email: String,
@@ -13,11 +15,16 @@ export class Schemas {
         favoriteStopIds: [],
         favoriteRouteIds: []
     }, {
-        // Make sure the name of the collection is "User" and not "users".
-        collection: 'User'
-    });
+            // Make sure the name of the collection is "User" and not "users".
+            collection: 'User'
+        });
 
     public static schemaNames: string[] = [
         'User'
     ];
 }
+
+/**
+ * Represents a 'User' Mongoose Model.
+ */
+export const UserType = mongoose.model('User', Schemas.userSchema);
