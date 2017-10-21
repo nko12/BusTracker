@@ -1,7 +1,23 @@
 import * as mongo from 'mongodb';
 import * as mongoose from 'mongoose';
-import { Result } from '../Result'
+import { serverConfig } from '../ServerConfig'
+import { Schemas } from './DbSchemas';
+import { Result } from '../Result';
 
+/**
+ * Represents the connection state of a mongoose connection.
+ */
+enum ConnectionState {
+    Disconnected = 0,
+    Connected = 1,
+    Connecting = 2,
+    Disconnecting = 3
+}
+
+/**
+ * An object that will perform communications with the MongoDB database, with methods to perform common
+ * actions such as registering a user and adding a new route.
+ */
 export class BusTrackerDb {
 
     /**
@@ -14,33 +30,38 @@ export class BusTrackerDb {
      * @param client The MongoClient instance to use.
      */
     public constructor(client: mongoose.Connection | null) {
-        if (client == null)
-            this.client = await mongoose.connect('');
+        if (client != null) {
+            this.client = client;
+        }
     }
 
     /**
-     * Initializes the BusTracker database.
-     * @param client The mongoose connection to the database. If not specified, uses 'BusTracker' database on port 27017.
+     * Initializes the BusTracker database. If the connection provided in the constructor was not already connected, 
+     * this will also attempt to connect to a 'BusTracker' database on port 27017.
+     * @param client The mongoose connection to the database. 
      * @returns The result of the operation.
      */
-    public async init(conn: mongoose.Connection | null): Promise<Result> {
+    public async init(): Promise<Result> {
 
         // Attempt to connect to MongoDB.
         let db: mongo.Db;
         try {
 
-            db = await this.client.connect(`mongodb://localhost:${this.port}/BusTracker`);
-            console.log('MongoDB: Successfully connected to the BusTracker database.');
+            switch (this.client.readyState) {
+                case ConnectionState.Disconnected:
+                    // Connect using the database 'BusTracker' and port '27017'.
+                    this.client = await mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`);
+                    console.log(`MongoDB: Successfully connected to the ${serverConfig.dbName} database.`);
+                    break;
+            }
 
             // Verify all the necessary collections exist, creating them if they don't.
-            
-            
+            // const userModel = mongoose.model('User', Schemas.userSchema);
+
         } catch (err) {
 
-            return new Result(false, 'Failed to connect to MongoDB.');
+            return new Result(false, 'Failed to connect to MongoDB.' + JSON.stringify(err));
         }
-        
-        
 
         return new Result(true);
     }
