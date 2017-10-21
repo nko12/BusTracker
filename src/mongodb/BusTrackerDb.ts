@@ -5,16 +5,6 @@ import { Schemas } from './DbSchemas';
 import { Result } from '../Result';
 
 /**
- * Represents the connection state of a mongoose connection.
- */
-enum ConnectionState {
-    Disconnected = 0,
-    Connected = 1,
-    Connecting = 2,
-    Disconnecting = 3
-}
-
-/**
  * An object that will perform communications with the MongoDB database, with methods to perform common
  * actions such as registering a user and adding a new route.
  */
@@ -32,6 +22,8 @@ export class BusTrackerDb {
     public constructor(client: mongoose.Connection | null) {
         if (client != null) {
             this.client = client;
+        } else {
+            throw Error('Not yet implemented. BusTrackerDb must be initailized with a valid mongoose connection.');
         }
     }
 
@@ -43,26 +35,38 @@ export class BusTrackerDb {
      */
     public async init(): Promise<Result> {
 
-        // Attempt to connect to MongoDB.
-        let db: mongo.Db;
         try {
+            // Get the names of the existing collections.        
+            const cursor: mongo.CommandCursor = this.client.db.listCollections({});
+            const collectionList = await cursor.toArray();
 
-            switch (this.client.readyState) {
-                case ConnectionState.Disconnected:
-                    // Connect using the database 'BusTracker' and port '27017'.
-                    this.client = await mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`);
-                    console.log(`MongoDB: Successfully connected to the ${serverConfig.dbName} database.`);
-                    break;
+            // For each schema name, there should be a corresponding collection for it. Loop through each schema name, and
+            // if a collection does not exist for it, create the collection.
+            const pendingCollectionNames: string[] = [];
+            Schemas.schemaNames.forEach((schemaName: string) => {
+
+                if (collectionList.findIndex((collection: mongo.Collection): boolean => {
+                    return collection.collectionName === schemaName;
+                }) == -1) {
+                    // The given schema name does not have a matching collection. Create the collection.
+                    pendingCollectionNames.push(schemaName);
+                }
+            });
+
+            // Create a collection for all the pending collection names.
+            for (let i: number = 0; i < pendingCollectionNames.length; i++) {
+                await this.client.db.createCollection(pendingCollectionNames[i]);
             }
-
-            // Verify all the necessary collections exist, creating them if they don't.
-            // const userModel = mongoose.model('User', Schemas.userSchema);
 
         } catch (err) {
 
+            console.log('Failed to connect to MongoDB. ' + JSON.stringify(err));
             return new Result(false, 'Failed to connect to MongoDB.' + JSON.stringify(err));
         }
 
         return new Result(true);
+    
     }
+
+
 }

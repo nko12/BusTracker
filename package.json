@@ -18,7 +18,9 @@
   "homepage": "https://github.com/nko12/BusTracker#readme",
   "dependencies": {
     "express": "^4.16.2",
-    "mongodb": "^2.2.33"
+    "mongodb": "^2.2.33",
+    "mongoose": "^4.12.3",
+    "ts-node": "^3.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
@@ -30,10 +32,8 @@
     "@types/sinon-chai": "^2.7.29",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
-    "mongoose": "^4.12.3",
     "sinon": "^4.0.1",
     "sinon-chai": "^2.14.0",
-    "ts-node": "^3.3.0",
     "typescript": "^2.5.3"
   }
 }
