@@ -5,9 +5,11 @@ export class BusMap extends React.Component {
 	render() {
 		return (
 			<GoogleMap
-				defaultZoom={5} 
-				defaultCenter={{lat: 59.95, lng: 30.33}}
+				defaultZoom={15} 
+				defaultCenter={{lat: 40.71, lng: -74}}
 			/>
 		);
 	}
 }
+
+export default BusMap;
