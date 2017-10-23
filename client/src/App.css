@@ -22,3 +22,24 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.BusMap {
+  height: 100%;
+  width: 70%;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.SideBar {
+  height: 100%;
+  width: 30%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  background-color: #1a4072;
+  /*box-shadow: 10px 10px 5px #888888;*/
+  color: white;
+  /*padding: 4px;*/
+}

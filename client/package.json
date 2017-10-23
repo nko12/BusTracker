@@ -6,6 +6,7 @@
     "google-map-react": "^0.24.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
+    "react-md": "^1.2.4",
     "react-scripts-ts": "2.8.0"
   },
   "scripts": {

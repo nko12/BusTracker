@@ -1,16 +1,27 @@
 import * as React from 'react';
 import GoogleMap from 'google-map-react';
-import './../styles/BusMap.css';
 
-export class BusMap extends React.Component {
+// TODO: Props interface?
+
+export class BusMap extends React.Component<any, any> {
+	constructor() {
+		super();
+		this.state = {
+			map: null
+		};
+	}
+
+	mapMoved() {
+		console.log('mapMoved: ');
+	}
+
 	render() {
 		return (
-			<div className='BusMap'>
-				<GoogleMap
-					defaultZoom={15} 
-					defaultCenter={{lat: 40.71, lng: -74}}
-				/>
-			</div>
+			<GoogleMap
+				defaultZoom={this.props.defaultZoom}
+				defaultCenter={this.props.defaultCenter}
+				onChange={this.mapMoved.bind(this)}
+			/>
 		);
 	}
 }
