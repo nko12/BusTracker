@@ -1,18 +1,15 @@
 import * as React from 'react';
-import GoogleMap from 'google-map-react';
+import GoogleMap from 'google-map-react'; // API: https://github.com/istarkov/google-map-react/blob/master/API.md
+// There are two other GoogleMaps packages for React that I know about:
+// google-maps-react and react-google-maps. Neither of which have
+// TypeScript definitions, which is why we're using google-map-react.
 
 // TODO: Props interface?
+// TODO: remove `any`s
 
 export class BusMap extends React.Component<any, any> {
-	constructor() {
-		super();
-		this.state = {
-			map: null
-		};
-	}
-
-	mapMoved() {
-		console.log('mapMoved: ');
+	_onChange({center, zoom, bounds, marginBounds}: any) {
+		console.log('center: ' + JSON.stringify(center));
 	}
 
 	render() {
@@ -20,7 +17,7 @@ export class BusMap extends React.Component<any, any> {
 			<GoogleMap
 				defaultZoom={this.props.defaultZoom}
 				defaultCenter={this.props.defaultCenter}
-				onChange={this.mapMoved.bind(this)}
+				onChange={this._onChange}
 			/>
 		);
 	}

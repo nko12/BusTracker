@@ -5,8 +5,7 @@
   "dependencies": {
     "@types/webfontloader": "^1.6.29",
     "google-map-react": "^0.24.0",
-    "node-sass-chokidar": "0.0.3",
-    "npm-run-all": "^4.1.1",
+    "node-sass-chokidar": "^0.0.3",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-md": "^1.2.4",
@@ -14,13 +13,12 @@
     "webfontloader": "^1.6.28"
   },
   "scripts": {
-    "build-css": "node-sass-chokidar --include-path ./node_modules src/ -o src/",
-    "watch-css": "npm run build-css && npm run build-css --watch --recursive",
-    "start-js": "react-scripts-ts start",
-    "start": "npm-run-all -p watch-css start-js",
+    "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+    "build-css": "node-sass-chokidar src/ -o src/",
+    "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive"
   },
   "devDependencies": {
     "@types/google-map-react": "^0.23.0",
