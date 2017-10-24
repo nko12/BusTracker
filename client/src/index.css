@@ -3042,7 +3042,7 @@ svg.md-icon {
     overflow-x: auto; }
   .md-tab {
     max-width: calc(100vw - 56px);
-    min-width: 32px; }
+    min-width: 1px; }
   .md-tab-label {
     font-size: 14px;
     font-weight: 500;
@@ -3073,7 +3073,7 @@ svg.md-icon {
     overflow: visible; }
   .md-tab {
     max-width: 264px;
-    min-width: 32px;
+    min-width: 1px;
     padding-left: 24px;
     padding-right: 24px; }
   .md-tab-label {

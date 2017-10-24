@@ -1,5 +1,9 @@
 import * as React from 'react';
-import GoogleMap from 'google-map-react'; // API: https://github.com/istarkov/google-map-react/blob/master/API.md
+import GoogleMap from 'google-map-react';
+import BusMarker from './BusMarker';
+
+// google-map-react API:
+// 		https://github.com/istarkov/google-map-react/blob/master/API.md
 // There are a few other GoogleMaps packages for React that I know about:
 // google-maps-react
 // react-google-maps
@@ -10,35 +14,55 @@ import GoogleMap from 'google-map-react'; // API: https://github.com/istarkov/go
 // TODO: Props interface?
 // TODO: remove `any`s
 
-// import {GoogleApiWrapper} from 'google-maps-react';
-
 export default class BusMap extends React.Component<any, any> {
 	state = {
 		pointA: this.props.pointA,
 		pointB: this.props.pointB,
+		zoom: this.props.zoom,
+		center: this.midPoint(this.props.pointA, this.props.pointB),
+		map: null,
+		maps: null,
+		mapLoaded: false,
+	};
+
+	componentWillReceiveProps(nextProps: any) {
+		console.log('willReceiveProps: ' + JSON.stringify(nextProps));
+		this.setState({
+			zoom: nextProps.zoom,
+			pointA: nextProps.pointA,
+			pointB: nextProps.pointB,
+			center: this.midPoint(nextProps.pointA, nextProps.pointB),
+		});
 	}
 
-	componentDidUpdate(prevProps: object, PrevState: object) {
-		console.log(JSON.stringify(this.state));
-		console.log(JSON.stringify(this.props));
-	}
-
-	_onChange({center, zoom, bounds, marginBounds}: any) {
-		console.log('center: ' + JSON.stringify(center));
+	midPoint(A: any, B: any) {
+		return {
+			lat: (A.lat + B.lat) / 2,
+			lng: (A.lng + B.lng) / 2,
+		}
 	}
 
 	render() {
 		return (
 			<GoogleMap
-				// defaultZoom={this.props.defaultZoom}
-				zoom={this.props.zoom}
-				center={this.props.pointA}
-				onChange={this._onChange}
-			/>
+				zoom={this.state.zoom}
+				center={this.state.center}
+				yesIWantToUseGoogleMapApiInternals
+				onGoogleApiLoaded={({map, maps}) => {
+					this.setState({map: map, maps: maps, mapLoaded: true});
+				}}
+			>
+				<BusMarker
+					lat={this.state.pointA.lat}
+					lng={this.state.pointA.lng}
+					text={'A'}
+				/>
+				<BusMarker
+					lat={this.state.pointB.lat}
+					lng={this.state.pointB.lng}
+					text={'B'}
+				/>
+			</GoogleMap>
 		);
 	}
 }
-
-// export default GoogleApiWrapper({
-// 	apiKey: (AIzaSyBc6ogBABh5D1YHPjL5aarMJ5cbizS8fzc)
-// })(BusMap)

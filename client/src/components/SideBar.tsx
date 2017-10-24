@@ -1,38 +1,14 @@
 import * as React from 'react';
 import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
+// API: https://react-md.mlaursen.com/components/
 
 export default class SideBar extends React.Component<any, any> {
 	state = {
-		latA: this.props.pointA.lat,
-		lngA: this.props.pointA.lng,
-		latB: this.props.pointB.lat,
-		lngB: this.props.pointB.lng,
-		zoom: this.props.zoom,
-	}
-
-	handleLatAchange = (latA: any) => {
-		this.setState({latA});
-		this.props.callBackFunction({lat: this.state.latA, lng: this.state.lngA}, {lat: this.state.latB, lng: this.state.lngB});
-	}
-
-	handleLngAchange = (lngA: any) => {
-		this.setState({lngA});
-		this.props.callBackFunction({lat: this.state.latA, lng: this.state.lngA}, {lat: this.state.latB, lng: this.state.lngB});
-	}
-
-	handleLatBchange = (latB: any) => {
-		this.setState({latB});
-		this.props.callBackFunction({lat: this.state.latA, lng: this.state.lngA}, {lat: this.state.latB, lng: this.state.lngB});
-	}
-
-	handleLngBchange = (lngB: any) => {
-		this.setState({lngB});
-		this.props.callBackFunction({lat: this.state.latA, lng: this.state.lngA}, {lat: this.state.latB, lng: this.state.lngB});
-	}
+		pointA: this.props.pointA,
+		pointB: this.props.pointB,
+	};
 
 	render() {
-		var {latA, lngA, latB, lngB, zoom} = this.state;
-
 		return (
 			<div>
 				<TabsContainer
@@ -44,33 +20,41 @@ export default class SideBar extends React.Component<any, any> {
 							<h1>Winter is Coming</h1>
 							<TextField
 								label='Latitude A'
-								value={latA}
-								onChange={this.handleLatAchange}
+								value={this.state.pointA.lat}
+								onChange={(value) => {
+									this.setState({pointA: {lat: Number(value), lng: this.state.pointA.lng}});
+								}}
 							/>
 							<TextField
 								label='Longitude A'
-								value={lngA}
-								onChange={this.handleLngAchange}
+								value={this.state.pointA.lng}
+								onChange={(value) => {
+									this.setState({pointA: {lat: this.state.pointA.lat, lng: Number(value)}});
+								}}
 							/>
 							<TextField
 								label='Latitude B'
-								value={latB}
-								onChange={this.handleLatBchange}
+								value={this.state.pointB.lat}
+								onChange={(value) => {
+									this.setState({pointB: {lat: Number(value), lng: this.state.pointB.lng}});
+								}}
 							/>
 							<TextField
 								label='Longitude B'
-								value={lngB}
-								onChange={this.handleLngBchange}
-							/>
-							<TextField
-								label='Zoom'
-								value={zoom}
+								value={this.state.pointB.lng}
 								onChange={(value) => {
-									this.setState({zoom: value});
-									this.props.callBackZoom(this.state);
+									this.setState({pointB: {lat: this.state.pointB.lat, lng: Number(value)}});
 								}}
 							/>
-							<Button flat primary>Get Directions</Button>
+							<Button
+							flat
+							primary
+							onClick={() => {
+								this.props.sendToApp(this.state.pointA, this.state.pointB);
+							}}
+						>
+							Get Directions
+						</Button>
 						</Tab>
 						<Tab label='Targaryans'><h1>Fire and Blood</h1></Tab>
 						<Tab label='Lannisters'><h1>A Lannister Always Pays His Debts</h1></Tab>
