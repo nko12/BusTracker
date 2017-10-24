@@ -18,7 +18,7 @@ export class Result {
      * @param success Whether or not this result represents a successful operation.
      * @param message The message associated with an unsuccessful operation.
      */
-    public constructor(success: boolean, message: string = '') {
+    public constructor(success: boolean, message: string = 'Operation completed successfully') {
         this.success = success;
         this.message = message;
     }

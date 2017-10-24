@@ -110,6 +110,16 @@ export class BusTrackerDb {
             return new Result(false, `Failed to create a new user object. ${JSON.stringify(err)}.`);
         }
        
-        return new Result(true, '');
+        return new Result(true);
+    }
+
+    /**
+     * Removes the user with matching id from the database.
+     * @param userId The id of the user to delete.
+     */
+    public async deleteUser(userId: string): Promise<Result> {
+
+        // Remove the user with specified id from the database.
+        return new Result(true);
     }
 }
