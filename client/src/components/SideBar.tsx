@@ -7,6 +7,7 @@ export default class SideBar extends React.Component<any, any> {
 		lngA: this.props.pointA.lng,
 		latB: this.props.pointB.lat,
 		lngB: this.props.pointB.lng,
+		zoom: this.props.zoom,
 	}
 
 	handleLatAchange = (latA: any) => {
@@ -30,7 +31,7 @@ export default class SideBar extends React.Component<any, any> {
 	}
 
 	render() {
-		var {latA, lngA, latB, lngB} = this.state;
+		var {latA, lngA, latB, lngB, zoom} = this.state;
 
 		return (
 			<div>
@@ -60,6 +61,14 @@ export default class SideBar extends React.Component<any, any> {
 								label='Longitude B'
 								value={lngB}
 								onChange={this.handleLngBchange}
+							/>
+							<TextField
+								label='Zoom'
+								value={zoom}
+								onChange={(value) => {
+									this.setState({zoom: value});
+									this.props.callBackZoom(this.state);
+								}}
 							/>
 							<Button flat primary>Get Directions</Button>
 						</Tab>
