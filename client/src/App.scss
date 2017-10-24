@@ -48,3 +48,9 @@
   /*color: white;*/
   /*padding: 4px;*/
 }
+
+.tabs__page-layout {
+  .md-tab--inactive {
+    color: get-color('secondary', $md-light-theme);
+  }
+}

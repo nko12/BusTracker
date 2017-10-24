@@ -1,3 +1,4 @@
+/*$md-tab-max-width: 64px;*/
 .App {
   text-align: center; }
 
@@ -39,3 +40,6 @@
   /*box-shadow: 10px 10px 5px #888888;*/
   /*color: white;*/
   /*padding: 4px;*/ }
+
+.tabs__page-layout .md-tab--inactive {
+  color: rgba(0, 0, 0, 0.54); }

@@ -1,5 +1,10 @@
 @import 'react-md/src/scss/react-md';
 
 // Variable overrides
-$md-primary-color: $md-teal-500;
-$md-secondary-color: $md-purple-a-400;
+$md-light-theme: true;
+$md-primary-color: $md-light-blue-500;
+$md-secondary-color: $md-deep-orange-a-200;
+
+/*$md-tab-max-width: 64px;*/
+$md-tab-mobile-min-width: 32px;
+$md-tab-desktop-min-width: 32px;
