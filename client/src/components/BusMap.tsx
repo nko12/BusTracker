@@ -7,7 +7,12 @@ import GoogleMap from 'google-map-react'; // API: https://github.com/istarkov/go
 // TODO: Props interface?
 // TODO: remove `any`s
 
-export class BusMap extends React.Component<any, any> {
+export default class BusMap extends React.Component<any, any> {
+	state = {
+		pointA: this.props.pointA,
+		pointB: this.props.pointB,
+	}
+
 	_onChange({center, zoom, bounds, marginBounds}: any) {
 		console.log('center: ' + JSON.stringify(center));
 	}
@@ -16,11 +21,9 @@ export class BusMap extends React.Component<any, any> {
 		return (
 			<GoogleMap
 				defaultZoom={this.props.defaultZoom}
-				defaultCenter={this.props.defaultCenter}
+				center={this.state.pointA}
 				onChange={this._onChange}
 			/>
 		);
 	}
 }
-
-export default BusMap;
