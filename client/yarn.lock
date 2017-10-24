@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@google/maps@^0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@google/maps/-/maps-0.4.5.tgz#72eb9cf8e7de944619245d0f8f3f969571ea84d8"
+
 "@types/google-map-react@^0.23.0":
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/@types/google-map-react/-/google-map-react-0.23.0.tgz#6b4441094373be32860985165ad15f161ab1bfe3"

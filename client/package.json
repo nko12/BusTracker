@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@google/maps": "^0.4.5",
     "google-map-react": "^0.24.0",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.1",

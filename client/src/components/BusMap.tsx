@@ -20,8 +20,8 @@ export default class BusMap extends React.Component<any, any> {
 		pointB: this.props.pointB,
 		zoom: this.props.zoom,
 		center: this.midPoint(this.props.pointA, this.props.pointB),
-		map: null,
-		maps: null,
+		map: undefined,
+		maps: undefined, // TODO: what's this for?
 		mapLoaded: false,
 	};
 
@@ -32,6 +32,29 @@ export default class BusMap extends React.Component<any, any> {
 			pointA: nextProps.pointA,
 			pointB: nextProps.pointB,
 			center: this.midPoint(nextProps.pointA, nextProps.pointB),
+		});
+		// marker (google)
+		new google.maps.Marker({
+			position: this.state.center,
+			map: this.state.map,
+		});
+		// directions
+		var directionsService = new google.maps.DirectionsService;
+		var directionsDisplay = new google.maps.DirectionsRenderer({
+			suppressMarkers: true,
+			map: this.state.map
+		});
+		directionsService.route({
+			origin: nextProps.pointA,
+			destination: nextProps.pointB,
+			travelMode: google.maps.TravelMode.DRIVING
+		}, function(response: any, status: any) {
+			if (status === 'OK') {
+				console.log(response);
+				directionsDisplay.setDirections(response);
+			} else {
+				console.log(status);
+			}
 		});
 	}
 
@@ -45,11 +68,31 @@ export default class BusMap extends React.Component<any, any> {
 	render() {
 		return (
 			<GoogleMap
+				// apiKey={AIzaSyC3yy6iEqFbnD8ZeVmppBtWp5CaeSLMD24}
 				zoom={this.state.zoom}
 				center={this.state.center}
 				yesIWantToUseGoogleMapApiInternals
 				onGoogleApiLoaded={({map, maps}) => {
 					this.setState({map: map, maps: maps, mapLoaded: true});
+					// new google.maps.Marker({
+					// 	position: this.state.center,
+					// 	map: map,
+					// });
+					// var directionsService = new maps.DirectionsService;
+					// var directionsDisplay = new maps.DirectionsRenderer({suppressMarkers: true});
+					// directionsDisplay.setMap(map);
+					// directionsService.route({
+					// 	origin: this.state.pointA,
+					// 	destination: this.state.pointB,
+					// 	travelMode: 'DRIVING'
+					// }, function(response: any, status: any) {
+					// 	if (status === 'OK') {
+					// 		console.log(response);
+					// 		directionsDisplay.setDirections(response);
+					// 	} else {
+					// 		console.log(status);
+					// 	}
+					// });
 				}}
 			>
 				<BusMarker
