@@ -169,8 +169,8 @@ describe('BusTrackerDb', () => {
             const user = new UserType(userData);
             await user.save();
 
-            // Remove the user by email.
-            await appDb.deleteUser(userData.email);
+            // Remove the user by id.
+            await appDb.deleteUser(userData.id);
 
             // The user should no longer exist.
             const queryResult = await UserType.findOne({id: user.id}).cursor().next();
@@ -191,8 +191,8 @@ describe('BusTrackerDb', () => {
             // Count the number of users that are in the collection.
             const userCount: number = await UserType.count({});
 
-            // Remove the user by email.
-            await appDb.deleteUser(userData.email);
+            // Remove the user by id.
+            await appDb.deleteUser(userData.id);
 
             // The number of users should be 1 less than the number at the start of the method.
             const newUserCount: number = await UserType.count({});

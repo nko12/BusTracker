@@ -120,6 +120,10 @@ export class BusTrackerDb {
     public async deleteUser(userId: string): Promise<Result> {
 
         // Remove the user with specified id from the database.
-        return new Result(true);
+        const removeResult = await schema.UserType.findOne({id: userId}).remove();
+        if (removeResult.result.ok)
+            return new Result(true);
+        else
+            return new Result(false, `Unable to remove user with id: ${userId}.`);
     }
 }
