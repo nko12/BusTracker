@@ -62,3 +62,7 @@ compiled/
 
 # VS Code specific files.
 .vscode/
+
+# platform specific files
+.DS_STORE
+package-lock.json
