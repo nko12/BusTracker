@@ -3,7 +3,10 @@
         "target": "es6",
         "module": "commonjs",
         "outDir": "./compiled",
-        "strict": true
+        "strict": true,
+        "sourceMap": true,
+        "mapRoot": "./compiled",
+        "sourceRoot": "./src"
     },
     "include": [
         "./src/**/*"

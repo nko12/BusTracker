@@ -3,8 +3,8 @@
   "version": "0.5.0",
   "description": "A bus tracking system that can be used to track the realtime movements of busses in New York city.",
   "scripts": {
-    "start": "node ./compiled/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "SET NODE_ENV=prod && node ./compiled/app.js",
+    "test": "SET NODE_ENV=test && mocha -r ts-node/register src/**/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -17,10 +17,27 @@
   },
   "homepage": "https://github.com/nko12/BusTracker#readme",
   "dependencies": {
-    "express": "^4.16.2"
+    "deep-equal": "^1.0.1",
+    "express": "^4.16.2",
+    "mongodb": "^2.2.33",
+    "mongoose": "^4.12.3",
+    "ts-node": "^3.3.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/deep-equal": "^1.0.1",
     "@types/express": "^4.0.37",
+    "@types/faker": "^4.1.1",
+    "@types/mocha": "^2.2.43",
+    "@types/mongodb": "^2.2.14",
+    "@types/mongoose": "^4.7.24",
+    "@types/sinon": "^2.3.6",
+    "@types/sinon-chai": "^2.7.29",
+    "chai": "^4.1.2",
+    "faker": "^4.1.0",
+    "mocha": "^4.0.1",
+    "sinon": "^4.0.1",
+    "sinon-chai": "^2.14.0",
     "typescript": "^2.5.3"
   }
 }
