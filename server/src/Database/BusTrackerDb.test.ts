@@ -7,7 +7,7 @@ import * as mongoose from 'mongoose';
 var equal = require('deep-equal');
 
 import * as models from '../Models';
-import { Schemas, UserType, BusTrackerDb } from '../Database'
+import { Schemas, UserType, BusTrackerDB } from '../Database'
 import { Result, TypedResult } from '../Result'
 import { serverConfig } from '../ServerConfig'
 import { copyInCommonProperties } from '../Util'
@@ -27,10 +27,10 @@ afterEach(() => {
     sandbox.restore();
 });
 
-// Tests for BusTrackerDb's Initialization method.
-describe('BusTrackerDb Initialization', () => {
+// Tests for BusTrackerDB's Initialization method.
+describe('BusTrackerDB Initialization', () => {
 
-    // BusTrackerDb's 'init' method should create all collections if they are missing.
+    // BusTrackerDB's 'init' method should create all collections if they are missing.
     it('should create missing collections if they don\'t exist.', (done) => {
 
         // Create and initialize a connection to the database.
@@ -38,10 +38,10 @@ describe('BusTrackerDb Initialization', () => {
         mongoose.connection.once('open', async () => {
             
             const conn: mongoose.Connection = mongoose.connection;
-            const db: BusTrackerDb = new BusTrackerDb(conn);
+            const db: BusTrackerDB = new BusTrackerDB(conn);
             await db.init();
 
-            // The BusTrackerDb class should have created the missing collections. There should be at least one collection
+            // The BusTrackerDB class should have created the missing collections. There should be at least one collection
             // in the test database.
             const cursor = conn.db.listCollections({});
             const collections = await cursor.toArray();
@@ -52,20 +52,20 @@ describe('BusTrackerDb Initialization', () => {
     });
 });
 
-// Tests for BusTrackerDb.
-describe('BusTrackerDb', () => {
+// Tests for BusTrackerDB.
+describe('BusTrackerDB', () => {
 
     // The bus tracker database instance that all the tests will use. It is initialized before tests use it, as they
     // all assume it has been initialized.
-    let appDb: BusTrackerDb;
+    let appDB: BusTrackerDB;
 
     before((done: MochaDone) => {
 
-        function initBusTrackerDbCallback() {
+        function initBusTrackerDBCallback() {
 
-            // Initailization the BusTrackerDb object.
-            appDb = new BusTrackerDb(mongoose.connection);
-            appDb.init().then(() => {
+            // Initailization the BusTrackerDB object.
+            appDB = new BusTrackerDB(mongoose.connection);
+            appDB.init().then(() => {
                 // End test bootstrap.
                 done();
             }).catch((err) => {
@@ -78,21 +78,21 @@ describe('BusTrackerDb', () => {
         // Create and initialize a connection to the database. (1 = connected)
         if (mongoose.connection.readyState == 1) {
 
-            initBusTrackerDbCallback();          
+            initBusTrackerDBCallback();          
         } else {
 
             mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });        
             mongoose.connection.once('open', () => {
 
-                initBusTrackerDbCallback(); 
+                initBusTrackerDBCallback(); 
             });
         }    
     });
 
-    // Tests for BusTrackerDb's 'verifyEmail' method.
+    // Tests for BusTrackerDB's 'verifyEmail' method.
     describe('#verifyEmail', () => {
 
-        // BusTrackerDb's 'verifyEmail' method should fail if a user with the same email adready exists.
+        // BusTrackerDB's 'verifyEmail' method should fail if a user with the same email adready exists.
         it('should fail if a user with the same email already exists.', async () => {
 
             // Create a user to put in User database.
@@ -101,25 +101,25 @@ describe('BusTrackerDb', () => {
             await user1.save();
 
             // Verify an email address.
-            const result: TypedResult<boolean> = await appDb.verifyEmail(userData.email);
+            const result: TypedResult<boolean> = await appDB.verifyEmail(userData.email);
 
-            // Since that email address already exists, BusTrackerDb should have returned an error.
+            // Since that email address already exists, BusTrackerDB should have returned an error.
             chai.assert(result.success);
             chai.expect(result.data).to.be.false;
         });
     })
 
-    // Tests for BusTrackerDb's 'registerUser' method.
+    // Tests for BusTrackerDB's 'registerUser' method.
     describe('#registerUser', () => {
 
-        // BusTrackerDb's 'registerUser' method should successfully create a new user in the database.
+        // BusTrackerDB's 'registerUser' method should successfully create a new user in the database.
         it('should add a new user into the database with matching properties.', async () => {
 
             // Create a user to put in the database.
             const userData = models.User.generateRandomUser();
 
             // Attempt to register a new user.
-            const result: Result = await appDb.registerUser(userData);
+            const result: Result = await appDB.registerUser(userData);
 
             // Registration of the user should be successful.
             chai.expect(result.success).to.be.true;
@@ -138,7 +138,7 @@ describe('BusTrackerDb', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // BusTrackerDb's 'registerUser' method should fail if a user with the same email already exists.
+        // BusTrackerDB's 'registerUser' method should fail if a user with the same email already exists.
         it('should fail if a user with the same email already exists.', async () => {
 
             // Create a user to put in the database.
@@ -151,14 +151,14 @@ describe('BusTrackerDb', () => {
             secondUserData.email = firstUserData.email;
 
             // Attempt to register the new user who has the same email as the first.
-            const result: Result = await appDb.registerUser(secondUserData);
+            const result: Result = await appDB.registerUser(secondUserData);
 
             // The register operation should fail.
             chai.expect(result.success).to.be.false;
         });
     });
 
-    // Tests for BusTrackerDb's '' method.
+    // Tests for BusTrackerDB's '' method.
     describe('#deleteUser', () => {
 
         // The 'deleteUser' method should actually remove the user from the database.
@@ -170,7 +170,7 @@ describe('BusTrackerDb', () => {
             await user.save();
 
             // Remove the user by id.
-            await appDb.deleteUser(userData.id);
+            await appDB.deleteUser(userData.id);
 
             // The user should no longer exist.
             const queryResult = await UserType.findOne({id: user.id}).cursor().next();
@@ -192,7 +192,7 @@ describe('BusTrackerDb', () => {
             const userCount: number = await UserType.count({});
 
             // Remove the user by id.
-            await appDb.deleteUser(userData.id);
+            await appDB.deleteUser(userData.id);
 
             // The number of users should be 1 less than the number at the start of the method.
             const newUserCount: number = await UserType.count({});

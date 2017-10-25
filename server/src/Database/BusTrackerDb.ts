@@ -10,7 +10,7 @@ import { Result, TypedResult } from '../Result';
  * An object that will perform communications with the MongoDB database, with methods to perform common
  * actions such as registering a user and adding a new route.
  */
-export class BusTrackerDb {
+export class BusTrackerDB {
 
     /**
      * Represents the mongoose client used to make queries against the MongoDB instance.
