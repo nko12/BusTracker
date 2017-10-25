@@ -1,22 +1,36 @@
 import * as React from 'react';
+import BusMap from './components/BusMap';
+import SideBar from './components/SideBar';
 import './App.css';
 
-const logo = require('./logo.svg');
+export default class App extends React.Component {
+	state = {
+		pointA: {lat: 41.337716, lng: -74.35912},
+		pointB: {lat: 40.7588528, lng: -73.9852625}
+	};
 
-class App extends React.Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+	recieveFromSideBar = (pointA: any, pointB: any) => {
+		this.setState({pointA: pointA, pointB: pointB});
+	}
+
+	render() {
+		return (
+			<div>
+				<div className='SideBar'>
+					<SideBar
+						pointA={this.state.pointA}
+						pointB={this.state.pointB}
+						sendToApp={this.recieveFromSideBar}
+					/>
+				</div>
+				<div className='BusMap'>
+					<BusMap
+						zoom={10}
+						pointA={this.state.pointA}
+						pointB={this.state.pointB}
+					/>
+				</div>
+			</div>
+		);
+	}
 }
-
-export default App;
