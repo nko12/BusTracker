@@ -10,10 +10,8 @@ interface AppState {
 }
 
 export default class App extends React.Component<{}, AppState> {
-	
 	public constructor(props: Object) {
 		super(props);
-
 		this.state = {
 			pointA: {lat: 41.337716, lng: -74.35912},
 			pointB: {lat: 40.7588528, lng: -73.9852625}

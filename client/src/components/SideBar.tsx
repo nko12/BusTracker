@@ -15,7 +15,6 @@ interface SideBarProps {
 }
 
 export default class SideBar extends React.Component<SideBarProps, SideBarState> {
-	
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {

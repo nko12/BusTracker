@@ -12,8 +12,7 @@ import BusMarker from './BusMarker';
 // None of which have TypeScript definitions, which is why we're using google-map-react.
 // however, the documentation for google-map-react is sparse and it doesn't seem to do as much as the others
 
-// TODO: Props interface?
-// TODO: remove `any`s
+// TODO: ability to remove markers and routes
 
 export interface BusMapState {
 	pointA: GMapReact.Coords;
@@ -32,9 +31,7 @@ export interface BusMapProps {
 }
 
 export default class BusMap extends React.Component<BusMapProps, BusMapState> {
-
 	public constructor(props: BusMapProps) {
-
 		super(props);
 		this.state = {
 			pointA: this.props.pointA,
@@ -67,7 +64,7 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 			origin: nextProps.pointA,
 			destination: nextProps.pointB,
 			travelMode: google.maps.TravelMode.DRIVING
-		}, function (response: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) {
+		}, (response: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) => {
 			if (status === google.maps.DirectionsStatus.OK) {
 				directionsDisplay.setDirections(response);
 			} else {
