@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 
 import * as models from '../Models';
 import { serverConfig } from '../ServerConfig'
-import * as schema from './DbSchemas'
+import * as schema from './DBSchemas'
 import { Result, TypedResult } from '../Result';
 
 /**
