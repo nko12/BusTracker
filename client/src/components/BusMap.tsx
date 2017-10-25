@@ -26,14 +26,13 @@ export default class BusMap extends React.Component<any, any> {
 	};
 
 	componentWillReceiveProps(nextProps: any) {
-		console.log('willReceiveProps: ' + JSON.stringify(nextProps));
 		this.setState({
 			zoom: nextProps.zoom,
 			pointA: nextProps.pointA,
 			pointB: nextProps.pointB,
 			center: this.midPoint(nextProps.pointA, nextProps.pointB),
 		});
-		// marker (google)
+		// marker (Google)
 		new google.maps.Marker({
 			position: this.state.center,
 			map: this.state.map,
@@ -50,7 +49,6 @@ export default class BusMap extends React.Component<any, any> {
 			travelMode: google.maps.TravelMode.DRIVING
 		}, function(response: any, status: any) {
 			if (status === 'OK') {
-				console.log(response);
 				directionsDisplay.setDirections(response);
 			} else {
 				console.log(status);
@@ -68,31 +66,16 @@ export default class BusMap extends React.Component<any, any> {
 	render() {
 		return (
 			<GoogleMap
-				// apiKey={AIzaSyC3yy6iEqFbnD8ZeVmppBtWp5CaeSLMD24}
 				zoom={this.state.zoom}
 				center={this.state.center}
 				yesIWantToUseGoogleMapApiInternals
 				onGoogleApiLoaded={({map, maps}) => {
 					this.setState({map: map, maps: maps, mapLoaded: true});
-					// new google.maps.Marker({
-					// 	position: this.state.center,
-					// 	map: map,
-					// });
-					// var directionsService = new maps.DirectionsService;
-					// var directionsDisplay = new maps.DirectionsRenderer({suppressMarkers: true});
-					// directionsDisplay.setMap(map);
-					// directionsService.route({
-					// 	origin: this.state.pointA,
-					// 	destination: this.state.pointB,
-					// 	travelMode: 'DRIVING'
-					// }, function(response: any, status: any) {
-					// 	if (status === 'OK') {
-					// 		console.log(response);
-					// 		directionsDisplay.setDirections(response);
-					// 	} else {
-					// 		console.log(status);
-					// 	}
-					// });
+					// init marker at midpoint
+					new google.maps.Marker({
+						position: this.state.center,
+						map: map,
+					});
 				}}
 			>
 				<BusMarker
