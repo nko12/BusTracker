@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as GMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
 import BusMarker from './BusMarker';
 
@@ -14,18 +15,37 @@ import BusMarker from './BusMarker';
 // TODO: Props interface?
 // TODO: remove `any`s
 
-export default class BusMap extends React.Component<any, any> {
-	state = {
-		pointA: this.props.pointA,
-		pointB: this.props.pointB,
-		zoom: this.props.zoom,
-		center: this.midPoint(this.props.pointA, this.props.pointB),
-		map: undefined,
-		maps: undefined, // TODO: what's this for?
-		mapLoaded: false,
-	};
+export interface BusMapState {
+	pointA: GMapReact.Coords;
+	pointB: GMapReact.Coords;
+	zoom: number;
+	center: GMapReact.Coords;
+	map?: google.maps.Map;
+	maps?: GMapReact.Maps;
+	mapLoaded: boolean;
+}
 
-	componentWillReceiveProps(nextProps: any) {
+export interface BusMapProps {
+	pointA: GMapReact.Coords;
+	pointB: GMapReact.Coords;
+	zoom: number;
+}
+
+export default class BusMap extends React.Component<BusMapProps, BusMapState> {
+
+	public constructor(props: BusMapProps) {
+
+		super(props);
+		this.state = {
+			pointA: this.props.pointA,
+			pointB: this.props.pointB,
+			zoom: this.props.zoom,
+			center: this.midPoint(this.props.pointA, this.props.pointB),
+			mapLoaded: false
+		};
+	}
+
+	componentWillReceiveProps(nextProps: BusMapProps) {
 		this.setState({
 			zoom: nextProps.zoom,
 			pointA: nextProps.pointA,
@@ -47,20 +67,24 @@ export default class BusMap extends React.Component<any, any> {
 			origin: nextProps.pointA,
 			destination: nextProps.pointB,
 			travelMode: google.maps.TravelMode.DRIVING
-		}, function(response: any, status: any) {
-			if (status === 'OK') {
+		}, function (response: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) {
+			if (status === google.maps.DirectionsStatus.OK) {
 				directionsDisplay.setDirections(response);
 			} else {
+				// TODO: Lint reports calls to 'console.log' is not allowed. After looking it up, 
+				// it's trying to help us prevent lines  like this from existing in production code. 
+				// This kind of thing should only be seen in tests (according to TSLint).
+				// We can figure out how to deal with this later.
 				console.log(status);
 			}
 		});
 	}
 
-	midPoint(A: any, B: any) {
+	midPoint(A: GMapReact.Coords, B: GMapReact.Coords) {
 		return {
 			lat: (A.lat + B.lat) / 2,
 			lng: (A.lng + B.lng) / 2,
-		}
+		};
 	}
 
 	render() {
@@ -68,9 +92,9 @@ export default class BusMap extends React.Component<any, any> {
 			<GoogleMap
 				zoom={this.state.zoom}
 				center={this.state.center}
-				yesIWantToUseGoogleMapApiInternals
-				onGoogleApiLoaded={({map, maps}) => {
-					this.setState({map: map, maps: maps, mapLoaded: true});
+				yesIWantToUseGoogleMapApiInternals={true}
+				onGoogleApiLoaded={({ map, maps }) => {
+					this.setState({ map: map, maps: maps, mapLoaded: true });
 					// init marker at midpoint
 					new google.maps.Marker({
 						position: this.state.center,
