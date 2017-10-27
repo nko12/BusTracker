@@ -62,3 +62,10 @@ compiled/
 
 # VS Code specific files.
 .vscode/
+
+# Visual Studio specific files and folders.
+.vs/
+bin/
+obj/
+*.njsproj
+*.sln
