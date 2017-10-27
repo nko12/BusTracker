@@ -45,8 +45,7 @@ export class BusTrackerDB {
             } catch (err) {
 
                 throw new Error("Failed to connect to the database. Is MongoDB running?");
-            }
-            
+            }    
         }
 
         try {
@@ -135,6 +134,20 @@ export class BusTrackerDB {
             return new Result(true);
         else
             return new Result(false, `Unable to remove user with id: ${userId}.`);
+    }
+
+    /**
+     * Gets a user with matching email from the database.
+     * @param email The email address of the user to get.
+     * @returns A promise containing the result of the operation. If successful, the result contains the user data.
+     */
+    public async getUser(email: string): Promise<TypedResult<models.User>> {
+
+        // Find the user by their email address.
+        const resultUser: models.User = await schema.UserType.findOne({ email: email}).lean().cursor().next();
+        if (resultUser == null)
+            return new TypedResult<models.User>(false, null, `User with email ${email} not found.`);
+        return new TypedResult<models.User>(true, resultUser);
     }
 
     /**
