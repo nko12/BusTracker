@@ -10,6 +10,7 @@ export class Schemas {
         id: { type: String, index: true },
         firstName: String,
         lastName: String,
+        username: String,
         email: String,
         passwordHash: String,
         favoriteStopIds: [],

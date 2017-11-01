@@ -89,11 +89,11 @@ describe('BusTrackerDB', () => {
         }    
     });
 
-    // Tests for BusTrackerDB's 'verifyEmail' method.
-    describe('#verifyEmail', () => {
+    // Tests for BusTrackerDB's 'verifyUsername' method.
+    describe('#verifyUsername', () => {
 
-        // BusTrackerDB's 'verifyEmail' method should fail if a user with the same email adready exists.
-        it('should fail if a user with the same email already exists.', async () => {
+        // BusTrackerDB's 'verifyUsername' method should fail if a user with the same username adready exists.
+        it('should fail if a user with the same username already exists.', async () => {
 
             // Create a user to put in User database.
             const userData = models.User.generateRandomUser();
@@ -101,7 +101,7 @@ describe('BusTrackerDB', () => {
             await user1.save();
 
             // Verify an email address.
-            const result: TypedResult<boolean> = await appDB.verifyEmail(userData.email);
+            const result: TypedResult<boolean> = await appDB.verifyUsername(userData.username);
 
             // Since that email address already exists, BusTrackerDB should have returned an error.
             chai.assert(result.success);
@@ -138,19 +138,19 @@ describe('BusTrackerDB', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // BusTrackerDB's 'registerUser' method should fail if a user with the same email already exists.
-        it('should fail if a user with the same email already exists.', async () => {
+        // BusTrackerDB's 'registerUser' method should fail if a user with the same username already exists.
+        it('should fail if a user with the same username already exists.', async () => {
 
             // Create a user to put in the database.
             const firstUserData: models.User = models.User.generateRandomUser();
             const firstUser = new UserType(firstUserData);
             await firstUser.save();
 
-            // Create a new user with different properties except the email is the same.
+            // Create a new user with different properties except the username is the same.
             const secondUserData: models.User = models.User.generateRandomUser();
-            secondUserData.email = firstUserData.email;
+            secondUserData.username = firstUserData.username;
 
-            // Attempt to register the new user who has the same email as the first.
+            // Attempt to register the new user who has the same username as the first.
             const result: Result = await appDB.registerUser(secondUserData);
 
             // The register operation should fail.
@@ -169,11 +169,11 @@ describe('BusTrackerDB', () => {
             const user = new UserType(userData);
             await user.save();
 
-            // Remove the user by id.
-            await appDB.deleteUser(userData.id);
+            // Remove the user by username.
+            await appDB.deleteUser(userData.username);
 
             // The user should no longer exist.
-            const queryResult = await UserType.findOne({id: user.id}).cursor().next();
+            const queryResult = await UserType.findOne({username: userData.username}).cursor().next();
             chai.expect(queryResult).to.be.null;
         });
 
@@ -191,8 +191,8 @@ describe('BusTrackerDB', () => {
             // Count the number of users that are in the collection.
             const userCount: number = await UserType.count({});
 
-            // Remove the user by id.
-            await appDB.deleteUser(userData.id);
+            // Remove the user by username.
+            await appDB.deleteUser(userData.username);
 
             // The number of users should be 1 less than the number at the start of the method.
             const newUserCount: number = await UserType.count({});
@@ -204,15 +204,15 @@ describe('BusTrackerDB', () => {
     describe('#getUser', () => {
 
         // The get user method should succeed and find the same user data
-        it('should succeed and return all the user data given their email.', async () => {
+        it('should succeed and return all the user data given their username.', async () => {
 
             // Create a user.
             const userData: models.User = models.User.generateRandomUser();
             const user = new UserType(userData);
             await user.save();
 
-            // This should get the appropriate user given their email address.
-            const result: TypedResult<models.User> = await appDB.getUser(userData.email);
+            // This should get the appropriate user given their username.
+            const result: TypedResult<models.User> = await appDB.getUser(userData.username);
 
             chai.expect(result.success).to.be.true;
             chai.assert(result.data != null && result.data != undefined);
@@ -225,10 +225,10 @@ describe('BusTrackerDB', () => {
         });
 
         // The get user method should return null if the user's email does not exist.
-        it('should fail and return null if the user\'s email does not exist.', async () => {
+        it('should fail and return null if the user\'s username does not exist.', async () => {
 
             // This should return a failing result with the data set to null.
-            const result: TypedResult<models.User> = await appDB.getUser('invalid.email@gmail.com');
+            const result: TypedResult<models.User> = await appDB.getUser('invalid.user');
 
             chai.expect(result.success).to.be.false;
             chai.expect(result.data).to.be.null;

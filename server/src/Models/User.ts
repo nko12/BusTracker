@@ -12,6 +12,7 @@ export class User {
     static generateRandomUser(): User {
 
         const user: User = new User();
+        user.username = faker.name.firstName() + "." + faker.name.lastName();
         user.firstName = faker.name.firstName();
         user.lastName = faker.name.lastName();
         user.email = faker.internet.email(user.firstName, user.lastName);
@@ -31,6 +32,10 @@ export class User {
      * The last name of the user.
      */
     public lastName: string = '';
+    /**
+     * The username of the user.
+     */
+    public username: string = '';
     /**
      * The email address of the user.
      */
