@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
+import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
 import * as GMapReact from 'google-map-react';
 // API: https://react-md.mlaursen.com/components/
 

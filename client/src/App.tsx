@@ -1,6 +1,7 @@
 import * as React from 'react';
-import BusMap from './components/BusMap';
-import SideBar from './components/SideBar';
+// import BusMap from './components/BusMap';
+// import SideBar from './components/SideBar';
+import LogIn from './components/LogIn';
 import * as GMapReact from 'google-map-react';
 import './App.css';
 
@@ -25,20 +26,7 @@ export default class App extends React.Component<{}, AppState> {
 	render() {
 		return (
 			<div>
-				<div className="SideBar">
-					<SideBar
-						pointA={this.state.pointA}
-						pointB={this.state.pointB}
-						onMarkerPositionsChanged={this.recieveFromSideBar}
-					/>
-				</div>
-				<div className="BusMap">
-					<BusMap
-						zoom={10}
-						pointA={this.state.pointA}
-						pointB={this.state.pointB}
-					/>
-				</div>
+				<LogIn />
 			</div>
 		);
 	}
