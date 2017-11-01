@@ -45,6 +45,10 @@ export class User {
      */
     public passwordHash: string = '';
     /**
+     * Whether or not the user has administrative rights.
+     */
+    public isAdmin: boolean = false;
+    /**
      * The list of IDs representing the stops that the user has favorited.
      */
     public favoriteStopIds: Array<number> = [];

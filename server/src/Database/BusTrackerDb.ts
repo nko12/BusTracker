@@ -123,32 +123,62 @@ export class BusTrackerDB {
     }
 
     /**
-     * Removes the user with matching username from the database.
-     * @param username The username of the user to delete.
+     * Removes the user with matching id from the database.
+     * @param id The id of the user to delete.
      * @returns A promise containing the result of the operation.
      */
-    public async deleteUser(username: string): Promise<Result> {
+    public async deleteUser(id: string): Promise<Result> {
 
         // Remove the user with specified id from the database.
-        const removeResult = await schema.UserType.findOne({ username: username }).remove();
+        const removeResult = await schema.UserType.findOne({ id: id }).remove();
         if (removeResult.result.ok)
             return new Result(true);
         else
-            return new Result(false, `Unable to remove user with username: ${username}.`);
+            return new Result(false, `Unable to remove user with id: ${id}.`);
     }
 
     /**
-     * Gets a user with matching username from the database.
-     * @param username The username address of the user to get.
+     * Gets a user with matching id from the database.
+     * @param id The id of the user to get.
      * @returns A promise containing the result of the operation. If successful, the result contains the user data.
      */
-    public async getUser(username: string): Promise<TypedResult<models.User>> {
+    public async getUser(id: string): Promise<TypedResult<models.User>> {
 
-        // Find the user by their username.
-        const resultUser: models.User = await schema.UserType.findOne({ username: username}).lean().cursor().next();
+        // Find the user by their id.
+        const resultUser: models.User = await schema.UserType.findOne({ id: id}).lean().cursor().next();
         if (resultUser == null)
-            return new TypedResult<models.User>(false, null, `User with username ${username} not found.`);
+            return new TypedResult<models.User>(false, null, `User with id ${id} not found.`);
         return new TypedResult<models.User>(true, resultUser);
+    }
+
+    /**
+     * Allows a user to grant or revoke admin rights of a target user.
+     * @param grantingId The id of the user who is attempting to grant admin rights.
+     * @param targetId The id of the user who is to receive admin rights.
+     * @param adminStatus True to grant admin rights, false to revoke them.
+     * @returns A promise containing the result of the operation.
+     */
+    public async toggleAdminRights(grantingId: string, targetId: string, adminStatus: boolean): Promise<Result> {
+
+        // Find the user attempting to grant admin rights.
+        const grantingUserData: models.User = await schema.UserType.findOne({id: grantingId}).lean().cursor().next();
+        if (grantingUserData == null)
+            return new Result(false, `Granting user with id ${grantingId} not found.`);
+
+        // Verify that the user granting the privileges has admin rights.
+        if (!grantingUserData.isAdmin)
+            return new Result(false, `Granting user with id ${grantingId} does not have administrative rights.`);
+
+        // Find the target user.
+        const targetUser: mongoose.Document = await schema.UserType.findOne({id: targetId}).cursor().next();
+        if (targetUser == null)
+            return new Result(false, `Target user with id ${targetId} not found.`);
+
+        // Change the target user admin rights. Nothing happens if the toggle value matches their current rights.
+        targetUser.set({isAdmin: adminStatus});
+        await targetUser.save();
+
+        return new Result(true);
     }
 
     /**

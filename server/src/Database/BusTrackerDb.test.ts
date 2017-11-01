@@ -169,11 +169,11 @@ describe('BusTrackerDB', () => {
             const user = new UserType(userData);
             await user.save();
 
-            // Remove the user by username.
-            await appDB.deleteUser(userData.username);
+            // Remove the user by id.
+            await appDB.deleteUser(userData.id);
 
             // The user should no longer exist.
-            const queryResult = await UserType.findOne({username: userData.username}).cursor().next();
+            const queryResult = await UserType.findOne({id: userData.id}).cursor().next();
             chai.expect(queryResult).to.be.null;
         });
 
@@ -191,8 +191,8 @@ describe('BusTrackerDB', () => {
             // Count the number of users that are in the collection.
             const userCount: number = await UserType.count({});
 
-            // Remove the user by username.
-            await appDB.deleteUser(userData.username);
+            // Remove the user by id.
+            await appDB.deleteUser(userData.id);
 
             // The number of users should be 1 less than the number at the start of the method.
             const newUserCount: number = await UserType.count({});
@@ -203,16 +203,16 @@ describe('BusTrackerDB', () => {
     // Tests for BusTrackerDB's 'getUser' method.
     describe('#getUser', () => {
 
-        // The get user method should succeed and find the same user data
-        it('should succeed and return all the user data given their username.', async () => {
+        // The get user method should succeed and find the same user data as was added to the database.
+        it('should succeed and return all the user data given their id.', async () => {
 
             // Create a user.
             const userData: models.User = models.User.generateRandomUser();
             const user = new UserType(userData);
             await user.save();
 
-            // This should get the appropriate user given their username.
-            const result: TypedResult<models.User> = await appDB.getUser(userData.username);
+            // This should get the appropriate user given their id.
+            const result: TypedResult<models.User> = await appDB.getUser(userData.id);
 
             chai.expect(result.success).to.be.true;
             chai.assert(result.data != null && result.data != undefined);
@@ -224,14 +224,93 @@ describe('BusTrackerDB', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // The get user method should return null if the user's email does not exist.
-        it('should fail and return null if the user\'s username does not exist.', async () => {
+        // The get user method should return null if the user's id does not exist.
+        it('should fail and return null if the user\'s id does not exist.', async () => {
 
             // This should return a failing result with the data set to null.
-            const result: TypedResult<models.User> = await appDB.getUser('invalid.user');
+            const result: TypedResult<models.User> = await appDB.getUser('invalid_user_id');
 
             chai.expect(result.success).to.be.false;
             chai.expect(result.data).to.be.null;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'toggleAdminRights' method.
+    describe('#toggleAdminRights', () => {
+
+        // The 'grantAdminRights' method should succeed if the user trying to grant access has admin rights.
+        it('should succeed if the user modifying admin rights has admin rights.', async () => {
+
+            // Create a user, with admin rights.
+            const userData1: models.User = models.User.generateRandomUser();
+            userData1.isAdmin = true;
+            const user1 = new UserType(userData1);
+            await user1.save();
+
+            // Create another user, who does not have admin rights by default.
+            const userData2: models.User = models.User.generateRandomUser();
+            userData2.isAdmin = false;
+            const user2 = new UserType(userData2);
+            await user2.save();
+
+            // Have user1 attempt to give user2 admin rights.
+            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+
+            // The operation should succeed.
+            chai.expect(result.success).to.be.true;
+        });
+
+        // The 'toggleAdminRights' method should fail if the user does not already have admin rights.
+        it('should fail if the user attempting to modify admin rights does not have admin rights.', async () => {
+
+            // Create a user, who doesn't have admin rights.
+            const userData1: models.User = models.User.generateRandomUser();
+            userData1.isAdmin = false;
+            const user1 = new UserType(userData1);
+            await user1.save();
+
+            // Create another user, who does not have admin rights by default.
+            const userData2: models.User = models.User.generateRandomUser();
+            userData2.isAdmin = false;
+            const user2 = new UserType(userData2);
+            await user2.save();
+
+            // Have user1 attempt to give user2 admin rights.
+            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        // The 'toggleAdminRights' method should actually change the admin rights of the target user if
+        // the granting user has admin rights.
+        it('should actually grant the target user admin rights.', async () => {
+
+            // Create a user, with admin rights.
+            const userData1: models.User = models.User.generateRandomUser();
+            userData1.isAdmin = true;
+            const user1 = new UserType(userData1);
+            await user1.save();
+
+            // Create another user, who does not have admin rights.
+            const userData2: models.User = models.User.generateRandomUser();
+            userData2.isAdmin = false;
+            const user2 = new UserType(userData2);
+            await user2.save();
+
+            // Have user1 attempt to give user2 admin rights.
+            await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+
+            // The second user should have admin rights.
+            let locatedUser: models.User = await UserType.findOne({ id: userData2.id }).lean().cursor().next();
+            chai.expect(locatedUser.isAdmin).to.be.true;
+
+            // Now, have user1 attempt to remove user2's admin rights.
+            await appDB.toggleAdminRights(userData1.id, userData2.id, false);
+
+            // The second user should no longer have admin rights.
+            locatedUser = await UserType.findOne({ id: userData2.id }).lean().cursor().next();
+            chai.expect(locatedUser.isAdmin).to.be.false;
         });
     });
 
