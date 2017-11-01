@@ -158,7 +158,7 @@ describe('BusTrackerDB', () => {
         });
     });
 
-    // Tests for BusTrackerDB's '' method.
+    // Tests for BusTrackerDB's 'deleteUser' method.
     describe('#deleteUser', () => {
 
         // The 'deleteUser' method should actually remove the user from the database.
@@ -200,6 +200,41 @@ describe('BusTrackerDB', () => {
         });
     });
 
+    // Tests for BusTrackerDB's 'getUser' method.
+    describe('#getUser', () => {
+
+        // The get user method should succeed and find the same user data
+        it('should succeed and return all the user data given their email.', async () => {
+
+            // Create a user.
+            const userData: models.User = models.User.generateRandomUser();
+            const user = new UserType(userData);
+            await user.save();
+
+            // This should get the appropriate user given their email address.
+            const result: TypedResult<models.User> = await appDB.getUser(userData.email);
+
+            chai.expect(result.success).to.be.true;
+            chai.assert(result.data != null && result.data != undefined);
+
+            // Remove extra properties before comparison.
+            const resultUser: models.User = new models.User();
+            copyInCommonProperties(result.data, resultUser);
+
+            chai.expect(equal(resultUser, userData)).to.be.true;
+        });
+
+        // The get user method should return null if the user's email does not exist.
+        it('should fail and return null if the user\'s email does not exist.', async () => {
+
+            // This should return a failing result with the data set to null.
+            const result: TypedResult<models.User> = await appDB.getUser('invalid.email@gmail.com');
+
+            chai.expect(result.success).to.be.false;
+            chai.expect(result.data).to.be.null;
+        });
+    });
+
     after(async () => {
 
         // Ensure the connection to MongoDB is closed so Mocha doesn't hang.
@@ -209,6 +244,6 @@ describe('BusTrackerDB', () => {
             await conn.db.dropDatabase();
             await conn.close();
             const readyState = conn.readyState;
-        }   
+        }
     });
 });
