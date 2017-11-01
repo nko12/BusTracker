@@ -7,7 +7,7 @@ export class Schemas {
 
     // The User schema.
     public static userSchema: mongoose.Schema = new mongoose.Schema({
-        id: { type: Number, index: true },
+        id: { type: String, index: true },
         firstName: String,
         lastName: String,
         email: String,
