@@ -63,9 +63,14 @@ compiled/
 # VS Code specific files.
 .vscode/
 
+# platform specific files
+.DS_STORE
+package-lock.json
+
 # Visual Studio specific files and folders.
 .vs/
 bin/
 obj/
 *.njsproj
 *.sln
+
