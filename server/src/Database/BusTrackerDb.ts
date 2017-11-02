@@ -86,7 +86,7 @@ export class BusTrackerDB {
      */
     public async verifyUsername(username: string): Promise<TypedResult<boolean>> {
 
-        // Try to find a user who has the given email address.
+        // Try to find a user who has the given username.
         const queryResult = await schema.UserType.findOne({ username: username }).cursor().next();
 
         // A null result means the user was found in the db with the provided username. The specified
@@ -139,15 +139,24 @@ export class BusTrackerDB {
 
     /**
      * Gets a user with matching id from the database.
-     * @param id The id of the user to get.
+     * @param username The username of the user to get.
+     * @param passwordHash The password hash of the user, generated client side from their password.
      * @returns A promise containing the result of the operation. If successful, the result contains the user data.
      */
-    public async getUser(id: string): Promise<TypedResult<models.User>> {
+    public async loginUser(username: string, passwordHash: string): Promise<TypedResult<models.User>> {
 
-        // Find the user by their id.
-        const resultUser: models.User = await schema.UserType.findOne({ id: id}).lean().cursor().next();
+        // Find the user by their username.
+        const resultUser: models.User = await schema.UserType.findOne({ username: username}).lean().cursor().next();
+
+        // If the user wasn't found, return a failing result.
         if (resultUser == null)
-            return new TypedResult<models.User>(false, null, `User with id ${id} not found.`);
+            return new TypedResult<models.User>(false, null, `User with username ${username} not found.`);
+        
+        // If the provided password hash doesn't match the password hash of this username, return a failing result.
+        if (resultUser.passwordHash !== passwordHash)
+            return new TypedResult<models.User>(false, null, `User with username ${username} provided an invalid password.`);
+
+        // The user was found and they provided a valid password.
         return new TypedResult<models.User>(true, resultUser);
     }
 
