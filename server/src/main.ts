@@ -1,20 +1,12 @@
-import * as express from 'express';
+import { BusTrackerServer } from './BusTrackerServer';
 
-// Create an Express app instance.
-const app = express();
+// Create the BusTrackerServer object, initialize it, and then start it.
+const server: BusTrackerServer = new BusTrackerServer();
+server.init().then(() => {
 
-// Set the port Node will listen on to one passed in the commandline or 5000.
-const port = process.env.PORT || 5000;
+    server.start();
+}).catch((err) => {
 
-// Set up the '/' endpoint.
-app.get('/', (req: express.Request, res: express.Response) => {
-
-    // Respond with "Hello World!";
-    res.send('Hello World!');
-});
-
-// Begin listening for requests.
-app.listen(port, () => {
-
-    console.log(`BusTracker is listening on port ${port}.`);
+    console.log('An error occurred during server initialization. Server is unable to start.');
+    console.log(`Error Object: ${err}`);
 });

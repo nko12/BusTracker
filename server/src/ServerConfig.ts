@@ -49,7 +49,11 @@ switch (environmentName.trim()) {
         serverConfig.dbHost = 'localhost'
         serverConfig.serverPort = 80;
         break;
+    case 'dev':
     default:
-        console.log(`Invalid node environment specified. '${process.env.NODE_ENV}' is not a valid environment.`)
-        throw Error(`Invalid node environment specified. '${process.env.NODE_ENV}' is not a valid environment.`);
+        serverConfig.dbName = 'BusTracker';
+        serverConfig.dbPort = 27017;
+        serverConfig.dbHost = 'localhost'
+        serverConfig.serverPort = 5000;
+        break;
 }
