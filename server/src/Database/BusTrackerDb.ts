@@ -6,6 +6,9 @@ import { serverConfig } from '../ServerConfig'
 import * as schema from './DBSchemas'
 import { Result, TypedResult } from '../Result';
 
+// Make mongoose use the native Promise type.
+mongoose.Promise = global.Promise;
+
 /**
  * An object that will perform communications with the MongoDB database, with methods to perform common
  * actions such as registering a user and adding a new route.
