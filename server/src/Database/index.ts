@@ -1,2 +1,2 @@
-export * from './BusTrackerDb';
-export * from './DbSchemas';
+export * from './BusTrackerDB';
+export * from './DBSchemas';
