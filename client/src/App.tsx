@@ -4,6 +4,7 @@ import * as React from 'react';
 import LogIn from './components/LogIn';
 import * as GMapReact from 'google-map-react';
 import './App.css';
+import {CardText} from 'react-md';
 import {Button} from 'react-md';
 
 interface AppState {
@@ -26,12 +27,13 @@ export default class App extends React.Component<{}, AppState> {
 
 	render() {
 		return (
-			<div>
+			<div className="loginPage">
 				<h2>Login Page</h2>
 				<LogIn />
 				<Button raised primary>Login?</Button>
-				<Button raised secondary>Create New Account?</Button>
-			</div>
+				<CardText>Don't have an account?</CardText>
+				<Button raised secondary>Create A New Account?</Button>
+			</div>	
 		);
 	}
 }

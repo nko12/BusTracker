@@ -20,12 +20,14 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 	
 	render() {
 		return (
-			<div>
+			<div className="loginCenter">
 				<TextField
 					label="Username"
+					type="text"
 				/>
 				<TextField
 					label="Password"
+					type="password"
 				/>
 			</div>
 		);
