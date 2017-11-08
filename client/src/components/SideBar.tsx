@@ -3,9 +3,12 @@ import { TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
 import * as GMapReact from 'google-map-react';
 // API: https://react-md.mlaursen.com/components/
 
+import {subscribeToTimer} from './api';
+
 interface SideBarState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
+	timestamp: any;
 }
 
 interface SideBarProps {
@@ -20,6 +23,7 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 		this.state = {
 			pointA: this.props.pointA,
 			pointB: this.props.pointB,
+			timestamp: 'no timestamp yet'
 		};
 	}
 	
@@ -70,6 +74,18 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 							>
 							Get Directions
 							</Button>
+							<Button
+								flat={true}
+								primary={true}
+								onClick={() => {
+									subscribeToTimer(1000, (err: any, timestamp: any) => this.setState({
+										timestamp
+									}));
+								}}
+							>
+							Contact Server
+							</Button>
+							<p> state: {this.state.timestamp} </p>
 						</Tab>
 						<Tab label="Targaryans"><h1>Fire and Blood</h1></Tab>
 						<Tab label="Lannisters"><h1>A Lannister Always Pays His Debts</h1></Tab>
