@@ -8,13 +8,16 @@ import {subscribeToTimer} from './api';
 interface SideBarState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	timestamp: any;
+	busses: [GMapReact.Coords];
+	tempPoint: GMapReact.Coords;
 }
 
 interface SideBarProps {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	onMarkerPositionsChanged: (pointA: GMapReact.Coords, pointB: GMapReact.Coords) => void;
+	busses: [GMapReact.Coords];
+	tempPoint: GMapReact.Coords;
+	onMarkerPositionsChanged: (pointA: GMapReact.Coords, pointB: GMapReact.Coords, busses?: [GMapReact.Coords]) => void;
 }
 
 export default class SideBar extends React.Component<SideBarProps, SideBarState> {
@@ -23,7 +26,8 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 		this.state = {
 			pointA: this.props.pointA,
 			pointB: this.props.pointB,
-			timestamp: 'no timestamp yet'
+			busses: this.props.busses,
+			tempPoint: this.props.tempPoint,
 		};
 	}
 	
@@ -78,14 +82,33 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								flat={true}
 								primary={true}
 								onClick={() => {
-									subscribeToTimer(1000, (err: any, timestamp: any) => this.setState({
-										timestamp
-									}));
+									console.log('TODO: Get Route');
 								}}
 							>
-							Contact Server
+							Get Route
 							</Button>
-							<p> state: {this.state.timestamp} </p>
+							<Button
+								flat={true}
+								primary={true}
+								onClick={() => {
+									subscribeToTimer(1000, (err: any, busses: any) => {
+										this.setState({busses});
+										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.busses);
+									});
+								}}
+							>
+							Get Bus
+							</Button>
+							<Button
+								flat={true}
+								primary={true}
+								onClick={() => {
+									console.log('TODO: Get Stops');
+								}}
+							>
+							Get Stops
+							</Button>
+							<p> state: {JSON.stringify(this.state.tempPoint)} </p>
 						</Tab>
 						<Tab label="Targaryans"><h1>Fire and Blood</h1></Tab>
 						<Tab label="Lannisters"><h1>A Lannister Always Pays His Debts</h1></Tab>
