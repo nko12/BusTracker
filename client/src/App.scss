@@ -70,3 +70,16 @@
   font-weight: bold;
   padding: 4;
 }
+.loginPage, .registerPage{
+  position: absolute;
+  text-align: center;
+  text-decoration: none;
+  background-color: white;
+  height: 100%;
+  width: 30%;
+  top: auto;
+  bottom: auto;
+  left: 400px;
+  right: 500px;
+  padding: 25px
+}

@@ -1,11 +1,12 @@
 import * as React from 'react';
 //import BusMap from './components/BusMap';
 //import SideBar from './components/SideBar';
-import LogIn from './components/LogIn';
+//import LogIn from './components/LogIn';
+import RegisterPage from './components/RegisterPage';
 import * as GMapReact from 'google-map-react';
 import './App.css';
-import {CardText} from 'react-md';
-import {Button} from 'react-md';
+//import {CardText} from 'react-md';
+//import {Button} from 'react-md';
 
 interface AppState {
 	pointA: GMapReact.Coords;
@@ -28,12 +29,12 @@ export default class App extends React.Component<{}, AppState> {
 	render() {
 		return (
 			<div className="loginPage">
-				<h2>Login Page</h2>
-				<LogIn />
-				<Button raised primary>Login?</Button>
-				<CardText>Don't have an account?</CardText>
-				<Button raised secondary>Create A New Account?</Button>
+				<RegisterPage/>
+				
 			</div>	
+			// <div>
+			// 	<LogIn/>
+			// </div>
 		);
 	}
 }
