@@ -9,10 +9,16 @@ interface BusType {
 	ID: String;
 }
 
+interface StopType {
+	location: GMapReact.Coords;
+	ID: String;
+}
+
 interface AppState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
 	busses: [BusType];
+	stops: [StopType];
 
 	tempString: String;
 }
@@ -24,13 +30,14 @@ export default class App extends React.Component<{}, AppState> {
 			pointA: {lat: 41.337716, lng: -74.35912},
 			pointB: {lat: 40.7588528, lng: -73.9852625},
 			busses: [{location: {lat: 0, lng: 0}, ID: '512'}],
+			stops: [{location: {lat: 0, lng: 0}, ID: '400323'}],
 
 			tempString: 'no string from socket yet'
 		};
 	}
 
-	recieveFromSideBar = (pointA: GMapReact.Coords, pointB: GMapReact.Coords, busses = this.state.busses) => {
-		this.setState({pointA: pointA, pointB: pointB, busses: busses});
+	recieveFromSideBar = (pointA: GMapReact.Coords, pointB: GMapReact.Coords, busses = this.state.busses, stops = this.state.stops) => {
+		this.setState({pointA: pointA, pointB: pointB, busses: busses, stops: stops});
 	}
 
 	render() {
@@ -41,6 +48,7 @@ export default class App extends React.Component<{}, AppState> {
 						pointA={this.state.pointA}
 						pointB={this.state.pointB}
 						busses={this.state.busses}
+						stops={this.state.stops}
 						tempString={this.state.tempString}
 						onMarkerPositionsChanged={this.recieveFromSideBar}
 					/>
@@ -51,6 +59,7 @@ export default class App extends React.Component<{}, AppState> {
 						pointA={this.state.pointA}
 						pointB={this.state.pointB}
 						busses={this.state.busses}
+						stops={this.state.stops}
 					/>
 				</div>
 			</div>

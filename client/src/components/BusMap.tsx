@@ -19,6 +19,11 @@ interface BusType {
 	ID: String;
 }
 
+interface StopType {
+	location: GMapReact.Coords;
+	ID: String;
+}
+
 export interface BusMapState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
@@ -27,15 +32,17 @@ export interface BusMapState {
 	map?: google.maps.Map;
 	maps?: GMapReact.Maps;
 	mapLoaded: boolean;
-	busses: [BusType];
+	busses: BusType[];
+	stops: StopType[]
 
-	markers: google.maps.Marker[];
+	busMarkers: google.maps.Marker[];
 }
 
 export interface BusMapProps {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	busses: [BusType];
+	busses: BusType[];
+	stops: StopType[];
 	zoom: number;
 }
 
@@ -49,7 +56,8 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 			center: this.midPoint(this.props.pointA, this.props.pointB),
 			mapLoaded: false,
 			busses: this.props.busses,
-			markers: [new google.maps.Marker()]
+			stops: this.props.stops,
+			busMarkers: [new google.maps.Marker()]
 		};
 	}
 
@@ -68,7 +76,7 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 		console.log(JSON.stringify(nextProps.busses));
 
-		var oldMarkers = this.state.markers;
+		var oldMarkers = this.state.busMarkers;
 
 		var markers = []
 		for (var i = 0; i < nextProps.busses.length; i++)
@@ -78,7 +86,7 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 				icon: 'https://i.imgur.com/7f5HCOn.png'
 			}));
 
-		this.setState({markers: markers});
+		this.setState({busMarkers: markers});
 
 		for (var i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);

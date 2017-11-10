@@ -3,9 +3,14 @@ import { TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
 import * as GMapReact from 'google-map-react';
 // API: https://react-md.mlaursen.com/components/
 
-import {subscribeToTimer, subscribeToBus} from './api';
+import {getStop, subscribeToStop, subscribeToBus} from './api';
 
 interface BusType {
+	location: GMapReact.Coords;
+	ID: String;
+}
+
+interface StopType {
 	location: GMapReact.Coords;
 	ID: String;
 }
@@ -13,7 +18,8 @@ interface BusType {
 interface SideBarState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	busses: [BusType];
+	busses: BusType[];
+	stops: StopType[];
 
 	tempString: String;
 }
@@ -21,8 +27,9 @@ interface SideBarState {
 interface SideBarProps {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	busses: [BusType];
-	onMarkerPositionsChanged: (pointA: GMapReact.Coords, pointB: GMapReact.Coords, busses?: [BusType]) => void;
+	busses: BusType[];
+	stops: StopType[];
+	onMarkerPositionsChanged: (pointA: GMapReact.Coords, pointB: GMapReact.Coords, busses?: BusType[], stops?: StopType[]) => void;
 
 	tempString: String;
 }
@@ -34,6 +41,7 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 			pointA: this.props.pointA,
 			pointB: this.props.pointB,
 			busses: this.props.busses,
+			stops: this.props.stops,
 			
 			tempString: this.props.tempString
 		};
@@ -90,30 +98,6 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								flat={true}
 								primary={true}
 								onClick={() => {
-									console.log('TODO: Get Route');
-								}}
-							>
-							Get Route
-							</Button>
-							<Button
-								flat={true}
-								primary={true}
-								onClick={() => {
-									subscribeToTimer(1000, (err: any, busses: any) => {
-										var newBusses: [BusType] = [{location: busses[0], ID: 'nil'}];
-										for (var i = 1; i < busses.length; i++)
-											newBusses.push({location: busses[i], ID: 'nil'});
-										this.setState({busses: newBusses});
-										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.busses);
-									});
-								}}
-							>
-							Get Busses
-							</Button>
-							<Button
-								flat={true}
-								primary={true}
-								onClick={() => {
 									subscribeToBus({interval: 1000, ID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
 										console.log(JSON.stringify(busLoc));
 										var busses: [BusType] = [{location: busLoc, ID: this.state.busses[0].ID}]
@@ -128,7 +112,20 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								flat={true}
 								primary={true}
 								onClick={() => {
-									console.log('TODO: Get Stops');
+									getStop(this.state.stops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
+										console.log('stopLoc: ' + stopLoc);
+										var stops: StopType[] = [{location: stopLoc, ID: this.state.stops[0].ID}];
+										this.setState({stops: stops});
+										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.stops);
+									});
+
+									subscribeToStop({interval: 1000, ID: this.state.stops[0].ID}, (err: any, busLocs: [GMapReact.Coords]) => {
+										var busses: BusType[] = [];
+										for (var i = 0; i < this.state.busses.length; i++)
+											busses.push({location: busLocs[i], ID: 'nil'});
+										this.setState({busses: busses});
+										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.busses);
+									});
 								}}
 							>
 							Get Stop
