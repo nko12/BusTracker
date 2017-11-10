@@ -14,6 +14,11 @@ import BusMarker from './BusMarker';
 
 // TODO: ability to remove markers and routes
 
+interface BusType {
+	location: GMapReact.Coords;
+	ID: String;
+}
+
 export interface BusMapState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
@@ -22,8 +27,7 @@ export interface BusMapState {
 	map?: google.maps.Map;
 	maps?: GMapReact.Maps;
 	mapLoaded: boolean;
-	busses: [GMapReact.Coords];
-	tempPoint: GMapReact.Coords;
+	busses: [BusType];
 
 	markers: google.maps.Marker[];
 }
@@ -31,8 +35,7 @@ export interface BusMapState {
 export interface BusMapProps {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	busses: [GMapReact.Coords];
-	tempPoint: GMapReact.Coords;
+	busses: [BusType];
 	zoom: number;
 }
 
@@ -46,7 +49,6 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 			center: this.midPoint(this.props.pointA, this.props.pointB),
 			mapLoaded: false,
 			busses: this.props.busses,
-			tempPoint: this.props.tempPoint,
 			markers: [new google.maps.Marker()]
 		};
 	}
@@ -71,12 +73,11 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 		var markers = []
 		for (var i = 0; i < nextProps.busses.length; i++)
 			markers.push(new google.maps.Marker({
-				position: nextProps.busses[i],
+				position: nextProps.busses[i].location,
 				map: this.state.map,
 				icon: 'https://i.imgur.com/7f5HCOn.png'
 			}));
 
-		// new google maps marker from next tempPoint prop
 		this.setState({markers: markers});
 
 		for (var i = 0; i < oldMarkers.length; i++)

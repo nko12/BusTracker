@@ -6,4 +6,9 @@ function subscribeToTimer(interval, cb) {
 	socket.emit('subscribeToTimer', interval);
 }
 
-export {subscribeToTimer}
+function subscribeToBus(param, cb) {
+	socket.on('busTimer', (cbParam) => cb(null, cbParam));
+	socket.emit('subscribeToBus', param);
+}
+
+export {subscribeToTimer, subscribeToBus}

@@ -4,11 +4,17 @@ import SideBar from './components/SideBar';
 import * as GMapReact from 'google-map-react';
 import './App.css';
 
+interface BusType {
+	location: GMapReact.Coords;
+	ID: String;
+}
+
 interface AppState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
-	busses: [GMapReact.Coords];
-	tempPoint: GMapReact.Coords;
+	busses: [BusType];
+
+	tempString: String;
 }
 
 export default class App extends React.Component<{}, AppState> {
@@ -17,8 +23,9 @@ export default class App extends React.Component<{}, AppState> {
 		this.state = {
 			pointA: {lat: 41.337716, lng: -74.35912},
 			pointB: {lat: 40.7588528, lng: -73.9852625},
-			busses: [{lat: 0, lng: 0}],
-			tempPoint: {lat: 0, lng: 0}
+			busses: [{location: {lat: 0, lng: 0}, ID: '512'}],
+
+			tempString: 'no string from socket yet'
 		};
 	}
 
@@ -34,7 +41,7 @@ export default class App extends React.Component<{}, AppState> {
 						pointA={this.state.pointA}
 						pointB={this.state.pointB}
 						busses={this.state.busses}
-						tempPoint={this.state.tempPoint}
+						tempString={this.state.tempString}
 						onMarkerPositionsChanged={this.recieveFromSideBar}
 					/>
 				</div>
@@ -44,7 +51,6 @@ export default class App extends React.Component<{}, AppState> {
 						pointA={this.state.pointA}
 						pointB={this.state.pointB}
 						busses={this.state.busses}
-						tempPoint ={this.state.tempPoint}
 					/>
 				</div>
 			</div>
