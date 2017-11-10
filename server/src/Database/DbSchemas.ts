@@ -1,4 +1,8 @@
-import * as mongoose from 'mongoose';
+// Use 'require' here as TypeScript will not compile when trying to set the Promise type of mongoose.
+import mongoose = require('mongoose');
+
+// Make mongoose use the native Promise type.
+mongoose.Promise = global.Promise;
 
 /**
  * Contains the various database schemas used by the BusTrackerDb.
