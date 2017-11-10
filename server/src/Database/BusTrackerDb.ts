@@ -80,17 +80,17 @@ export class BusTrackerDB {
     }
 
     /**
-     * Checks that a user does not already exist in the system with the specified email address.
-     * @param emailAddress The email address to check.
-     * @returns A true result value if the email is free to use, otherwise false.
+     * Checks that a user does not already exist in the system with the specified username.
+     * @param username The username to check.
+     * @returns A true result value if the username is free to use, otherwise false.
      */
-    public async verifyEmail(emailAddress: string): Promise<TypedResult<boolean>> {
+    public async verifyUsername(username: string): Promise<TypedResult<boolean>> {
 
-        // Try to find a user who has the given email address.
-        const queryResult = await schema.UserType.findOne({ email: emailAddress }).cursor().next();
+        // Try to find a user who has the given username.
+        const queryResult = await schema.UserType.findOne({ username: username }).cursor().next();
 
-        // A null result means know user was found in the db with the provided email address. The specified
-        // email address is free to use in that case.
+        // A null result means the user was found in the db with the provided username. The specified
+        // username is free to use in that case.
         if (queryResult == null)
             return new TypedResult<boolean>(true, true);
         else
@@ -100,16 +100,16 @@ export class BusTrackerDB {
     /**
      * Registers a new user to the database.
      * @param user An object representing the user to register.
-     * @returns The result of the operation.
+     * @returns A promise containing the result of the operation.
      */
     public async registerUser(user: models.User): Promise<Result> {
 
-        // Before adding a new user to the database, verify no other user has their email address.
-        const verifyResult: TypedResult<boolean> = await this.verifyEmail(user.email);
+        // Before adding a new user to the database, verify no other user has their username.
+        const verifyResult: TypedResult<boolean> = await this.verifyUsername(user.username);
         if (!verifyResult.success)
-            return new Result(false, 'Failed to verify the new user\'s email address.');
+            return new Result(false, 'Failed to verify the new user\'s username.');
         if (!verifyResult.data)
-            return new Result(false, 'A user with that email address already exists.');
+            return new Result(false, 'A user with that username already exists.');
 
         // Add the new user to the database.
         const newUser = new schema.UserType(user);
@@ -124,30 +124,70 @@ export class BusTrackerDB {
 
     /**
      * Removes the user with matching id from the database.
-     * @param userId The id of the user to delete.
+     * @param id The id of the user to delete.
+     * @returns A promise containing the result of the operation.
      */
-    public async deleteUser(userId: string): Promise<Result> {
+    public async deleteUser(id: string): Promise<Result> {
 
         // Remove the user with specified id from the database.
-        const removeResult = await schema.UserType.findOne({ id: userId }).remove();
+        const removeResult = await schema.UserType.findOne({ id: id }).remove();
         if (removeResult.result.ok)
             return new Result(true);
         else
-            return new Result(false, `Unable to remove user with id: ${userId}.`);
+            return new Result(false, `Unable to remove user with id: ${id}.`);
     }
 
     /**
-     * Gets a user with matching email from the database.
-     * @param email The email address of the user to get.
+     * Gets a user with matching id from the database.
+     * @param username The username of the user to get.
+     * @param passwordHash The password hash of the user, generated client side from their password.
      * @returns A promise containing the result of the operation. If successful, the result contains the user data.
      */
-    public async getUser(email: string): Promise<TypedResult<models.User>> {
+    public async loginUser(username: string, passwordHash: string): Promise<TypedResult<models.User>> {
 
-        // Find the user by their email address.
-        const resultUser: models.User = await schema.UserType.findOne({ email: email}).lean().cursor().next();
+        // Find the user by their username.
+        const resultUser: models.User = await schema.UserType.findOne({ username: username}).lean().cursor().next();
+
+        // If the user wasn't found, return a failing result.
         if (resultUser == null)
-            return new TypedResult<models.User>(false, null, `User with email ${email} not found.`);
+            return new TypedResult<models.User>(false, null, `User with username ${username} not found.`);
+        
+        // If the provided password hash doesn't match the password hash of this username, return a failing result.
+        if (resultUser.passwordHash !== passwordHash)
+            return new TypedResult<models.User>(false, null, `User with username ${username} provided an invalid password.`);
+
+        // The user was found and they provided a valid password.
         return new TypedResult<models.User>(true, resultUser);
+    }
+
+    /**
+     * Allows a user to grant or revoke admin rights of a target user.
+     * @param grantingId The id of the user who is attempting to grant admin rights.
+     * @param targetId The id of the user who is to receive admin rights.
+     * @param adminStatus True to grant admin rights, false to revoke them.
+     * @returns A promise containing the result of the operation.
+     */
+    public async toggleAdminRights(grantingId: string, targetId: string, adminStatus: boolean): Promise<Result> {
+
+        // Find the user attempting to grant admin rights.
+        const grantingUserData: models.User = await schema.UserType.findOne({id: grantingId}).lean().cursor().next();
+        if (grantingUserData == null)
+            return new Result(false, `Granting user with id ${grantingId} not found.`);
+
+        // Verify that the user granting the privileges has admin rights.
+        if (!grantingUserData.isAdmin)
+            return new Result(false, `Granting user with id ${grantingId} does not have administrative rights.`);
+
+        // Find the target user.
+        const targetUser: mongoose.Document = await schema.UserType.findOne({id: targetId}).cursor().next();
+        if (targetUser == null)
+            return new Result(false, `Target user with id ${targetId} not found.`);
+
+        // Change the target user admin rights. Nothing happens if the toggle value matches their current rights.
+        targetUser.set({isAdmin: adminStatus});
+        await targetUser.save();
+
+        return new Result(true);
     }
 
     /**
