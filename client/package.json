@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "@google/maps": "^0.4.5",
+    "@types/enzyme": "^3.1.4",
     "@types/prop-types": "^15.5.2",
+    "enzyme": "^3.1.1",
     "google-map-react": "^0.24.0",
     "googlemaps": "^1.12.0",
     "node-sass-chokidar": "0.0.3",
