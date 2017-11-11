@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
+import { TabsContainer, CardText, TextField, SelectionControlGroup, Tabs, Tab, Button } from 'react-md';
 import * as GMapReact from 'google-map-react';
 // API: https://react-md.mlaursen.com/components/
 
-import {subscribeToTimer, subscribeToBus} from './api';
+//import {subscribeToTimer, subscribeToBus} from './api';
 
 interface BusType {
 	location: GMapReact.Coords;
@@ -47,46 +47,43 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 					panelClassName="md-grid"
 				>
 					<Tabs tabId="phone-stuffs">
-						<Tab label="Starks">
-							<h1>Winter is Coming</h1>
-							<TextField
-								label="Latitude A"
-								value={this.state.pointA.lat}
-								onChange={(value) => {
-									this.setState({pointA: {lat: Number(value), lng: this.state.pointA.lng}});
-								}}
+						<Tab label="Stops">
+							
+								
+								<TextField
+									//toolbar
+									placeholder = "Search"
+									type = "search"
+								/>
+								
+							<SelectionControlGroup 
+    							type="radio"
+    							label="Select stops to add: "
+    							defaultValue=" "
+								className="tabFormat"
+    							controls={[{
+      								label: 'Stop 1: ',
+      								value: 'A',
+    								}, {
+      									label: 'Stop 2: ',
+      									value: 'B',
+    								}, {
+      									label: 'Stop 3: ',
+      									value: 'C',
+    								}]}
 							/>
-							<TextField
-								label="Longitude A"
-								value={this.state.pointA.lng}
-								onChange={(value) => {
-									this.setState({pointA: {lat: this.state.pointA.lat, lng: Number(value)}});
-								}}
-							/>
-							<TextField
-								label="Latitude B"
-								value={this.state.pointB.lat}
-								onChange={(value) => {
-									this.setState({pointB: {lat: Number(value), lng: this.state.pointB.lng}});
-								}}
-							/>
-							<TextField
-								label="Longitude B"
-								value={this.state.pointB.lng}
-								onChange={(value) => {
-									this.setState({pointB: {lat: this.state.pointB.lat, lng: Number(value)}});
-								}}
-							/>
+							
+							<CardText> </CardText>
 							<Button
-								flat={true}
+								raised={true}
 								primary={true}
 								onClick={() => {
 									this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB);
 								}}
 							>
-							Get Directions
+							Add to Favorites
 							</Button>
-							<Button
+							{/* <Button
 								flat={true}
 								primary={true}
 								onClick={() => {
@@ -132,11 +129,14 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								}}
 							>
 							Get Stop
-							</Button>
-							<p> state: {this.state.tempString} </p>
+							</Button> */}
 						</Tab>
-						<Tab label="Targaryans"><h1>Fire and Blood</h1></Tab>
-						<Tab label="Lannisters"><h1>A Lannister Always Pays His Debts</h1></Tab>
+						<Tab label="Favorites">
+							<h3>Search Favorites</h3>
+						</Tab>
+						<Tab label="Buses">
+							<h3>Search Buses</h3>
+						</Tab>
 					</Tabs>
 				</TabsContainer>
 			</div>
