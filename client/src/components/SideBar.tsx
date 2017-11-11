@@ -98,7 +98,7 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								flat={true}
 								primary={true}
 								onClick={() => {
-									subscribeToBus({interval: 1000, ID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
+									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
 										console.log(JSON.stringify(busLoc));
 										var busses: [BusType] = [{location: busLoc, ID: this.state.busses[0].ID}]
 										this.setState({busses: busses});
@@ -113,13 +113,14 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								primary={true}
 								onClick={() => {
 									getStop(this.state.stops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
-										console.log('stopLoc: ' + stopLoc);
 										var stops: StopType[] = [{location: stopLoc, ID: this.state.stops[0].ID}];
 										this.setState({stops: stops});
-										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.stops);
+										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.busses, this.state.stops);
 									});
 
-									subscribeToStop({interval: 1000, ID: this.state.stops[0].ID}, (err: any, busLocs: [GMapReact.Coords]) => {
+									console.log('about to subscribe to stop: ' + JSON.stringify(this.state.stops));
+									subscribeToStop({interval: 1000, stopID: this.state.stops[0].ID}, (err: any, busLocs: [GMapReact.Coords]) => {
+										console.log('got busses: ' + JSON.stringify(busLocs));
 										var busses: BusType[] = [];
 										for (var i = 0; i < this.state.busses.length; i++)
 											busses.push({location: busLocs[i], ID: 'nil'});

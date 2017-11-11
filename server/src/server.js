@@ -1,123 +1,75 @@
-/* api key:   8e4264f7-a1c1-49f3-930a-f2f1430f5e90    */
+const KEY = '8e4264f7-a1c1-49f3-930a-f2f1430f5e90';
+const URL = 'http://bustime.mta.info/api/';
 
 var request = require('request');
-const io = require('socket.io')();
+const IO = require('socket.io')();
+const PORT = 8000;
+IO.listen(PORT);
+console.log('listening on port', PORT);
 
-/*request('http://bustime.mta.info/api/siri/stop-monitoring.json?key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90&MonitoringRef=308214', function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				try {
-						var stops = JSON.parse(body);
-						console.log(stops.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit);
-					
-				}
-				catch (err) {
-					console.log(err);
-				}
-			}
-			
-		});*/
-
-io.on('connection', (client) => {
+IO.on('connection', (client) => {
 	console.log('connected');
-	client.on('subscribeToTimer', interval => {
-		console.log('client is subscribing to timer with interval', interval);
-
-		foo(interval);
+	client.on('subscribeToStop', param => {
+		console.log('client asked for busses going to stop ' + param.stopID + ' with interval ' + param.interval);
 
 		setInterval(() => {
-			client.emit('timer', locationWrappers);
-		}, interval);
+			getBussesFromStop(param.stopID);
+			client.emit('returnBussesFromStop', busLocArray);
+		}, param.interval);
 	});
 	
 	client.on('subscribeToBus', param => {
-		console.log('client asked for a bus');
+		console.log('client asked for a bus ' + param.busID + ' with interval ' + param.interval);
 		
 		setInterval(() => {
-			getBus(param.interval, param.ID);
-			client.emit('busTimer', busLoc);
+			getBus(param.busID);
+			client.emit('returnBusSingleton', busLoc);
 		}, param.interval);
 	
 	});
 	
 	client.on('getStop', stopID => {
-		console.log('client asked for stop lat/lng');
-		
+		console.log('client asked for lat/lng of stop ' + stopID);
 		getStop(stopID, client);
 	});
 });
 
 function getStop(stopID, client) {
-	var urlBase = 'http://bustime.mta.info/api/where/stop/MTA_';
-	var urlKey = 'key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90';
-
-	request(urlBase + stopID + '.json?' + urlKey, function (error, response, body) {
+	request(URL + 'where/stop/MTA_' + stopID + '.json?key=' + KEY, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			try {
 				var loc = JSON.parse(body);
-				console.log('returning ' + JSON.stringify({lat: loc.data.lat, lng: loc.data.lon}));
-				client.emit('stopLocation', {lat: loc.data.lat, lng: loc.data.lon});
+				var ret = {lat: loc.data.lat, lng: loc.data.lon};
+				console.log('getStop() emitting ' + JSON.stringify(ret));
+				client.emit('returnStopLocation', ret);
 			} catch (err) {
 				console.log('JSON was invalid from API call in getStop()!');
 				console.log(err);
 			}
 		} else
-			console.log('some form of error');
+			console.log('some form of error in getStop()');
 	});
 }
 
 var busLoc = {lat: 0, lng: 0};
-
-function getBus(interval, busID) {
-	var url = 'http://bustime.mta.info/api/siri/vehicle-monitoring.json?key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90&VehicleRef=';
-	
-	setInterval(() => {
-		request(url + busID, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				try {
-					var loc = JSON.parse(body);
-					console.log(loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation);
-					busLoc.lat = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Latitude;
-					busLoc.lng = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Longitude;
-				}
-				catch (err) {
-					console.log('JSON was invalid from API call in getBus()!');
-				}
+function getBus(busID) {
+	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			try {
+				var loc = JSON.parse(body);
+				busLoc.lat = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Latitude;
+				busLoc.lng = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Longitude;
+				console.log('getBus() set busLoc to ' + JSON.stringify(busLoc));
+			} catch (err) {
+				console.log('JSON was invalid from API call in getBus()!');
+				console.log(err);
 			}
-			
-		});
-	}, interval);
-	
+		} else
+			console.log('some form of error in getBus()');
+	});
 }
 
-var locationWrappers = [{lat: -1, lng: -1}];
-
-function foo(interval) {
-	setInterval(() => {
-		request('http://api.prod.obanyc.com/api/siri/vehicle-monitoring.json?key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				try {
-					var loc = JSON.parse(body);
-					locationWrappers = [];
-					for (var i = 0; i < 10; i++) {
-						location = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[i].MonitoredVehicleJourney.VehicleLocation;
-						
-						var locationWrapper = {
-							lat: location.Latitude,
-							lng: location.Longitude
-						};
-						console.log(JSON.stringify(locationWrapper));
-						locationWrappers.push(locationWrapper);
-					}
-				}
-				catch (err) {
-					console.log('JSON was invalid from API call!');
-				}
-			}
-			
-		});
-	}, interval);
+var busLocArray = [{lat: -1, lng: -1}];
+function getBussesFromStop(stopID) {
+	console.log('TODO: getBussesFromStop()');
 }
-
-const port = 8000;
-io.listen(port);
-console.log('listening on port', port);

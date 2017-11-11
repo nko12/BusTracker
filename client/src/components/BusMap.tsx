@@ -27,22 +27,29 @@ interface StopType {
 export interface BusMapState {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
+
 	zoom: number;
 	center: GMapReact.Coords;
+
 	map?: google.maps.Map;
 	maps?: GMapReact.Maps;
+
 	mapLoaded: boolean;
+
 	busses: BusType[];
-	stops: StopType[]
+	stops: StopType[];
 
 	busMarkers: google.maps.Marker[];
+	stopMarkers: google.maps.Marker[];
 }
 
 export interface BusMapProps {
 	pointA: GMapReact.Coords;
 	pointB: GMapReact.Coords;
+
 	busses: BusType[];
 	stops: StopType[];
+
 	zoom: number;
 }
 
@@ -52,12 +59,17 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 		this.state = {
 			pointA: this.props.pointA,
 			pointB: this.props.pointB,
+
 			zoom: this.props.zoom,
 			center: this.midPoint(this.props.pointA, this.props.pointB),
+
 			mapLoaded: false,
+
 			busses: this.props.busses,
 			stops: this.props.stops,
-			busMarkers: [new google.maps.Marker()]
+
+			busMarkers: [new google.maps.Marker()],
+			stopMarkers: [new google.maps.Marker()]
 		};
 	}
 
@@ -74,22 +86,36 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// 	map: this.state.map,
 		// });
 
-		console.log(JSON.stringify(nextProps.busses));
+		// stops
+		var oldStopMarkers = this.state.stopMarkers;
+		var stopMarkers = [];
 
-		var oldMarkers = this.state.busMarkers;
+		for (var i = 0; i < nextProps.stops.length; i++)
+			stopMarkers.push(new google.maps.Marker({
+				position: nextProps.stops[i].location,
+				map: this.state.map
+			}));
 
-		var markers = []
+		this.setState({stopMarkers: stopMarkers});
+
+		for (var i = 0; i < oldStopMarkers.length; i++)
+			oldStopMarkers[i].setMap(null);
+
+		// busses
+		var oldBusMarkers = this.state.busMarkers;
+		var busMarkers = []
+
 		for (var i = 0; i < nextProps.busses.length; i++)
-			markers.push(new google.maps.Marker({
+			busMarkers.push(new google.maps.Marker({
 				position: nextProps.busses[i].location,
 				map: this.state.map,
 				icon: 'https://i.imgur.com/7f5HCOn.png'
 			}));
 
-		this.setState({busMarkers: markers});
+		this.setState({busMarkers: busMarkers});
 
-		for (var i = 0; i < oldMarkers.length; i++)
-			oldMarkers[i].setMap(null);
+		for (var i = 0; i < oldBusMarkers.length; i++)
+			oldBusMarkers[i].setMap(null);
 
 		// directions
 		// var directionsService = new google.maps.DirectionsService;
