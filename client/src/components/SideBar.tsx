@@ -25,7 +25,7 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 	
 	render() {
 		return (
-			<div>
+			<div className='SideBar'>
 				<TabsContainer
 					className="tabs__page-layout"
 					panelClassName="md-grid"
@@ -62,8 +62,8 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 								}}
 							/>
 							<Button
-								flat={true}
-								primary={true}
+								flat
+								primary
 								onClick={() => {
 									this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB);
 								}}

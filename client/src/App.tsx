@@ -1,12 +1,9 @@
 import * as React from 'react';
-//import BusMap from './components/BusMap';
-//import SideBar from './components/SideBar';
-//import LogIn from './components/LogIn';
-import RegisterPage from './components/RegisterPage';
+import BusMap from './components/BusMap';
+import SideBar from './components/SideBar';
+import LogIn from './components/LogIn';
 import * as GMapReact from 'google-map-react';
-import './App.css';
-//import {CardText} from 'react-md';
-//import {Button} from 'react-md';
+import './styles/App.css';
 
 interface AppState {
 	pointA: GMapReact.Coords;
@@ -28,13 +25,21 @@ export default class App extends React.Component<{}, AppState> {
 
 	render() {
 		return (
-			<div className="loginPage">
-				<RegisterPage/>
-				
-			</div>	
-			// <div>
-			// 	<LogIn/>
-			// </div>
+			<div>
+				<LogIn />
+				<div className='blurr'>
+					<SideBar
+						pointA={this.state.pointA}
+						pointB={this.state.pointB}
+						onMarkerPositionsChanged={this.recieveFromSideBar}
+					/>
+					<BusMap
+						zoom={10}
+						pointA={this.state.pointA}
+						pointB={this.state.pointB}
+					/>
+				</div>
+			</div>
 		);
 	}
 }

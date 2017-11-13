@@ -1,45 +1,54 @@
 import * as React from 'react';
-import { TextField, Button, CardText } from 'react-md';
+import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
 
-// API: https://react-md.mlaursen.com/components/
+interface LogInState {}
 
-interface LogInState {
-	
-}
-
-interface LogInProps {
-
-}
+interface LogInProps {}
 
 export default class LogIn extends React.Component<LogInProps, LogInState> {
 	public constructor(props: LogInProps) {
 		super(props);
-		this.state = {
-			
-		};
+		this.state = {};
 	}
 
-	// Need to link login button to actually login
-	// Need to link create an account button to register page
+	hideLogin = () => {
+		console.log('wawawewa');
+		var blocker = document.getElementsByClassName('blocker')[0];
+		// blocker.style.display = 'none';
+		console.log(blocker);
+	}
+
+	// TODO: @Nkosi, @Alex: Need to link login button to actually login
 	render() {
 		return (
-			<div className="loginCenter">
-				<h2>Login</h2>
-				<TextField
-					label="Username:"
-					type="text"
-				/>
-				
-				<TextField
-					label="Password:"
-					type="password"
-				/>
-				
-				<CardText> </CardText> 
-				<Button raised primary>Login?</Button>
-				<CardText>Don't have an account?</CardText>
-				<Button raised secondary>Create A New Account?</Button>
-
+			<div className='blocker'>
+				<Card className='login' >
+					<CardTitle title='Log In' subtitle='or Register' />
+					<CardText>
+						<TextField
+							label='Username'
+							type='text'
+						/>
+						<TextField
+							label='Password'
+							type='password'
+						/>
+						<Button
+							raised
+							primary
+							onClick={() => {this.hideLogin()}}
+						>
+						Login
+						</Button>
+						<Button
+							raised
+							secondary
+							onClick={() => {this.hideLogin()}}
+						>
+						Register
+						</Button>
+					</CardText>
+				</Card>
 			</div>
 		);
 	}

@@ -86,30 +86,32 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 	render() {
 		return (
-			<GoogleMap
-				zoom={this.state.zoom}
-				center={this.state.center}
-				yesIWantToUseGoogleMapApiInternals={true}
-				onGoogleApiLoaded={({ map, maps }) => {
-					this.setState({ map: map, maps: maps, mapLoaded: true });
-					// init marker at midpoint
-					new google.maps.Marker({
-						position: this.state.center,
-						map: map,
-					});
-				}}
-			>
-				<BusMarker
-					lat={this.state.pointA.lat}
-					lng={this.state.pointA.lng}
-					text={'A'}
-				/>
-				<BusMarker
-					lat={this.state.pointB.lat}
-					lng={this.state.pointB.lng}
-					text={'B'}
-				/>
-			</GoogleMap>
+			<div className='BusMap'>
+				<GoogleMap
+					zoom={this.state.zoom}
+					center={this.state.center}
+					yesIWantToUseGoogleMapApiInternals={true}
+					onGoogleApiLoaded={({ map, maps }) => {
+						this.setState({ map: map, maps: maps, mapLoaded: true });
+						// init marker at midpoint
+						new google.maps.Marker({
+							position: this.state.center,
+							map: map,
+						});
+					}}
+				>
+					<BusMarker
+						lat={this.state.pointA.lat}
+						lng={this.state.pointA.lng}
+						text={'A'}
+					/>
+					<BusMarker
+						lat={this.state.pointB.lat}
+						lng={this.state.pointB.lng}
+						text={'B'}
+					/>
+				</GoogleMap>
+			</div>
 		);
 	}
 }
