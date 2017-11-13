@@ -1,25 +1,34 @@
 import * as React from 'react';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
 
-interface LogInState {}
+interface LogInState {
+	active: boolean;
+}
 
 interface LogInProps {}
 
 export default class LogIn extends React.Component<LogInProps, LogInState> {
 	public constructor(props: LogInProps) {
 		super(props);
-		this.state = {};
+		this.state = {
+			active: true
+		};
 	}
 
 	hideLogin = () => {
-		console.log('wawawewa');
-		var blocker = document.getElementsByClassName('blocker')[0];
-		// blocker.style.display = 'none';
-		console.log(blocker);
+		// get rid of the blurr
+		document.getElementsByClassName('blurr')[0].classList.remove('blurr');
+
+		// janky way to stop this from rendering
+		this.setState({active: false});
 	}
 
 	// TODO: @Nkosi, @Alex: Need to link login button to actually login
 	render() {
+		// janky way to get this component to stop rendering
+		if (!this.state.active)
+			return (<div></div>);
+
 		return (
 			<div className='blocker'>
 				<Card className='login' >

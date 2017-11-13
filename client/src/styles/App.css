@@ -90,13 +90,6 @@
   z-index: 9;
   /* right behind login */ }
 
-.blurrable {
-  -webkit-filter: blur(5px);
-  -moz-filter: blur(5px);
-  -o-filter: blur(5px);
-  -ms-filter: blur(5px);
-  filter: blur(5px); }
-
 .blurr {
   -webkit-filter: blur(5px);
   -moz-filter: blur(5px);
