@@ -4,12 +4,12 @@ import GoogleMap from 'google-map-react';
 
 export interface BusType {
 	location: GMapReact.Coords;
-	ID: String;
+	ID: string;
 }
 
 export interface StopType {
 	location: GMapReact.Coords;
-	ID: String;
+	ID: string;
 }
 
 export interface BusMapState {
@@ -82,16 +82,16 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 		// busses
 		var oldBusMarkers = this.state.busMarkers;
-		var busMarkers = []
+		var newBusMarkers = []
 
 		for (var i = 0; i < nextProps.busses.length; i++)
-			busMarkers.push(new google.maps.Marker({
+			newBusMarkers.push(new google.maps.Marker({
 				position: nextProps.busses[i].location,
 				map: this.state.map,
 				icon: 'https://i.imgur.com/7f5HCOn.png'
 			}));
 
-		this.setState({busMarkers: busMarkers});
+		this.setState({busMarkers: newBusMarkers});
 
 		for (var i = 0; i < oldBusMarkers.length; i++)
 			oldBusMarkers[i].setMap(null);
