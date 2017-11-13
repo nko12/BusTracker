@@ -74,7 +74,7 @@ export default class RegisterPage extends React.Component<RegisterProps, Registe
 		// Need to have register button actually store the user's info
 	render() {
 		return (
-			<div className='registerCenter'>
+			<div className="registerCenter">
 								<h2>Register</h2>
 								<CardText>Enter a username:</CardText>
 
