@@ -11,7 +11,7 @@ import * as models from '../Models';
 import { Schemas, UserType, BusTrackerDB } from '../Database'
 import { Result, TypedResult } from '../Result'
 import { serverConfig } from '../ServerConfig'
-import { copyInCommonProperties } from '../Util'
+import { copyInCommonProperties, arrayEquals } from '../Util'
 
 // TODO: Remove chai and sinon setup code if not used once more tests are written.
 // Set up Chai to use sinon-chai.
@@ -332,27 +332,69 @@ describe('BusTrackerDB', () => {
         });
     });
 
-    // Tests for BusTrackerDB's 'editFavoriteStopsIds' method.
-    describe('#editFavoriteBusStopIds', () => {
+    // Tests for BusTrackerDB's 'editFavoriteStopsIDs' method.
+    describe('#editFavoriteBusStopIDs', () => {
 
         it('should correctly set the list of favorite bus stop ids for the user.', async () => {
 
+            // Create and save a random user.
+            const userData: models.User = models.User.generateRandomUser();
+            const user = new UserType(userData);
+            await user.save();
+
+            // Create the new set of ids to set on the user.
+            const ids = ['FAKE_481', 'FAKE_777', 'FAKE_983'];
+
+            // Change their favorite ids.
+            const result = await appDB.editFavoriteBusStopIDs(userData.id, ids);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+
+            // The ids of the user should be correct.
+            const locatedUser: models.User = await UserType.findOne({ id: userData.id }).lean().cursor().next();
+            chai.expect(arrayEquals(locatedUser.favoriteStopIds, ids)).to.be.true;
         });
 
         it('should fail if the user id does not exist.', async () => {
 
+            const result = await appDB.editFavoriteBusStopIDs('invalid_id', ['FAKE_481', 'FAKE_777', 'FAKE_983']);
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
         });
     })
 
-    // Tests for BusTrackerDB's 'editFavoriteRouteIds' method.
-    describe('#editFavoriteRouteIds', () => {
+    // Tests for BusTrackerDB's 'editFavoriteRouteIDs' method.
+    describe('#editFavoriteRouteIDs', () => {
 
         it('should correctly set the list of favorite route ids for the user.', async () => {
 
+            // Create and save a random user.
+            const userData: models.User = models.User.generateRandomUser();
+            const user = new UserType(userData);
+            await user.save();
+
+            // Create the new set of ids to set on the user.
+            const ids = ['FAKE_481', 'FAKE_777', 'FAKE_983'];
+
+            // Change their favorite ids.
+            const result = await appDB.editFavoriteRouteIDs(userData.id, ids);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+
+            // The ids of the user should be correct.
+            const locatedUser: models.User = await UserType.findOne({ id: userData.id }).lean().cursor().next();
+            chai.expect(arrayEquals(locatedUser.favoriteRouteIds, ids)).to.be.true;
         });
 
         it('should fail if the user id does not exist.', async () => {
+            
+            const result = await appDB.editFavoriteRouteIDs('invalid_id', ['FAKE_481', 'FAKE_777', 'FAKE_983']);
 
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
         });
     });
 

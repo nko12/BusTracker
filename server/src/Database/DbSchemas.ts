@@ -28,9 +28,9 @@ export class Schemas {
     // The Route schema.
     public static routeSchema: mongoose.Schema = new mongoose.Schema({
         id: { type: String, index: true },
-        name: string,
-        polyline: string,
-        busStopIDs: [],
+        name: String,
+        polyline: String,
+        busStopIDs: []
     }, {
             // Make sure the name of the collection is "Route" and not "routes".
             collection: 'Route'
@@ -39,10 +39,10 @@ export class Schemas {
     // The BusStop schema.
     public static busStopSchema: mongoose.Schema = new mongoose.Schema({
         id: {type: String, index: true},
-        name: string,
-        latitude: string,
-        longitude: string
-    }), {
+        name: String,
+        latitude: String,
+        longitude: String
+    }, {
         collection: 'BusStop'
     });
 

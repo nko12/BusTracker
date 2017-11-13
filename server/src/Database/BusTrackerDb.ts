@@ -193,6 +193,46 @@ export class BusTrackerDB {
     }
 
     /**
+     * Edits the favorite bus stop ids of a particular user. Pass in all ids that should be considered
+     * favorited by the user.
+     * @param userID The user id of the user whose favorite bus stop ids should be edited.
+     * @param ids The list of bus stop ids to set on the user.
+     */
+    public async editFavoriteBusStopIDs(userId: string, ids: Array<string>): Promise<Result> {
+        
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+        
+        // Set the user's favorite bus stop ids to the value passed in.
+        user.set({favoriteStopIds: ids});
+        await user.save();
+
+        return new Result(true);
+    }
+
+    /**
+     * Edits the favorite route ids of a particular user. Pass in all ids that should be considered
+     * favorited by the user.
+     * @param userId The user id of the user whose favorite route ids should be edited.
+     * @param ids The list of route ids to set on the user.
+     */
+    public async editFavoriteRouteIDs(userId: string, ids: Array<string>): Promise<Result> {
+        
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+        
+        // Set the user's favorite bus stop ids to the value passed in.
+        user.set({favoriteRouteIds: ids});
+        await user.save();
+
+        return new Result(true);
+    }
+
+    /**
      * Attempts to connect to the database.
      * @returns The connection to the database if successful, otherwise an error.
      */
