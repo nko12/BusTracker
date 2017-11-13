@@ -37,7 +37,7 @@ describe('BusTrackerDB Initialization', () => {
         // Create and initialize a connection to the database.
         mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
         mongoose.connection.once('open', async () => {
-            
+
             const conn: mongoose.Connection = mongoose.connection;
             const db: BusTrackerDB = new BusTrackerDB(conn);
             await db.init();
@@ -70,7 +70,7 @@ describe('BusTrackerDB', () => {
                 // End test bootstrap.
                 done();
             }).catch((err) => {
-                
+
                 // Rethrow the error.
                 throw err;
             });
@@ -79,15 +79,15 @@ describe('BusTrackerDB', () => {
         // Create and initialize a connection to the database. (1 = connected)
         if (mongoose.connection.readyState == 1) {
 
-            initBusTrackerDBCallback();          
+            initBusTrackerDBCallback();
         } else {
 
-            mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });        
+            mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
             mongoose.connection.once('open', () => {
 
-                initBusTrackerDBCallback(); 
+                initBusTrackerDBCallback();
             });
-        }    
+        }
     });
 
     // Tests for BusTrackerDB's 'verifyUsername' method.
@@ -174,7 +174,7 @@ describe('BusTrackerDB', () => {
             await appDB.deleteUser(userData.id);
 
             // The user should no longer exist.
-            const queryResult = await UserType.findOne({id: userData.id}).cursor().next();
+            const queryResult = await UserType.findOne({ id: userData.id }).cursor().next();
             chai.expect(queryResult).to.be.null;
         });
 
@@ -332,6 +332,110 @@ describe('BusTrackerDB', () => {
         });
     });
 
+    // Tests for BusTrackerDB's 'editFavoriteStopsIds' method.
+    describe('#editFavoriteBusStopIds', () => {
+
+        it('should correctly set the list of favorite bus stop ids for the user.', async () => {
+
+        });
+
+        it('should fail if the user id does not exist.', async () => {
+
+        });
+    })
+
+    // Tests for BusTrackerDB's 'editFavoriteRouteIds' method.
+    describe('#editFavoriteRouteIds', () => {
+
+        it('should correctly set the list of favorite route ids for the user.', async () => {
+
+        });
+
+        it('should fail if the user id does not exist.', async () => {
+
+        });
+    });
+
+    // Tests for BusTrackerDB's 'addRoute' method.
+    describe('#addRoute', () => {
+
+        it('should add a new route into the database with matching properties.', async () => {
+
+        });
+
+        it('should fail if the user id does not have admin status.', async () => {
+
+        });
+    });
+
+    // Tests for BusTrackerDB's 'removeRoute' method.
+    describe('#removeRoute', () => {
+
+        it('should remove the route from the database with the specified id.', async () => {
+
+        });
+
+        it('should fail to remove the route if the user does not have admin status.', async () => {
+
+        });
+
+        it('should fail if the route id is not valid.', async () => {
+
+        });
+    });
+
+    // Tests for BusTrackerDB's 'addBusStop' method.
+    describe('#addBusStop', () => {
+
+        it('should add a new bus stop into the database with matching properties.', async () => {
+
+        });
+
+        it('should fail if the user id does not have admin status.', async () => {
+
+        });
+    });
+
+    // Tests for BusTrackerDB's 'removeBusStop' method.
+    describe('#removeBusStop', () => {
+
+        it('should remove the bus stop from the database with the specified id.', async () => {
+
+        });
+
+        it('should fail to remove the bus stop if the user does not have admin status.', async () => {
+
+        });
+
+        it('should fail if the bus stop id is not valid.', async () => {
+
+        });
+    });
+
+    // Tests for BusTrackerDB's 'getBusStop' method.
+    describe('#getBusStop', () => {
+
+        it('should get the bus stop object associated with the specified id.', async () => {
+
+        });
+
+        it('should fail if the bus stop id is not valid.', async () => {
+
+        });
+    });
+
+    // Tests for BusTrackerDB's 'getRoute' method.
+    describe('#getRoute', () => {
+
+        it('should get the route object associated with the specified id.', async () => {
+
+        });
+
+        it('should fail if the route id is not valid.', async () => {
+
+        });
+    });
+
     after(async () => {
 
         // Ensure the connection to MongoDB is closed so Mocha doesn't hang.
@@ -340,7 +444,6 @@ describe('BusTrackerDB', () => {
 
             await conn.db.dropDatabase();
             await conn.close();
-            const readyState = conn.readyState;
         }
     });
 });
