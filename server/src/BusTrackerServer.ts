@@ -1,9 +1,10 @@
 import * as express from 'express';
+var graphQLHTTP = require('express-graphql');
 
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
-import { GraphQLHandler } from './GraphQLHandler';
+import { GraphQLHandler, GraphQLUser } from './GraphQLHandler';
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -60,6 +61,12 @@ export class BusTrackerServer {
                 res.send('BusTracker Server');
 
             });
+            this.app.use('/graphql', graphQLHTTP({
+              schema: this.graphqlHandler.schema,
+              rootValue: this.graphqlHandler,
+              pretty: true,
+              graphiql: true,
+            }));
 
         } catch (err) {
 
