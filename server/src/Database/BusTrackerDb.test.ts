@@ -665,27 +665,77 @@ describe('BusTrackerDB', () => {
         });
     });
 
-    // Tests for BusTrackerDB's 'getBusStop' method.
-    describe('#getBusStop', () => {
-
-        it('should get the bus stop object associated with the specified id.', async () => {
-            chai.assert(false);
-        });
-
-        it('should fail if the bus stop id is not valid.', async () => {
-            chai.assert(false);
-        });
-    });
-
     // Tests for BusTrackerDB's 'getRoute' method.
     describe('#getRoute', () => {
 
         it('should get the route object associated with the specified id.', async () => {
-            chai.assert(false);
+
+            // Create a route and save it to the database.
+            const routeData: models.Route = new models.Route();
+            routeData.id = 'FAKE_123';
+            routeData.name = 'Test Route';
+            routeData.polyline = 'joasdpoewasjdkif';
+            routeData.busStopIDs = ['FAKE_444', 'FAKE_000', 'FAKE_322'];
+            const route = new RouteType(routeData);
+            await route.save();
+
+            // Attempt to get the route.
+            const result = await appDB.getRoute('FAKE_123');
+
+            // This should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // Remove extra properties before comparison.
+            const resultRoute: models.Route = new models.Route();
+            copyInCommonProperties(result.data, resultRoute);
+
+            // The returned route data should match what was saved.
+            chai.expect(equal(resultRoute, routeData)).to.be.true;
         });
 
         it('should fail if the route id is not valid.', async () => {
-            chai.assert(false);
+
+            const result = await appDB.getRoute('invalid_id');
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'getBusStop' method.
+    describe('#getBusStop', () => {
+
+        it('should get the bus stop object associated with the specified id.', async () => {
+
+            // Create a bus stop and save it to the database.
+            const stopData: models.BusStop = new models.BusStop();
+            stopData.id = 'FAKE_321';
+            stopData.name = 'Test Bus Stop';
+            stopData.latitude = '12.827461';
+            stopData.longitude = '10.496377'
+            const stop = new BusStopType(stopData);
+            await stop.save();
+
+            // Attempt to get the bus stop.
+            const result = await appDB.getBusStop('FAKE_321');
+
+            // This should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // Remove extra properties before comparison.
+            const resultStop: models.BusStop = new models.BusStop();
+            copyInCommonProperties(result.data, resultStop);
+
+            // The returned route data should match what was saved.
+            chai.expect(equal(resultStop, stopData)).to.be.true;
+        });
+
+        it('should fail if the bus stop id is not valid.', async () => {
+
+            const result = await appDB.getBusStop('invalid_id');
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
         });
     });
 
