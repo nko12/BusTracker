@@ -1,5 +1,6 @@
 import * as mongo from 'mongodb';
 import * as mongoose from 'mongoose';
+import * as faker from 'faker';
 
 import * as models from '../Models';
 import { serverConfig } from '../ServerConfig'
@@ -217,6 +218,7 @@ export class BusTrackerDB {
      * favorited by the user.
      * @param userId The user id of the user whose favorite route ids should be edited.
      * @param ids The list of route ids to set on the user.
+     * @returns The result of the operation.
      */
     public async editFavoriteRouteIDs(userId: string, ids: Array<string>): Promise<Result> {
         
@@ -228,6 +230,59 @@ export class BusTrackerDB {
         // Set the user's favorite bus stop ids to the value passed in.
         user.set({favoriteRouteIds: ids});
         await user.save();
+
+        return new Result(true);
+    }
+
+    /**
+     * Allows an admin to add a new fake route to the database.
+     * @param userId The user id of the user trying to add the new route.
+     * @param routeData The route object to add.
+     * @returns The id of the new route. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
+     */
+    public async addNewRoute(userId: string, routeData: models.Route): Promise<TypedResult<string>> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
+        if (user == null)
+            return new TypedResult(false, null, `User with id ${userId} not found.`);
+        
+        // The user must be an admin.
+        if ((<boolean> user.get('isAdmin')) == false)
+            return new TypedResult(false, null, `User with id ${userId} is not an admin.`);
+        
+        // Create a new route type and give it the route model.
+        routeData.id = 'FAKE_' + faker.random.uuid();
+        const route = new schema.RouteType(routeData);
+        await route.save();
+
+        return new TypedResult(true, routeData.id);
+    }
+
+    /**
+     * Allows an admin to remove an existing fake route from the database.
+     * @param userId The user id of the user trying to remove the route.
+     * @param routeId The id of the route to remove.
+     * @returns The result of the operation.
+     */
+    public async removeRoute(userId: string, routeId: string): Promise<Result> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+
+        // The user must be an admin.
+        if ((<boolean> user.get('isAdmin')) == false)
+            return new Result(false, `User with id ${userId} is not an admin.`);
+
+        // Get the route to remove. The route must exist in order to remove it.
+        const route: mongoose.Document = await schema.RouteType.findOne({id: routeId}).cursor().next();
+        if (route == null)
+            return new Result(false, `Route with id ${routeId} not found.`);
+        
+        // Delete the route.
+        await route.remove();
 
         return new Result(true);
     }
