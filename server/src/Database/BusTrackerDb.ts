@@ -7,8 +7,6 @@ import { serverConfig } from '../ServerConfig'
 import * as schema from './DBSchemas'
 import { Result, TypedResult } from '../Result';
 
-
-
 /**
  * An object that will perform communications with the MongoDB database, with methods to perform common
  * actions such as registering a user and adding a new route.
@@ -260,12 +258,39 @@ export class BusTrackerDB {
     }
 
     /**
+     * Allows an admin to add a new fake route to the database.
+     * @param userId The user id of the user trying to add the bus stop.
+     * @param stopData The bus stop object to add.
+     * @returns The id of the new bus stop. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
+     */
+    public async addNewBusStop(userId: string, stopData: models.BusStop): Promise<TypedResult<string>> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
+        if (user == null)
+            return new TypedResult(false, null, `User with id ${userId} not found.`);
+        
+        // The user must be an admin.
+        if ((<boolean> user.get('isAdmin')) == false)
+            return new TypedResult(false, null, `User with id ${userId} is not an admin.`);
+        
+        // Create a new bus stop type and give it the bus stop model.
+        stopData.id = 'FAKE_' + faker.random.uuid();
+        const busStop = new schema.BusStopType(stopData);
+        await busStop.save();
+
+        return new TypedResult(true, stopData.id);
+    }
+
+    /**
      * Allows an admin to remove an existing fake route from the database.
      * @param userId The user id of the user trying to remove the route.
      * @param routeId The id of the route to remove.
      * @returns The result of the operation.
      */
     public async removeRoute(userId: string, routeId: string): Promise<Result> {
+
+        // TODO: When removing a route, it should be removed from all users who have it favorited.
 
         // Ensure the user exists.
         const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
@@ -283,6 +308,36 @@ export class BusTrackerDB {
         
         // Delete the route.
         await route.remove();
+
+        return new Result(true);
+    }
+
+    /**
+     * Allows an admin to remove an existing fake bus stop from the database.
+     * @param userId The user id of the user trying to remove the bus stop.
+     * @param stopId The id of the bus stop to remove.
+     * @returns The result of the operation.
+     */
+    public async removeBusStop(userId: string, stopId: string): Promise<Result> {
+
+        // TODO: When removing a bus stop, it should be removed from all users who have it favorited.
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({id: userId}).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+
+        // The user must be an admin.
+        if ((<boolean> user.get('isAdmin')) == false)
+            return new Result(false, `User with id ${userId} is not an admin.`);
+
+        // Get the bus stop to remove. The bus stop must exist in order to remove it.
+        const busStop: mongoose.Document = await schema.BusStopType.findOne({id: stopId}).cursor().next();
+        if (busStop == null)
+            return new Result(false, `Bus Stop with id ${stopId} not found.`);
+        
+        // Delete the bus stop.
+        await busStop.remove();
 
         return new Result(true);
     }

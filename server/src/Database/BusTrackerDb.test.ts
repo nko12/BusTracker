@@ -68,7 +68,7 @@ describe('BusTrackerDB', () => {
             // Initailization the BusTrackerDB object.
             appDB = new BusTrackerDB(mongoose.connection);
             appDB.init().then(() => {
-                
+
                 // Add a special user with id ADMIN who represents an administrator.
                 const userData: models.User = models.User.generateRandomUser();
                 userData.isAdmin = true;
@@ -80,7 +80,7 @@ describe('BusTrackerDB', () => {
                     // Rethrow the error.
                     throw err;
                 });
-          
+
             }).catch((err) => {
 
                 // Rethrow the error.
@@ -436,7 +436,7 @@ describe('BusTrackerDB', () => {
 
             // The id for the route is created when the route is added to the database. Before comparing, make sure
             // to use the id returned by the addNewRoute method.
-            resultRoute.id = <string> result.data;
+            resultRoute.id = <string>result.data;
 
             chai.expect(equal(resultRoute, routeData)).to.be.true;
         });
@@ -472,7 +472,7 @@ describe('BusTrackerDB', () => {
         });
 
         it('should return an id that starts with \'FAKE_\' on route creation.', async () => {
-            
+
             // Create a new route object.
             const routeData: models.Route = new models.Route();
 
@@ -504,7 +504,7 @@ describe('BusTrackerDB', () => {
             chai.expect(result.success).to.be.true;
 
             // The route should not exist anymore.
-            const locatedRoute: mongoose.Document = await RouteType.findOne({id: routeData.id}).lean().cursor().next();
+            const locatedRoute: mongoose.Document = await RouteType.findOne({ id: routeData.id }).lean().cursor().next();
             chai.expect(locatedRoute).to.be.null;
         });
 
@@ -528,7 +528,7 @@ describe('BusTrackerDB', () => {
         });
 
         it('should fail if the route id is not valid.', async () => {
-            
+
             // Attempt to remove a route using an invalid id.
             const result = await appDB.removeRoute('ADMIN', 'invalid_id');
 
@@ -541,15 +541,75 @@ describe('BusTrackerDB', () => {
     describe('#addBusStop', () => {
 
         it('should add a new bus stop into the database with matching properties.', async () => {
-            chai.assert(false);
+
+            // Create a new route object.
+            const stopData: models.BusStop = new models.BusStop();
+            stopData.name = 'Test Bus Stop';
+            stopData.latitude = '15.337167';
+            stopData.longitude = '11.777344'
+
+            const result = await appDB.addNewBusStop('ADMIN', stopData);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+            chai.assert(result.data != null);
+
+            // The route object should exist.
+            const locatedStop: models.BusStop = await BusStopType.findOne({ id: stopData.id }).lean().cursor().next();
+
+            // Remove extra properties before comparison.
+            const resultStop: models.BusStop = new models.BusStop();
+            copyInCommonProperties(locatedStop, resultStop);
+
+            // The id for the route is created when the route is added to the database. Before comparing, make sure
+            // to use the id returned by the addNewRoute method.
+            resultStop.id = <string>result.data;
+
+            chai.expect(equal(resultStop, stopData)).to.be.true;
         });
 
         it('should fail if the user id does not have admin status.', async () => {
-            chai.assert(false);
+
+            // Create a new bus stop object.
+            const stopData: models.BusStop = new models.BusStop();
+
+            // Create and save a new non-admin user.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.isAdmin = false;
+            const user = new UserType(userData);
+            await user.save();
+
+            // Attempt to create the new route object.
+            const result = await appDB.addNewBusStop(userData.id, stopData);
+
+            // It should fail.
+            chai.expect(result.success).to.be.false;
         });
 
         it('should fail if the user id is invalid.', async () => {
-            chai.assert(false);
+
+            // Create a new route object.
+            const stopData: models.BusStop = new models.BusStop();
+
+            // Attempt to create the new route object.
+            const result = await appDB.addNewBusStop('invalid_user', stopData);
+
+            // It should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should return an id that starts with \'FAKE_\' on bus stop creation.', async () => {
+
+            // Create a new route object.
+            const stopData: models.BusStop = new models.BusStop();
+
+            // Add the route using the admin account.
+            const result = await appDB.addNewBusStop('ADMIN', stopData);
+
+            // The operation should have succeeded and the bus stop id should start with "FAKE_".
+            chai.expect(result.success).to.be.true;
+            chai.expect(result.data).to.not.be.null;
+            chai.expect((<string>result.data).startsWith('FAKE_')).to.be.true;
         });
     });
 
@@ -557,15 +617,51 @@ describe('BusTrackerDB', () => {
     describe('#removeBusStop', () => {
 
         it('should remove the bus stop from the database with the specified id.', async () => {
-            chai.assert(false);
+
+            // Create a new bus stop object and add it to the database.
+            const stopData: models.BusStop = new models.BusStop();
+            stopData.id = 'FAKE_' + faker.random.uuid();
+            const busStop = new BusStopType(stopData);
+            await busStop.save();
+
+            // Remove the bus stop.
+            const result = await appDB.removeBusStop('ADMIN', stopData.id);
+
+            // The operation should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // The bus stop should not exist anymore.
+            const locatedStop: mongoose.Document = await BusStopType.findOne({ id: stopData.id }).lean().cursor().next();
+            chai.expect(locatedStop).to.be.null;
         });
 
         it('should fail to remove the bus stop if the user does not have admin status.', async () => {
-            chai.assert(false);
+
+            // Create a new bus stop object and add it to the database.
+            const stopData: models.BusStop = new models.BusStop();
+            const busStop = new BusStopType(stopData);
+            await busStop.save();
+
+            // Create and save a new non-admin user.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.isAdmin = false;
+            const user = new UserType(userData);
+            await user.save();
+
+            // Attempt to remove the bus stop.
+            const result = await appDB.removeBusStop(userData.id, stopData.id);
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
         });
 
         it('should fail if the bus stop id is not valid.', async () => {
-            chai.assert(false);
+
+            // Attempt to remove a route using an invalid id.
+            const result = await appDB.removeBusStop('ADMIN', 'invalid_id');
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
         });
     });
 
