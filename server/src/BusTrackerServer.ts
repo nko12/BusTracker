@@ -3,6 +3,7 @@ import * as express from 'express';
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+import { GraphQLHandler } from './GraphQLHandler';
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -20,11 +21,17 @@ export class BusTrackerServer {
     private readonly app: express.Application;
 
     /**
+     * Represents the GraphQL handling component of the server.
+     */
+    private readonly graphqlHandler: GraphQLHandler;
+
+    /**
      * Creates a new instance of the BusTracker server.
      */
     public constructor() {
 
         this.storage = new BusTrackerDB();
+        this.graphqlHandler = new GraphQLHandler(this);
         this.app = express();
     }
 
@@ -42,13 +49,16 @@ export class BusTrackerServer {
             // Initialize the database component.
             await this.storage.init();
 
+            // Initialize the graphql component.
+            this.graphqlHandler.init();
+
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.
             this.app.get('/', (req: express.Request, res: express.Response) => {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-                
+
             });
 
         } catch (err) {
