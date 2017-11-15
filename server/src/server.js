@@ -34,9 +34,8 @@ function getStopInfo() {
 				console.log(err);
 			}
 		} else
-			console.log('some form of error in getStopInfo');
+			console.log('some form of error in getStopInfo()');
 	});
-	
 }
 
 IO.on('connection', (client) => {

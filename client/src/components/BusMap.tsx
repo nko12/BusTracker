@@ -2,6 +2,9 @@ import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
 
+// const IMG = 'https://i.imgur.com/7f5HCOn.png';
+const KRH = 'https://i.imgur.com/SUxfnuv.png';
+
 const ORIGIN = {lat: 0, lng: 0};
 
 export interface BusType {
@@ -97,7 +100,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			newBusMarkers.push(new google.maps.Marker({
 				position: nextProps.busses[i].location,
 				map: this.state.map,
-				icon: 'https://i.imgur.com/7f5HCOn.png'
+				icon: KRH
 			}));
 
 		this.setState({busses: nextProps.busses, busMarkers: newBusMarkers});
