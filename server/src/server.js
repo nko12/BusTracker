@@ -7,25 +7,75 @@ const PORT = 8000;
 IO.listen(PORT);
 console.log('listening on port', PORT);
 
+var bus_active = false;
+var stop_active = false;
+
+var numClicks = 0;
+var clickLimit = 5;
+
+
+getStopInfo();
+
+
+var stopInfoArray = [{code: 00000, name: 'RoadA/RoadB', lat: 0, lng: 0}];
+
+function getStopInfo() {
+	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=10&lonSpan=10&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			try {
+				var loc = JSON.parse(body);
+				for (var i = 0; i < loc.data.stops.length; i++) {
+					var stopInfoObject = {code: 00000, name: 'RoadA/RoadB', lat: 0, lng: 0};
+					stopInfoObject.code = loc.data.stops[i].code;
+					stopInfoObject.name = loc.data.stops[i].name;
+					stopInfoObject.lat = loc.data.stops[i].lat;
+					stopInfoObject.lng = loc.data.stops[i].lon;
+					stopInfoArray[i] = stopInfoObject;
+				}
+				console.log(JSON.stringify(stopInfoArray));
+			} catch (err) {
+				console.log('JSON was invalid from API call in getStopInfo()!');
+				console.log(err);
+			}
+		} else
+			console.log('some form of error in getStopInfo');
+	});
+	
+}
+
 IO.on('connection', (client) => {
 	console.log('connected');
 	client.on('subscribeToStop', param => {
+		
+		bus_active = false;
+		stop_active = true;
 		console.log('client asked for busses going to stop ' + param.stopID + ' with interval ' + param.interval);
 
 		// pseudo-do-while loop
-		getBussesFromStop(param.stopID, client);
-		setInterval(() => {
+		if (numClicks < clickLimit)
 			getBussesFromStop(param.stopID, client);
+		var stopTimer = setInterval(() => {
+			if (stop_active == false)
+				clearInterval(stopTimer);
+			getBussesFromStop(param.stopID, client);
+			numClicks = 0;
 		}, param.interval);
 	});
 	
 	client.on('subscribeToBus', param => {
+		
+		bus_active = true;
+		stop_active = false;
 		console.log('client asked for a bus ' + param.busID + ' with interval ' + param.interval);
 		
 		// pseudo-do-while loop
-		getBus(param.busID, client);
-		setInterval(() => {
+		if (numClicks < clickLimit)
 			getBus(param.busID, client);
+		var busTimer = setInterval(() => {
+			if (bus_active == false)
+				clearInterval(busTimer);
+			getBus(param.busID, client);
+			numClicks = 0;
 		}, param.interval);
 	
 	});
@@ -62,7 +112,8 @@ function getBus(busID, client) {
 				busLoc.lat = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Latitude;
 				busLoc.lng = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Longitude;
 				console.log('getBus() set busLoc to ' + JSON.stringify(busLoc));
-				client.emit('returnBusSingleton', busLoc);
+				if (bus_active == true)
+					client.emit('returnBusSingleton', busLoc);
 			} catch (err) {
 				console.log('JSON was invalid from API call in getBus()!');
 				console.log(err);
@@ -87,7 +138,8 @@ function getBussesFromStop(stopID, client) {
 					busLocArray[i] = thisBusLoc;
 					console.log('getBussesFromStop() setting busLocArray[' + i + '] to ' + JSON.stringify(thisBusLoc));
 				}
-				client.emit('returnBussesFromStop', busLocArray);
+				if (stop_active == true)
+					client.emit('returnBussesFromStop', busLocArray);
 			} catch (err) {
 				console.log('JSON was invalid from API call in getBus()!');
 				console.log(err);
