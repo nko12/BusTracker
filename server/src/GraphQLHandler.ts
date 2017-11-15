@@ -1,13 +1,15 @@
 import { BusTrackerServer } from './BusTrackerServer';
 var { buildSchema } = require('graphql');
+import { Result, TypedResult } from './Result';
+import * as models from './Models';
 
 
 /**
  * Represents the object sent to the client with GraphQL to represent the user
  */
 interface GraphQLUser {
-  id: string;
-  name: string;
+  id?: string;
+  error?: string;
 }
 
 /**
@@ -15,7 +17,7 @@ interface GraphQLUser {
  */
 interface LoginQueryData {
   username: string;
-  password: string;
+  passwordHash: string;
 }
 
 /**
@@ -35,7 +37,6 @@ class GraphQLHandler {
         this.server = server;
     }
     public init(): void {
-      var handler = this;
       this.schema = buildSchema(`
         type User {
           id: String
@@ -43,16 +44,25 @@ class GraphQLHandler {
         }
 
         type Query {
-          login(username: String, password: String): User
+          login(username: String, passwordHash: String): User
         }
       `);
     }
     public login(data: LoginQueryData): GraphQLUser {
-      console.log("GraphQL login attempt: {username=" + data.username + ",password=" + data.password + "}");
-      return {
-        id: "8675309",
-        name: "TestName"
-      };
+      console.log("GraphQL login attempt: {username=" + data.username + ",password=" + data.passwordHash + "}");
+      this.server.storage.loginUser(data.username, data.passwordHash).then((res: TypedResult<models.User>) => {
+        console.log("Got data");
+        //if (res.success && res.data) {
+          return {
+            id: "testid" // res.data.id
+          };
+      //  return {
+      //    error: "error" // res.message
+      //  };
+      }).catch((error) => {
+        console.log("Error in GraphQL login: ", error);
+      });
+      return {id: "test"};
     }
 }
 

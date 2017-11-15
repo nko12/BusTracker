@@ -14,17 +14,17 @@ export class BusTrackerServer {
     /**
      * Represents the persistent storage component of the BusTrackerServer.
      */
-    private readonly storage: BusTrackerDB;
+    public readonly storage: BusTrackerDB;
 
     /**
      * Represents the underlying Express application that drives much of the very low level server logic.
      */
-    private readonly app: express.Application;
+    public readonly app: express.Application;
 
     /**
      * Represents the GraphQL handling component of the server.
      */
-    private readonly graphqlHandler: GraphQLHandler;
+    public readonly graphqlHandler: GraphQLHandler;
 
     /**
      * Creates a new instance of the BusTracker server.
