@@ -1,8 +1,10 @@
 import * as express from 'express';
+var graphQLHTTP = require('express-graphql');
 
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+import { GraphQLHandler, GraphQLUser } from './GraphQLHandler';
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -12,12 +14,17 @@ export class BusTrackerServer {
     /**
      * Represents the persistent storage component of the BusTrackerServer.
      */
-    private readonly storage: BusTrackerDB;
+    public readonly storage: BusTrackerDB;
 
     /**
      * Represents the underlying Express application that drives much of the very low level server logic.
      */
-    private readonly app: express.Application;
+    public readonly app: express.Application;
+
+    /**
+     * Represents the GraphQL handling component of the server.
+     */
+    public readonly graphqlHandler: GraphQLHandler;
 
     /**
      * Creates a new instance of the BusTracker server.
@@ -25,6 +32,7 @@ export class BusTrackerServer {
     public constructor() {
 
         this.storage = new BusTrackerDB();
+        this.graphqlHandler = new GraphQLHandler(this);
         this.app = express();
     }
 
@@ -42,14 +50,23 @@ export class BusTrackerServer {
             // Initialize the database component.
             await this.storage.init();
 
+            // Initialize the graphql component.
+            this.graphqlHandler.init();
+
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.
             this.app.get('/', (req: express.Request, res: express.Response) => {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-                
+
             });
+            this.app.use('/graphql', graphQLHTTP({
+              schema: this.graphqlHandler.schema,
+              rootValue: this.graphqlHandler,
+              pretty: true,
+              graphiql: true,
+            }));
 
         } catch (err) {
 

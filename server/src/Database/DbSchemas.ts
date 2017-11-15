@@ -12,8 +12,10 @@ export class Schemas {
     // The User schema.
     public static userSchema: mongoose.Schema = new mongoose.Schema({
         id: { type: String, index: true },
+        isAdmin: Boolean,
         firstName: String,
         lastName: String,
+        username: String,
         email: String,
         passwordHash: String,
         favoriteStopIds: [],
