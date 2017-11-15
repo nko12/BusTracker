@@ -13,10 +13,6 @@ var stop_active = false;
 var numClicks = 0;
 var clickLimit = 5;
 
-
-getStopInfo();
-
-
 var stopInfoArray = [{code: 00000, name: 'RoadA/RoadB', lat: 0, lng: 0}];
 
 function getStopInfo() {
@@ -46,7 +42,6 @@ function getStopInfo() {
 IO.on('connection', (client) => {
 	console.log('connected');
 	client.on('subscribeToStop', param => {
-		
 		bus_active = false;
 		stop_active = true;
 		console.log('client asked for busses going to stop ' + param.stopID + ' with interval ' + param.interval);
@@ -62,16 +57,20 @@ IO.on('connection', (client) => {
 		}, param.interval);
 	});
 	
+	var busTimer = undefined;
 	client.on('subscribeToBus', param => {
-		
 		bus_active = true;
 		stop_active = false;
 		console.log('client asked for a bus ' + param.busID + ' with interval ' + param.interval);
 		
+		// end old interval, if there is one
+		if (busTimer != undefined)
+			clearInterval(busTimer);
+
 		// pseudo-do-while loop
 		if (numClicks < clickLimit)
 			getBus(param.busID, client);
-		var busTimer = setInterval(() => {
+		busTimer = setInterval(() => {
 			if (bus_active == false)
 				clearInterval(busTimer);
 			getBus(param.busID, client);

@@ -2,6 +2,8 @@ import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
 
+const ORIGIN = {lat: 0, lng: 0};
+
 export interface BusType {
 	location: GMapReact.Coords;
 	ID: string;
@@ -75,10 +77,17 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				map: this.state.map
 			}));
 
-		this.setState({stopMarkers: stopMarkers});
+		this.setState({stops: nextProps.stops, stopMarkers: stopMarkers});
 
 		for (var i = 0; i < oldStopMarkers.length; i++)
 			oldStopMarkers[i].setMap(null);
+
+		// change center to match first stop
+		// TODO: what happens when more than one stop?
+		if (this.state.stops.length > 0 && JSON.stringify(this.state.stops[0].location) != JSON.stringify(ORIGIN)) {
+			var center = this.state.stops[0].location;
+			this.setState({center: center});
+		}
 
 		// busses
 		var oldBusMarkers = this.state.busMarkers;
@@ -91,7 +100,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				icon: 'https://i.imgur.com/7f5HCOn.png'
 			}));
 
-		this.setState({busMarkers: newBusMarkers});
+		this.setState({busses: nextProps.busses, busMarkers: newBusMarkers});
 
 		for (var i = 0; i < oldBusMarkers.length; i++)
 			oldBusMarkers[i].setMap(null);

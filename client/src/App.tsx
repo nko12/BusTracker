@@ -3,6 +3,8 @@ import {BusMap, BusType, StopType} from './components/BusMap';
 import {SideBar} from './components/SideBar';
 import './App.css';
 
+const ORIGIN = {lat: 0, lng: 0};
+
 interface AppState {
 	busses: BusType[];
 	stops: StopType[];
@@ -12,8 +14,8 @@ export default class App extends React.Component<{}, AppState> {
 	public constructor(props: Object) {
 		super(props);
 		this.state = {
-			busses: [{location: {lat: 0, lng: 0}, ID: '256'}],
-			stops: [{location: {lat: 0, lng: 0}, ID: '400323'}]
+			busses: [{location: ORIGIN, ID: '256'}],
+			stops: [{location: ORIGIN, ID: '400323'}]
 		};
 	}
 
@@ -33,7 +35,7 @@ export default class App extends React.Component<{}, AppState> {
 				</div>
 				<div className="BusMap">
 					<BusMap
-						zoom={10}
+						zoom={12}
 						busses={this.state.busses}
 						stops={this.state.stops}
 					/>

@@ -4,6 +4,11 @@ import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
 import {getStop, subscribeToStop, subscribeToBus} from './api';
 import {BusType, StopType} from './BusMap';
 
+// interface retWrapperType {
+// 	busLoc: GMapReact.Coords;
+// 	stops: string[];
+// }
+
 export interface SideBarState {
 	busses: BusType[];
 	stops: StopType[];
@@ -47,12 +52,19 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								flat={true}
 								primary={true}
 								onClick={() => {
-									subscribeToBus({interval: 10000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
-										console.log(JSON.stringify(busLoc));
-										var busses: [BusType] = [{location: busLoc, ID: this.state.busses[0].ID}]
+									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
+										var busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
 									});
+									{/*subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, retWrapper: retWrapperType) => {
+										var busses: BusType[] = [{location: retWrapper.busLoc, ID: this.state.busses[0].ID}];
+										var stops: StopType[] = [];
+										for (var i = 0; i < retWrapper.stops.length; i++)
+											stops.push({location: getStopLocFromID(retWrapper.stops[i]), ID: retWrapper.stops[i]});
+										this.setState({busses: busses, stops: stops});
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
+									});*/}
 								}}
 							>
 							Get Bus
@@ -78,7 +90,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									});
 
 									console.log('about to subscribe to stop: ' + JSON.stringify(this.state.stops));
-									subscribeToStop({interval: 10000, stopID: this.state.stops[0].ID}, (err: any, busObjs: BusType[]) => {
+									subscribeToStop({interval: 1000, stopID: this.state.stops[0].ID}, (err: any, busObjs: BusType[]) => {
 										console.log('got busses: ' + JSON.stringify(busObjs));
 										var busses: BusType[] = [];
 										for (var i = 0; i < busObjs.length; i++)
