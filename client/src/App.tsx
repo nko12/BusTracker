@@ -24,7 +24,7 @@ export default class App extends React.Component<{}, AppState> {
 
 		getAllStops((err: any, kvStopArray: [number, StopType][]) => {
 			this.state = {
-				busses: [{location: ORIGIN, ID: '256'}],
+				busses: [{location: ORIGIN, ID: '256'}], // TODO: hashmap[0]
 				allStops: new Map<number, StopType>(kvStopArray),
 				activeStops: [{location: ORIGIN, ID: '400323'}] // TODO: hashmap[0]
 			};

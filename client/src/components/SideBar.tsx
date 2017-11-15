@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
-import {getStop, subscribeToStop, subscribeToBus} from './api';
+import {getStop, getStopsFromBus, subscribeToStop, subscribeToBus} from './api';
 import {BusType, StopType} from './BusMap';
 
 export interface SideBarState {
@@ -47,9 +47,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								flat={true}
 								primary={true}
 								onClick={() => {
-									{/*getStopsFromBus(this.state.busses[0].ID, (err: any, busLoc: GMapReact.Coords) => {
-
-									});*/}
+									getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[][]) => {
+										// TODO
+									});
 									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
 										var busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
 										this.setState({busses: busses});
