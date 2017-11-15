@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Card, CardTitle, CardText, TextField, Button } from 'react-md';
+import { BusTrackerApi } from '../api/BusTrackerApi';
 
 interface LogInState {
 	active: boolean;
@@ -8,14 +9,29 @@ interface LogInState {
 interface LogInProps { }
 
 export default class LogIn extends React.Component<LogInProps, LogInState> {
+	
+	private readonly api: BusTrackerApi;
+
 	public constructor(props: LogInProps) {
 		super(props);
 		this.state = {
 			active: true
 		};
+
+		this.api = new BusTrackerApi();
 	}
 
-	hideLogin = () => {
+	public async loginUser(): Promise<void> {
+		const result = await this.api.login('User', 'Password');
+		if (result != null) {
+			alert(JSON.stringify(result));
+			this.hideLogin();
+		} else {
+			alert('Failed to login the user.');
+		}
+	}
+
+	public hideLogin = () => {
 		// get rid of the blurr
 		document.getElementsByClassName('blurr')[0].classList.remove('blurr');
 
@@ -45,7 +61,7 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 						<Button
 							raised={true}
 							primary={true}
-							onClick={() => { this.hideLogin(); }}
+							onClick={() => { this.loginUser(); }}
 						>
 							Login
 						</Button>

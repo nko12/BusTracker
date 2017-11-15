@@ -66,6 +66,8 @@
   background-color: white;
   height: 100%;
   width: 30%;
+  top: auto;
+  bottom: auto;
   left: 400px;
   right: 500px;
   padding: 25px; }
