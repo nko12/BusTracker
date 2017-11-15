@@ -6,6 +6,8 @@ import { serverConfig } from '../ServerConfig'
 import * as schema from './DBSchemas'
 import { Result, TypedResult } from '../Result';
 
+
+
 /**
  * An object that will perform communications with the MongoDB database, with methods to perform common
  * actions such as registering a user and adding a new route.

@@ -1,9 +1,3 @@
-// Use 'require' as TypeScript will not compile when trying to set the Promise type of mongoose.
-import mongoose = require('mongoose');
-
-// Make mongoose use the native Promise type.
-mongoose.Promise = global.Promise;
-
 /**
  * Represents the shape of the configuration data that the server is being run with.
  */
@@ -23,6 +17,11 @@ export interface ServerConfig {
      * The hostname that the BusTracker MongoDB database is being hosted at.
      */
     dbHost: string;
+
+    /**
+     * The port that the server will listen on.
+     */
+    serverPort: number;
 }
 
 /**
@@ -31,7 +30,8 @@ export interface ServerConfig {
 export const serverConfig: ServerConfig = {
     dbPort: 0,
     dbName: '',
-    dbHost: ''
+    dbHost: '',
+    serverPort: 0
 };
 
 // Set the 'serverConfig' variable depending on the current execution environment.
@@ -41,13 +41,19 @@ switch (environmentName.trim()) {
         serverConfig.dbName = 'TestBusTracker';
         serverConfig.dbPort = 27017;
         serverConfig.dbHost = 'localhost'
+        serverConfig.serverPort = 5000;
         break;
     case 'prod':
         serverConfig.dbName = 'BusTracker';
         serverConfig.dbPort = 27017;
         serverConfig.dbHost = 'localhost'
+        serverConfig.serverPort = 80;
         break;
+    case 'dev':
     default:
-        console.log(`Invalid node environment specified. '${process.env.NODE_ENV}' is not a valid environment.`)
-        throw Error(`Invalid node environment specified. '${process.env.NODE_ENV}' is not a valid environment.`);
+        serverConfig.dbName = 'BusTracker';
+        serverConfig.dbPort = 27017;
+        serverConfig.dbHost = 'localhost'
+        serverConfig.serverPort = 5000;
+        break;
 }
