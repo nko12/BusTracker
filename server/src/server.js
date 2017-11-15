@@ -13,7 +13,7 @@ var stop_active = false;
 var numClicks = 0;
 var clickLimit = 5;
 
-var stopInfoArray = [{ID: 00000, name: 'RoadA/RoadB', location:{lat: 0, lng: 0}}];
+var stopInfoArray = [[ID, {ID: 00000, name: 'RoadA/RoadB', location:{lat: 0, lng: 0}}]];
 
 function getStopInfo(client) {
 	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=10&lonSpan=10&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error, response, body) {
@@ -21,12 +21,15 @@ function getStopInfo(client) {
 			try {
 				var loc = JSON.parse(body);
 				for (var i = 0; i < loc.data.stops.length; i++) {
+					var stopInnerArray = [ID, {ID: 00000, name: 'RoadA/RoadB', location:{lat: 0, lng: 0}}];
 					var stopInfoObject = {ID: 00000, name: 'RoadA/RoadB', location:{lat: 0, lng: 0}};
+					stopInnerArray[0] = loc.data.stops[i].code;
 					stopInfoObject.ID = loc.data.stops[i].code;
 					stopInfoObject.name = loc.data.stops[i].name;
 					stopInfoObject.location.lat = loc.data.stops[i].lat;
 					stopInfoObject.location.lng = loc.data.stops[i].lon;
-					stopInfoArray[i] = stopInfoObject;
+					stopInnerArray[1] = stopInfoObject;
+					stopInfoArray[i] = stopInnerArray;
 				}
 				client.emit('returnAllStops', stopInfoArray);
 				console.log(JSON.stringify(stopInfoArray));
