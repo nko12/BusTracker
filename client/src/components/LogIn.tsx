@@ -1,11 +1,11 @@
 import * as React from 'react';
-import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
+import { Card, CardTitle, CardText, TextField, Button } from 'react-md';
 
 interface LogInState {
 	active: boolean;
 }
 
-interface LogInProps {}
+interface LogInProps { }
 
 export default class LogIn extends React.Component<LogInProps, LogInState> {
 	public constructor(props: LogInProps) {
@@ -20,41 +20,41 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 		document.getElementsByClassName('blurr')[0].classList.remove('blurr');
 
 		// janky way to stop this from rendering
-		this.setState({active: false});
+		this.setState({ active: false });
 	}
 
 	// TODO: @Nkosi, @Alex: Need to link login button to actually login
 	render() {
 		// janky way to get this component to stop rendering
-		if (!this.state.active)
-			return (<div></div>);
-
+		if (!this.state.active) {
+			return (<div/>);
+		}
 		return (
-			<div className='blocker'>
-				<Card className='login' >
-					<CardTitle title='Log In' subtitle='or Register' />
+			<div className="blocker">
+				<Card className="login" >
+					<CardTitle title="Log In" subtitle="or Register" />
 					<CardText>
 						<TextField
-							label='Username'
-							type='text'
+							label="Username"
+							type="text"
 						/>
 						<TextField
-							label='Password'
-							type='password'
+							label="Password"
+							type="password"
 						/>
 						<Button
-							raised
-							primary
-							onClick={() => {this.hideLogin()}}
+							raised={true}
+							primary={true}
+							onClick={() => { this.hideLogin(); }}
 						>
-						Login
+							Login
 						</Button>
 						<Button
-							raised
-							secondary
-							onClick={() => {this.hideLogin()}}
+							raised={true}
+							secondary={true}
+							onClick={() => { this.hideLogin(); }}
 						>
-						Register
+							Register
 						</Button>
 					</CardText>
 				</Card>
