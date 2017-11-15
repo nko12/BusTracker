@@ -1,26 +1,38 @@
 import * as React from 'react';
 import {BusMap, BusType, StopType} from './components/BusMap';
 import {SideBar} from './components/SideBar';
+import {getAllStops} from './components/api';
 import './App.css';
 
 const ORIGIN = {lat: 0, lng: 0};
 
 interface AppState {
 	busses: BusType[];
-	stops: StopType[];
+	allStops: Map<number, StopType>;
+	activeStops: StopType[];
 }
 
 export default class App extends React.Component<{}, AppState> {
+	state = {
+		busses: [{location: ORIGIN, ID: '256'}],
+		allStops: new Map<number, StopType>(),
+		activeStops: [{location: ORIGIN, ID: '256'}]
+	};
+
 	public constructor(props: Object) {
 		super(props);
-		this.state = {
-			busses: [{location: ORIGIN, ID: '256'}],
-			stops: [{location: ORIGIN, ID: '400323'}]
-		};
+
+		getAllStops((err: any, kvStopArray: [number, StopType][]) => {
+			this.state = {
+				busses: [{location: ORIGIN, ID: '256'}],
+				allStops: new Map<number, StopType>(kvStopArray),
+				activeStops: [{location: ORIGIN, ID: '400323'}] // TODO: hashmap[0]
+			};
+		});
 	}
 
-	recieveFromSideBar = (busses = this.state.busses, stops = this.state.stops) => {
-		this.setState({busses: busses, stops: stops});
+	recieveFromSideBar = (busses = this.state.busses, stops = this.state.activeStops) => {
+		this.setState({busses: busses, activeStops: stops});
 	}
 
 	render() {
@@ -29,7 +41,7 @@ export default class App extends React.Component<{}, AppState> {
 				<div className="SideBar">
 					<SideBar
 						busses={this.state.busses}
-						stops={this.state.stops}
+						stops={this.state.activeStops}
 						onMarkerPositionsChanged={this.recieveFromSideBar}
 					/>
 				</div>
@@ -37,7 +49,7 @@ export default class App extends React.Component<{}, AppState> {
 					<BusMap
 						zoom={12}
 						busses={this.state.busses}
-						stops={this.state.stops}
+						stops={this.state.activeStops}
 					/>
 				</div>
 			</div>

@@ -4,11 +4,6 @@ import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
 import {getStop, subscribeToStop, subscribeToBus} from './api';
 import {BusType, StopType} from './BusMap';
 
-// interface retWrapperType {
-// 	busLoc: GMapReact.Coords;
-// 	stops: string[];
-// }
-
 export interface SideBarState {
 	busses: BusType[];
 	stops: StopType[];
@@ -52,19 +47,14 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								flat={true}
 								primary={true}
 								onClick={() => {
+									{/*getStopsFromBus(this.state.busses[0].ID, (err: any, busLoc: GMapReact.Coords) => {
+
+									});*/}
 									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
 										var busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
 									});
-									{/*subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, retWrapper: retWrapperType) => {
-										var busses: BusType[] = [{location: retWrapper.busLoc, ID: this.state.busses[0].ID}];
-										var stops: StopType[] = [];
-										for (var i = 0; i < retWrapper.stops.length; i++)
-											stops.push({location: getStopLocFromID(retWrapper.stops[i]), ID: retWrapper.stops[i]});
-										this.setState({busses: busses, stops: stops});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
-									});*/}
 								}}
 							>
 							Get Bus

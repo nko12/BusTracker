@@ -15,6 +15,7 @@ export interface BusType {
 export interface StopType {
 	location: GMapReact.Coords;
 	ID: string;
+	// name: string;
 }
 
 export interface BusMapState {
