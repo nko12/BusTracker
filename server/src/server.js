@@ -28,6 +28,7 @@ function getStopInfo(client) {
 					stopInfoObject.location.lng = loc.data.stops[i].lon;
 					stopInfoArray[i] = stopInfoObject;
 				}
+				client.emit('returnAllStops', stopInfoArray);
 				console.log(JSON.stringify(stopInfoArray));
 			} catch (err) {
 				console.log('JSON was invalid from API call in getStopInfo()!');
@@ -85,7 +86,6 @@ IO.on('connection', (client) => {
 	
 	client.on('getAllStops', () => {
 		getStopInfo(client);
-		client.emit('returnAllStops', stopInfoArray);
 	});
 });
 
