@@ -103,7 +103,7 @@ export class BusTrackerDB {
      * @param user An object representing the user to register.
      * @returns A promise containing the result of the operation.
      */
-    public async registerUser(user: models.User): Promise<Result> {
+    public async registerUserObject(user: models.User): Promise<Result> {
 
         // Before adding a new user to the database, verify no other user has their username.
         const verifyResult: TypedResult<boolean> = await this.verifyUsername(user.username);
@@ -121,6 +121,28 @@ export class BusTrackerDB {
         }
 
         return new Result(true);
+    }
+
+    /**
+     * Registers a new user to the database.
+     * @param username The new username for the user.
+     * @param passwordHash The password hash for the new user.
+     * @returns The 
+     */
+    public async registerUser(username: string, passwordHash: string): Promise<TypedResult<models.User>> {
+
+        // Create a blank user object and set the username and password hash on it.
+        const userData: models.User = new models.User();
+        userData.username = username;
+        userData.passwordHash = passwordHash;
+        
+        // Call registerUserObject.
+        const result: Result = await this.registerUserObject(userData);
+        if (result.success) {
+            return new TypedResult<models.User>(true, userData);   
+        } else {
+            return new TypedResult<models.User>(false, null, result.message);
+        }
     }
 
     /**

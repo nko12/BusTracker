@@ -122,17 +122,17 @@ describe('BusTrackerDB', () => {
         });
     })
 
-    // Tests for BusTrackerDB's 'registerUser' method.
-    describe('#registerUser', () => {
+    // Tests for BusTrackerDB's 'registerUserObject' method.
+    describe('#registerUserObject', () => {
 
-        // BusTrackerDB's 'registerUser' method should successfully create a new user in the database.
+        // BusTrackerDB's 'registerUserObject' method should successfully create a new user in the database.
         it('should add a new user into the database with matching properties.', async () => {
 
             // Create a user to put in the database.
             const userData = models.User.generateRandomUser();
 
             // Attempt to register a new user.
-            const result: Result = await appDB.registerUser(userData);
+            const result: Result = await appDB.registerUserObject(userData);
 
             // Registration of the user should be successful.
             chai.expect(result.success).to.be.true;
@@ -151,7 +151,7 @@ describe('BusTrackerDB', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // BusTrackerDB's 'registerUser' method should fail if a user with the same username already exists.
+        // BusTrackerDB's 'registerUserObject' method should fail if a user with the same username already exists.
         it('should fail if a user with the same username already exists.', async () => {
 
             // Create a user to put in the database.
@@ -164,12 +164,30 @@ describe('BusTrackerDB', () => {
             secondUserData.username = firstUserData.username;
 
             // Attempt to register the new user who has the same username as the first.
-            const result: Result = await appDB.registerUser(secondUserData);
+            const result: Result = await appDB.registerUserObject(secondUserData);
 
             // The register operation should fail.
             chai.expect(result.success).to.be.false;
         });
     });
+
+    // Tests for BusTrackerDb's 'registerUser' method.
+    describe('#registerUser', () => {
+
+        // The 'registerUser' method should return a new user object with matching username and password hash.
+        it('should return a user object with matching username and password.', async () => {
+
+            const result = await appDB.registerUser('test_user', md5('password'));
+
+            // The operation should have succeeded.
+            chai.expect(result.success).to.be.true;
+                 
+            // The username and password hash of the registered user should match what was passed.
+            const userData: models.User = <models.User> result.data;
+            chai.expect(userData.username).to.equal('test_user');
+            chai.expect(userData.passwordHash).to.equal(md5('password'));
+        })
+    })
 
     // Tests for BusTrackerDB's 'deleteUser' method.
     describe('#deleteUser', () => {
