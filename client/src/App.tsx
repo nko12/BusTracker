@@ -4,7 +4,7 @@ import {SideBar} from './components/SideBar';
 import {getAllStops} from './components/api';
 import './App.css';
 
-const ORIGIN = {lat: 0, lng: 0};
+const ORIGIN = {lat: 0.0, lng: 0.0};
 
 interface AppState {
 	busses: BusType[];

@@ -5,7 +5,8 @@ import GoogleMap from 'google-map-react';
 const IMG = 'https://i.imgur.com/7f5HCOn.png';
 // const KRH = 'https://i.imgur.com/SUxfnuv.png';
 
-const ORIGIN = {lat: 0, lng: 0};
+const ORIGIN = {lat: 0.0, lng: 0.0};
+const NYC = {lat: 40.7588528, lng: -73.9852625};
 
 export interface BusType {
 	location: GMapReact.Coords;
@@ -46,7 +47,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		super(props);
 		this.state = {
 			zoom: this.props.zoom,
-			center: {lat: 40.7588528, lng: -73.9852625},
+			center: NYC,
 
 			mapLoaded: false,
 
@@ -71,47 +72,12 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// 	map: this.state.map,
 		// });
 
-		// stops
-		var oldStopMarkers = this.state.stopMarkers;
-		var stopMarkers = [];
-
-		for (var i = 0; i < nextProps.stops.length; i++)
-			stopMarkers.push(new google.maps.Marker({
-				position: nextProps.stops[i].location,
-				map: this.state.map
-			}));
-
-		this.setState({stops: nextProps.stops, stopMarkers: stopMarkers});
-
-		for (var i = 0; i < oldStopMarkers.length; i++)
-			oldStopMarkers[i].setMap(null);
-
-		// change center to match first stop
-		// TODO: what happens when more than one stop?
-		if (this.state.stops.length > 0 && JSON.stringify(this.state.stops[0].location) != JSON.stringify(ORIGIN)) {
-			var center = this.state.stops[0].location;
-			this.setState({center: center});
-		}
-
-		// busses
-		var oldBusMarkers = this.state.busMarkers;
-		var newBusMarkers = []
-
-		for (var i = 0; i < nextProps.busses.length; i++)
-			newBusMarkers.push(new google.maps.Marker({
-				position: nextProps.busses[i].location,
-				map: this.state.map,
-				icon: IMG
-			}));
-
-		this.setState({busses: nextProps.busses, busMarkers: newBusMarkers});
-
-		for (var i = 0; i < oldBusMarkers.length; i++)
-			oldBusMarkers[i].setMap(null);
+		this.updateStops(nextProps.stops);
+		this.updateBusses(nextProps.busses);
 
 		// directions
-		// var directionsService = new google.maps.DirectionsService;
-		// var directionsDisplay = new google.maps.DirectionsRenderer({
+		// let directionsService = new google.maps.DirectionsService;
+		// let directionsDisplay = new google.maps.DirectionsRenderer({
 		// 	suppressMarkers: true,
 		// 	map: this.state.map
 		// });
@@ -128,10 +94,71 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// });
 	}
 
-	midPoint(A: GMapReact.Coords, B: GMapReact.Coords) {
+	updateStops (newStops: StopType[]) {
+		// ignore stops at the origin
+		if (newStops.length > 0 && JSON.stringify(newStops[0].location) != JSON.stringify(ORIGIN))
+			return;
+
+		// the markers we're working with
+		let oldMarkers = this.state.stopMarkers;
+		let newMarkers = [];
+		// variables for centroid calculation
+		let centroid = {lat: 0.0, lng: 0.0};
+		let total = newStops.length;
+
+		// loop through new stops
+		for (let i = 0; i < newStops.length; i++) {
+			// create the new markers
+			newMarkers.push(new google.maps.Marker({
+				position: newStops[i].location,
+				map: this.state.map
+			}));
+
+			// part of centroid calculation
+			centroid.lat += newStops[i].location.lat;
+			centroid.lng += newStops[i].location.lng;
+		}
+		// finish centroid calculation
+		centroid.lat /= total;
+		centroid.lng /= total;
+
+		// finalize changes
+		this.setState({stops: newStops, stopMarkers: newMarkers, center: centroid});
+
+		// dispose of old markers
+		for (var i = 0; i < oldMarkers.length; i++)
+			oldMarkers[i].setMap(null);
+	}
+
+	updateBusses (newBusses: BusType[]) {
+		// ignore busses at the origin
+		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) != JSON.stringify(ORIGIN))
+			return;
+
+		// the markers we're working with
+		let oldMarkers = this.state.busMarkers;
+		let newMarkers = [] as google.maps.Marker[];
+
+		// loop through new stops to make their markers
+		for (let i = 0; i < newBusses.length; i++)
+			newMarkers.push(new google.maps.Marker({
+				position: newBusses[i].location,
+				map: this.state.map,
+				icon: IMG
+			}));
+
+		// finalize changes
+		this.setState({busses: newBusses, busMarkers: newMarkers});
+
+		// dispose of old markers
+		for (let i = 0; i < oldMarkers.length; i++)
+			oldMarkers[i].setMap(null);
+	}
+
+	midPoint(a: GMapReact.Coords, b: GMapReact.Coords) {
 		return {
-			lat: (A.lat + B.lat) / 2,
-			lng: (A.lng + B.lng) / 2,
+			lat: (a.lat + b.lat) / 2,
+			lng: (a.lng + b.lng) / 2
 		};
 	}
 
@@ -144,8 +171,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				onGoogleApiLoaded={({map, maps}) => {
 					this.setState({map: map, maps: maps, mapLoaded: true});
 				}}
-			>
-			</GoogleMap>
+			/>
 		);
 	}
 }

@@ -38,20 +38,20 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								label='BusID'
 								value={this.state.busses[0].ID}
 								onChange={(value) => {
-									var busses = this.state.busses;
+									let busses = this.state.busses;
 									busses[0].ID = String(value);
 									this.setState({busses: busses});
 								}}
 							/>
 							<Button
-								flat={true}
-								primary={true}
+								flat
+								primary
 								onClick={() => {
 									getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[][]) => {
 										// TODO
 									});
 									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
-										var busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
+										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
 									});
@@ -63,18 +63,18 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								label='StopID'
 								value={this.state.stops[0].ID}
 								onChange={(value) => {
-									var stops = this.state.stops;
+									let stops = this.state.stops;
 									stops[0].ID = String(value);
 									this.setState({stops: stops});
 								}}
 							/>
 							<Button
-								flat={true}
-								primary={true}
+								flat
+								primary
 								onClick={() => {
 									// TODO: ask the DB for this. No need to spend an API call on something that remains static
 									getStop(this.state.stops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
-										var stops: StopType[] = [{location: stopLoc, ID: this.state.stops[0].ID}];
+										let stops: StopType[] = [{location: stopLoc, ID: this.state.stops[0].ID}];
 										this.setState({stops: stops});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
 									});
@@ -82,8 +82,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									console.log('about to subscribe to stop: ' + JSON.stringify(this.state.stops));
 									subscribeToStop({interval: 1000, stopID: this.state.stops[0].ID}, (err: any, busObjs: BusType[]) => {
 										console.log('got busses: ' + JSON.stringify(busObjs));
-										var busses: BusType[] = [];
-										for (var i = 0; i < busObjs.length; i++)
+										let busses: BusType[] = [];
+										for (let i = 0; i < busObjs.length; i++)
 											busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
