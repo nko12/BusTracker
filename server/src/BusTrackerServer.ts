@@ -3,6 +3,7 @@ import * as express from 'express';
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+import { User } from './Models';
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -48,7 +49,6 @@ export class BusTrackerServer {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-                
             });
 
         } catch (err) {

@@ -36,7 +36,7 @@ describe('BusTrackerDB Initialization', () => {
     it('should create missing collections if they don\'t exist.', (done) => {
 
         // Create and initialize a connection to the database.
-        mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
+        mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
         mongoose.connection.once('open', async () => {
 
             const conn: mongoose.Connection = mongoose.connection;
@@ -94,7 +94,7 @@ describe('BusTrackerDB', () => {
             initBusTrackerDBCallback();
         } else {
 
-            mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
+            mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
             mongoose.connection.once('open', () => {
 
                 initBusTrackerDBCallback();

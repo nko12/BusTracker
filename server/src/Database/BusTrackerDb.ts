@@ -127,7 +127,7 @@ export class BusTrackerDB {
      * Registers a new user to the database.
      * @param username The new username for the user.
      * @param passwordHash The password hash for the new user.
-     * @returns The 
+     * @returns The new user object that was created from the registration.
      */
     public async registerUser(username: string, passwordHash: string): Promise<TypedResult<models.User>> {
 
@@ -135,14 +135,14 @@ export class BusTrackerDB {
         const userData: models.User = new models.User();
         userData.username = username;
         userData.passwordHash = passwordHash;
-        
+
         // Call registerUserObject.
         const result: Result = await this.registerUserObject(userData);
-        if (result.success) {
-            return new TypedResult<models.User>(true, userData);   
-        } else {
+        if (!result.success) {
             return new TypedResult<models.User>(false, null, result.message);
         }
+
+        return new TypedResult<models.User>(true, userData);
     }
 
     /**
@@ -260,7 +260,7 @@ export class BusTrackerDB {
      * @param routeData The route object to add.
      * @returns The id of the new route. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
      */
-    public async addNewRoute(userId: string, routeData: models.Route): Promise<TypedResult<string>> {
+    public async addNewRoute(userId: string, routeData: models.Route): Promise<TypedResult<string | null>> {
 
         // Ensure the user exists.
         const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
@@ -285,7 +285,7 @@ export class BusTrackerDB {
      * @param stopData The bus stop object to add.
      * @returns The id of the new bus stop. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
      */
-    public async addNewBusStop(userId: string, stopData: models.BusStop): Promise<TypedResult<string>> {
+    public async addNewBusStop(userId: string, stopData: models.BusStop): Promise<TypedResult<string | null>> {
 
         // Ensure the user exists.
         const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
@@ -309,7 +309,7 @@ export class BusTrackerDB {
  * @param routeId The id of the route to get.
  * @returns The requested route object.
  */
-    public async getRoute(routeId: string): Promise<TypedResult<models.Route>> {
+    public async getRoute(routeId: string): Promise<TypedResult<models.Route | null>> {
 
         // Get the route object.
         const route: models.Route = await schema.RouteType.findOne({ id: routeId }).lean().cursor().next();
@@ -326,7 +326,7 @@ export class BusTrackerDB {
      * @param stopId The id of the bus stop to get.
      * @returns The requested bus stop id.
      */
-    public async getBusStop(stopId: string): Promise<TypedResult<models.BusStop>> {
+    public async getBusStop(stopId: string): Promise<TypedResult<models.BusStop | null>> {
 
         // Get the bus stop object.
         const stop: models.BusStop = await schema.BusStopType.findOne({ id: stopId }).lean().cursor().next();
@@ -366,7 +366,7 @@ export class BusTrackerDB {
         await route.remove();
 
         return new Result(true);
-    }
+    } 
 
     /**
      * Allows an admin to remove an existing fake bus stop from the database.
@@ -397,21 +397,22 @@ export class BusTrackerDB {
 
         return new Result(true);
     }
-
+    
     /**
      * Attempts to connect to the database.
      * @returns The connection to the database if successful, otherwise an error.
      */
     private initConnection(): Promise<mongoose.Connection | undefined> {
-        const conn: mongoose.Connection =
-            mongoose.createConnection(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
-
+        /*  const conn: mongoose.Connection =
+             mongoose.createConnection(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true }); */
+        mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
+        
         return new Promise<mongoose.Connection | undefined>((resolve, reject) => {
-            conn.on('error', (err) => {
+            mongoose.connection.on('error', (err) => {
                 reject(err);
             });
-            conn.once('open', () => {
-                resolve(conn);
+            mongoose.connection.once('open', () => {
+                resolve(mongoose.connection);
             });
         });
     }
