@@ -4,7 +4,11 @@ const BUSTIME_URL = 'http://bustime.mta.info/api/';
 var request = require('request');
 const IO = require('socket.io')();
 const PORT = 8000;
-IO.listen(PORT);
+
+export function realTimeInit() {
+	IO.listen(PORT);
+}
+
 console.log('listening on port', PORT);
 
 var bus_active = false;
