@@ -1,5 +1,5 @@
 const KEY = '8e4264f7-a1c1-49f3-930a-f2f1430f5e90';
-const BUSTIME_URL = 'http://bustime.mta.info/api/';
+const URL = 'http://bustime.mta.info/api/';
 
 var request = require('request');
 const IO = require('socket.io')();
@@ -16,6 +16,9 @@ var stop_active = false;
 
 var numClicks = 0;
 var clickLimit = 5;
+
+
+getStopsFromBus(7790);
 
 var stopInfoArray = [[0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];
 
@@ -94,6 +97,10 @@ IO.on('connection', (client: any) => {
 	client.on('getAllStops', () => {
 		getStopInfo(client);
 	});
+	
+	client.on('getStopsFromBus', busID => {
+		getStopsFromBus(busID, client);
+	});
 });
 
 function getStop(stopID: any, client: any) {
@@ -160,6 +167,31 @@ function getBussesFromStop(stopID: any, client: any) {
 }
 
 var stopLocArray = [{location: {lat: 0, lng: 0}, ID: 'nil'}];
-function getStopsFromBus(busID: any, client: any) {
-	console.log('TODO: getStopsFromBus()');
+function getStopsFromBus(busID: any, client : any) {
+	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error : any, response : any, body : any) {
+		if (!error && response.statusCode == 200) {
+			try {
+				var loc = JSON.parse(body);
+				console.log(JSON.stringify(loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.LineRef));
+				var routeID = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.LineRef.split(' ')[1];
+				request('http://bustime.mta.info/api/where/stops-for-route/MTA%20' + routeID + '.json?key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90&includePolylines=false&version=2', function (error : any, response : any, body : any) {
+					if (!error && response.statusCode == 200) {
+						try {
+							var loc = JSON.parse(body);
+							console.log('these are the stopIDs for this route: ' + JSON.stringify(loc.data.entry.stopIds));
+							client.emit('returnStopsFromBus', loc.data.entry.stopIds);
+						} catch (err) {
+							console.log('JSON was invalid from API call in getBus()!');
+							console.log(err);
+						}
+					} else
+						console.log('some form of error in getBus()');
+				});
+			} catch (err) {
+				console.log('JSON was invalid from API call in getBus()!');
+				console.log(err);
+			}
+		} else
+			console.log('some form of error in getBus()');
+	});
 }
