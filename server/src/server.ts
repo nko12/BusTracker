@@ -1,5 +1,5 @@
 const KEY = '8e4264f7-a1c1-49f3-930a-f2f1430f5e90';
-const URL = 'http://bustime.mta.info/api/';
+const BUSTIME_URL = 'http://bustime.mta.info/api/';
 
 var request = require('request');
 const IO = require('socket.io')();
@@ -13,16 +13,16 @@ var stop_active = false;
 var numClicks = 0;
 var clickLimit = 5;
 
-var stopInfoArray = [[00000, {ID: 00000, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];
+var stopInfoArray = [[0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];
 
-function getStopInfo(client) {
-	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=10&lonSpan=10&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error, response, body) {
+function getStopInfo(client: any) {
+	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=10&lonSpan=10&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
 				var loc = JSON.parse(body);
 				for (var i = 0; i < loc.data.stops.length; i++) {
-					var stopInnerArray = [00000, {ID: 00000, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}];
-					var stopInfoObject = {ID: 00000, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}};
+					var stopInnerArray = [0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}];
+					var stopInfoObject = {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}};
 					stopInnerArray[0] = loc.data.stops[i].code;
 					stopInfoObject.ID = loc.data.stops[i].code;
 					//stopInfoObject.name = loc.data.stops[i].name;
@@ -42,9 +42,9 @@ function getStopInfo(client) {
 	});
 }
 
-IO.on('connection', (client) => {
+IO.on('connection', (client: any) => {
 	console.log('connected');
-	client.on('subscribeToStop', param => {
+	client.on('subscribeToStop', (param: any) => {
 		bus_active = false;
 		stop_active = true;
 		console.log('client asked for busses going to stop ' + param.stopID + ' with interval ' + param.interval);
@@ -60,8 +60,8 @@ IO.on('connection', (client) => {
 		}, param.interval);
 	});
 	
-	var busTimer = undefined;
-	client.on('subscribeToBus', param => {
+	var busTimer: any = undefined;
+	client.on('subscribeToBus', (param: any) => {
 		bus_active = true;
 		stop_active = false;
 		console.log('client asked for a bus ' + param.busID + ' with interval ' + param.interval);
@@ -82,7 +82,7 @@ IO.on('connection', (client) => {
 	
 	});
 	
-	client.on('getStop', stopID => {
+	client.on('getStop', (stopID: any) => {
 		console.log('client asked for lat/lng of stop ' + stopID);
 		getStop(stopID, client);
 	});
@@ -92,8 +92,8 @@ IO.on('connection', (client) => {
 	});
 });
 
-function getStop(stopID, client) {
-	request(URL + 'where/stop/MTA_' + stopID + '.json?key=' + KEY, function (error, response, body) {
+function getStop(stopID: any, client: any) {
+	request(URL + 'where/stop/MTA_' + stopID + '.json?key=' + KEY, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
 				var loc = JSON.parse(body);
@@ -110,8 +110,8 @@ function getStop(stopID, client) {
 }
 
 var busLoc = {lat: 0, lng: 0};
-function getBus(busID, client) {
-	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error, response, body) {
+function getBus(busID: any, client: any) {
+	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
 				var loc = JSON.parse(body);
@@ -130,8 +130,8 @@ function getBus(busID, client) {
 }
 
 var busLocArray = [{location: {lat: 0, lng: 0}, ID: 'nil'}];
-function getBussesFromStop(stopID, client) {
-	request(URL + 'siri/stop-monitoring.json?key=' + KEY + '&MonitoringRef=' + stopID, function (error, response, body) {
+function getBussesFromStop(stopID: any, client: any) {
+	request(URL + 'siri/stop-monitoring.json?key=' + KEY + '&MonitoringRef=' + stopID, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
 				var loc = JSON.parse(body);
@@ -156,6 +156,6 @@ function getBussesFromStop(stopID, client) {
 }
 
 var stopLocArray = [{location: {lat: 0, lng: 0}, ID: 'nil'}];
-function getStopsFromBus(busID, client) {
+function getStopsFromBus(busID: any, client: any) {
 	console.log('TODO: getStopsFromBus()');
 }
