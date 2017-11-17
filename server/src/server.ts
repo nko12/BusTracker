@@ -5,11 +5,12 @@ var request = require('request');
 const IO = require('socket.io')();
 const PORT = 8000;
 
+// realTimeInit();
+
 export function realTimeInit() {
 	IO.listen(PORT);
+	console.log('listening on port', PORT);
 }
-
-console.log('listening on port', PORT);
 
 var bus_active = false;
 var stop_active = false;
@@ -17,16 +18,16 @@ var stop_active = false;
 var numClicks = 0;
 var clickLimit = 5;
 
-
-getStopsFromBus(7790);
+// getStopsFromBus(7790);
 
 var stopInfoArray = [[0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];
 
 function getStopInfo(client: any) {
-	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=10&lonSpan=10&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error: any, response: any, body: any) {
+	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=100&lonSpan=100&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
 				var loc = JSON.parse(body);
+				console.log(loc.data.stops.length);
 				for (var i = 0; i < loc.data.stops.length; i++) {
 					var stopInnerArray = [0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}];
 					var stopInfoObject = {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}};
@@ -95,10 +96,12 @@ IO.on('connection', (client: any) => {
 	});
 	
 	client.on('getAllStops', () => {
+		console.log('client asked for all stops');
 		getStopInfo(client);
 	});
 	
-	client.on('getStopsFromBus', busID => {
+	client.on('getStopsFromBus', (busID: any) => {
+		console.log('client asked for all stops visited by bus ' + busID);
 		getStopsFromBus(busID, client);
 	});
 });

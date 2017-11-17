@@ -23,6 +23,7 @@ export default class App extends React.Component<{}, AppState> {
 		super(props);
 
 		getAllStops((err: any, kvStopArray: [number, StopType][]) => {
+			console.log(kvStopArray.length);
 			this.state = {
 				busses: [{location: ORIGIN, ID: '256'}], // TODO: hashmap[0]
 				allStops: new Map<number, StopType>(kvStopArray),
@@ -31,8 +32,8 @@ export default class App extends React.Component<{}, AppState> {
 		});
 	}
 
-	recieveFromSideBar = (busses = this.state.busses, stops = this.state.activeStops) => {
-		this.setState({busses: busses, activeStops: stops});
+	recieveFromSideBar = (busses = this.state.busses, activeStops = this.state.activeStops) => {
+		this.setState({busses: busses, activeStops: activeStops});
 	}
 
 	render() {
@@ -41,7 +42,8 @@ export default class App extends React.Component<{}, AppState> {
 				<div className="SideBar">
 					<SideBar
 						busses={this.state.busses}
-						stops={this.state.activeStops}
+						allStops={this.state.allStops}
+						activeStops={this.state.activeStops}
 						onMarkerPositionsChanged={this.recieveFromSideBar}
 					/>
 				</div>

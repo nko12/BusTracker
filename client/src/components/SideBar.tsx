@@ -6,13 +6,15 @@ import {BusType, StopType} from './BusMap';
 
 export interface SideBarState {
 	busses: BusType[];
-	stops: StopType[];
+	allStops: Map<number, StopType>;
+	activeStops: StopType[];
 }
 
 export interface SideBarProps {
 	busses: BusType[];
-	stops: StopType[];
-	onMarkerPositionsChanged: (busses: BusType[], stops: StopType[]) => void;
+	allStops: Map<number, StopType>;
+	activeStops: StopType[];
+	onMarkerPositionsChanged: (busses: BusType[], activeStops: StopType[]) => void;
 }
 
 export class SideBar extends React.Component<SideBarProps, SideBarState> {
@@ -20,7 +22,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 		super(props);
 		this.state = {
 			busses: this.props.busses,
-			stops: this.props.stops,
+			allStops: this.props.allStops,
+			activeStops: this.props.activeStops
 		};
 	}
 	
@@ -47,13 +50,24 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								flat
 								primary
 								onClick={() => {
-									getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[][]) => {
-										// TODO
+									getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[]) => {
+										console.log(JSON.stringify(stopIDs));
+										let stops: StopType[] = [];
+										for (var i = 0; i < stopIDs.length; i++) {
+											let key = parseInt(stopIDs[i].split('_')[1]);
+											let stop = this.state.allStops.get(key);
+											console.log('searched map for ' + key + ' and found ' + stop);
+											if (stop != undefined)
+												stops.push({ID: stopIDs[i], location: stop.location})
+											console.log(stops);
+											this.setState({activeStops: stops});
+											this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+										}
 									});
 									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
 										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
 										this.setState({busses: busses});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
 								}}
 							>
@@ -61,11 +75,11 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							</Button>
 							<TextField
 								label='StopID'
-								value={this.state.stops[0].ID}
+								value={this.state.activeStops[0].ID}
 								onChange={(value) => {
-									let stops = this.state.stops;
+									let stops = this.state.activeStops;
 									stops[0].ID = String(value);
-									this.setState({stops: stops});
+									this.setState({activeStops: stops});
 								}}
 							/>
 							<Button
@@ -73,20 +87,20 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								primary
 								onClick={() => {
 									// TODO: ask the DB for this. No need to spend an API call on something that remains static
-									getStop(this.state.stops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
-										let stops: StopType[] = [{location: stopLoc, ID: this.state.stops[0].ID}];
-										this.setState({stops: stops});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
+									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
+										let stops: StopType[] = [{location: stopLoc, ID: this.state.activeStops[0].ID}];
+										this.setState({activeStops: stops});
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
 
-									console.log('about to subscribe to stop: ' + JSON.stringify(this.state.stops));
-									subscribeToStop({interval: 1000, stopID: this.state.stops[0].ID}, (err: any, busObjs: BusType[]) => {
+									console.log('about to subscribe to stop: ' + JSON.stringify(this.state.activeStops));
+									subscribeToStop({interval: 1000, stopID: this.state.activeStops[0].ID}, (err: any, busObjs: BusType[]) => {
 										console.log('got busses: ' + JSON.stringify(busObjs));
 										let busses: BusType[] = [];
 										for (let i = 0; i < busObjs.length; i++)
 											busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
 										this.setState({busses: busses});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.stops);
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
 								}}
 							>

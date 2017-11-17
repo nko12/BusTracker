@@ -7,22 +7,22 @@ function getAllStops(cb: Function) {
 	socket.emit('getAllStops');
 }
 
-function getStopsFromBus (busID: string, cb: Function) {
+function getStopsFromBus(busID: string, cb: Function) {
 	socket.on('returnStopsFromBus', (cbParam: any) => cb(null, cbParam));
-	socket.emit('getStopsFromBus');
+	socket.emit('getStopsFromBus', busID);
 }
 
-function getStop (stopID: string, cb: Function) {
+function getStop(stopID: string, cb: Function) {
 	socket.on('returnStopLocation', (cbParam: any) => cb(null, cbParam));
 	socket.emit('getStop', stopID);
 }
 
-function subscribeToStop (param: any, cb: Function) {
+function subscribeToStop(param: any, cb: Function) {
 	socket.on('returnBussesFromStop', (cbParam: any) => cb(null, cbParam));
 	socket.emit('subscribeToStop', param);
 }
 
-function subscribeToBus (param: any, cb: Function) {
+function subscribeToBus(param: any, cb: Function) {
 	socket.on('returnBusSingleton', (cbParam: any) => cb(null, cbParam));
 	socket.emit('subscribeToBus', param);
 }
