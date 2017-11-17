@@ -4,6 +4,7 @@ import * as mongo from 'mongodb';
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as mongoose from 'mongoose';
+import * as md5 from 'md5';
 var equal = require('deep-equal');
 
 import * as models from '../Models';
@@ -89,11 +90,11 @@ describe('BusTrackerDB', () => {
         }    
     });
 
-    // Tests for BusTrackerDB's 'verifyEmail' method.
-    describe('#verifyEmail', () => {
+    // Tests for BusTrackerDB's 'verifyUsername' method.
+    describe('#verifyUsername', () => {
 
-        // BusTrackerDB's 'verifyEmail' method should fail if a user with the same email adready exists.
-        it('should fail if a user with the same email already exists.', async () => {
+        // BusTrackerDB's 'verifyUsername' method should fail if a user with the same username adready exists.
+        it('should fail if a user with the same username already exists.', async () => {
 
             // Create a user to put in User database.
             const userData = models.User.generateRandomUser();
@@ -101,7 +102,7 @@ describe('BusTrackerDB', () => {
             await user1.save();
 
             // Verify an email address.
-            const result: TypedResult<boolean> = await appDB.verifyEmail(userData.email);
+            const result: TypedResult<boolean> = await appDB.verifyUsername(userData.username);
 
             // Since that email address already exists, BusTrackerDB should have returned an error.
             chai.assert(result.success);
@@ -138,19 +139,19 @@ describe('BusTrackerDB', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // BusTrackerDB's 'registerUser' method should fail if a user with the same email already exists.
-        it('should fail if a user with the same email already exists.', async () => {
+        // BusTrackerDB's 'registerUser' method should fail if a user with the same username already exists.
+        it('should fail if a user with the same username already exists.', async () => {
 
             // Create a user to put in the database.
             const firstUserData: models.User = models.User.generateRandomUser();
             const firstUser = new UserType(firstUserData);
             await firstUser.save();
 
-            // Create a new user with different properties except the email is the same.
+            // Create a new user with different properties except the username is the same.
             const secondUserData: models.User = models.User.generateRandomUser();
-            secondUserData.email = firstUserData.email;
+            secondUserData.username = firstUserData.username;
 
-            // Attempt to register the new user who has the same email as the first.
+            // Attempt to register the new user who has the same username as the first.
             const result: Result = await appDB.registerUser(secondUserData);
 
             // The register operation should fail.
@@ -173,7 +174,7 @@ describe('BusTrackerDB', () => {
             await appDB.deleteUser(userData.id);
 
             // The user should no longer exist.
-            const queryResult = await UserType.findOne({id: user.id}).cursor().next();
+            const queryResult = await UserType.findOne({id: userData.id}).cursor().next();
             chai.expect(queryResult).to.be.null;
         });
 
@@ -200,19 +201,20 @@ describe('BusTrackerDB', () => {
         });
     });
 
-    // Tests for BusTrackerDB's 'getUser' method.
-    describe('#getUser', () => {
+    // Tests for BusTrackerDB's 'loginUser' method.
+    describe('#loginUser', () => {
 
-        // The get user method should succeed and find the same user data
-        it('should succeed and return all the user data given their email.', async () => {
+        // The login user method should succeed and find the same user data as was added to the database.
+        it('should succeed and return all the user data given their username and a correct password hash.', async () => {
 
-            // Create a user.
+            // Create a user, giving them a specific password.
             const userData: models.User = models.User.generateRandomUser();
+            userData.passwordHash = md5('password');
             const user = new UserType(userData);
             await user.save();
 
-            // This should get the appropriate user given their email address.
-            const result: TypedResult<models.User> = await appDB.getUser(userData.email);
+            // This should get the appropriate user given their username and password hash.
+            const result: TypedResult<models.User> = await appDB.loginUser(userData.username, userData.passwordHash);
 
             chai.expect(result.success).to.be.true;
             chai.assert(result.data != null && result.data != undefined);
@@ -224,14 +226,109 @@ describe('BusTrackerDB', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // The get user method should return null if the user's email does not exist.
-        it('should fail and return null if the user\'s email does not exist.', async () => {
+        // The login user method should return null and fail if the username does not exist.
+        it('should fail and return null if the user\'s username does not exist.', async () => {
 
             // This should return a failing result with the data set to null.
-            const result: TypedResult<models.User> = await appDB.getUser('invalid.email@gmail.com');
+            const result: TypedResult<models.User> = await appDB.loginUser('invalid_username', md5('password'));
 
             chai.expect(result.success).to.be.false;
             chai.expect(result.data).to.be.null;
+        });
+
+        // The login user method should return null and fail if the user's password is incorrect.
+        it('should fail and return null if the user\'s password is incorrect.', async () => {
+
+            // Create a user, giving them a specific password.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.passwordHash = md5('password');
+            const user = new UserType(userData);
+            await user.save();
+
+            // This should fail because the password hash is incorrect.
+            const result: TypedResult<models.User> = await appDB.loginUser(userData.username, md5('incorrect_password'));
+
+            chai.expect(result.success).to.be.false;
+            chai.expect(result.data).to.be.null;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'toggleAdminRights' method.
+    describe('#toggleAdminRights', () => {
+
+        // The 'grantAdminRights' method should succeed if the user trying to grant access has admin rights.
+        it('should succeed if the user modifying admin rights has admin rights.', async () => {
+
+            // Create a user, with admin rights.
+            const userData1: models.User = models.User.generateRandomUser();
+            userData1.isAdmin = true;
+            const user1 = new UserType(userData1);
+            await user1.save();
+
+            // Create another user, who does not have admin rights by default.
+            const userData2: models.User = models.User.generateRandomUser();
+            userData2.isAdmin = false;
+            const user2 = new UserType(userData2);
+            await user2.save();
+
+            // Have user1 attempt to give user2 admin rights.
+            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+
+            // The operation should succeed.
+            chai.expect(result.success).to.be.true;
+        });
+
+        // The 'toggleAdminRights' method should fail if the user does not already have admin rights.
+        it('should fail if the user attempting to modify admin rights does not have admin rights.', async () => {
+
+            // Create a user, who doesn't have admin rights.
+            const userData1: models.User = models.User.generateRandomUser();
+            userData1.isAdmin = false;
+            const user1 = new UserType(userData1);
+            await user1.save();
+
+            // Create another user, who does not have admin rights by default.
+            const userData2: models.User = models.User.generateRandomUser();
+            userData2.isAdmin = false;
+            const user2 = new UserType(userData2);
+            await user2.save();
+
+            // Have user1 attempt to give user2 admin rights.
+            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        // The 'toggleAdminRights' method should actually change the admin rights of the target user if
+        // the granting user has admin rights.
+        it('should actually grant the target user admin rights.', async () => {
+
+            // Create a user, with admin rights.
+            const userData1: models.User = models.User.generateRandomUser();
+            userData1.isAdmin = true;
+            const user1 = new UserType(userData1);
+            await user1.save();
+
+            // Create another user, who does not have admin rights.
+            const userData2: models.User = models.User.generateRandomUser();
+            userData2.isAdmin = false;
+            const user2 = new UserType(userData2);
+            await user2.save();
+
+            // Have user1 attempt to give user2 admin rights.
+            await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+
+            // The second user should have admin rights.
+            let locatedUser: models.User = await UserType.findOne({ id: userData2.id }).lean().cursor().next();
+            chai.expect(locatedUser.isAdmin).to.be.true;
+
+            // Now, have user1 attempt to remove user2's admin rights.
+            await appDB.toggleAdminRights(userData1.id, userData2.id, false);
+
+            // The second user should no longer have admin rights.
+            locatedUser = await UserType.findOne({ id: userData2.id }).lean().cursor().next();
+            chai.expect(locatedUser.isAdmin).to.be.false;
         });
     });
 

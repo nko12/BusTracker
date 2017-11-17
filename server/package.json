@@ -3,7 +3,8 @@
   "version": "0.5.0",
   "description": "A bus tracking system that can be used to track the realtime movements of busses in New York city.",
   "scripts": {
-    "start": "SET NODE_ENV=prod && node ./compiled/app.js",
+    "start": "SET NODE_ENV=dev && node ./compiled/main.js",
+    "start-prod": "SET NODE_ENV=prod && node ./compiled/main.js",
     "test": "SET NODE_ENV=test && mocha -r ts-node/register src/**/*.test.ts"
   },
   "repository": {
@@ -19,6 +20,7 @@
   "dependencies": {
     "deep-equal": "^1.0.1",
     "express": "^4.16.2",
+    "md5": "^2.2.1",
     "mongodb": "^2.2.33",
     "mongoose": "^4.12.3",
     "request": "^2.83.0",
@@ -30,6 +32,7 @@
     "@types/deep-equal": "^1.0.1",
     "@types/express": "^4.0.37",
     "@types/faker": "^4.1.1",
+    "@types/md5": "^2.1.32",
     "@types/mocha": "^2.2.43",
     "@types/mongodb": "^2.2.14",
     "@types/mongoose": "^4.7.24",
