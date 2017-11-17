@@ -96,7 +96,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 	updateStops (newStops: StopType[]) {
 		// ignore stops at the origin
-		if (newStops.length > 0 && JSON.stringify(newStops[0].location) != JSON.stringify(ORIGIN))
+		if (newStops.length == 0 || newStops.length > 0 && JSON.stringify(newStops[0].location) == JSON.stringify(ORIGIN))
 			return;
 
 		// the markers we're working with
@@ -122,6 +122,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		centroid.lat /= total;
 		centroid.lng /= total;
 
+		console.log('setting center to ' + JSON.stringify(centroid));
+
 		// finalize changes
 		this.setState({stops: newStops, stopMarkers: newMarkers, center: centroid});
 
@@ -132,7 +134,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 	updateBusses (newBusses: BusType[]) {
 		// ignore busses at the origin
-		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) != JSON.stringify(ORIGIN))
+		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) == JSON.stringify(ORIGIN))
 			return;
 
 		// the markers we're working with

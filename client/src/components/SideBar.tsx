@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
-import {getStop, getStopsFromBus, subscribeToStop, subscribeToBus} from './api';
+import {getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus} from './api';
 import {BusType, StopType} from './BusMap';
 
 export interface SideBarState {
@@ -50,7 +50,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								flat
 								primary
 								onClick={() => {
-									getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[]) => {
+									{/*getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[]) => {
 										console.log(JSON.stringify(stopIDs));
 										let stops: StopType[] = [];
 										for (var i = 0; i < stopIDs.length; i++) {
@@ -63,9 +63,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 											this.setState({activeStops: stops});
 											this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 										}
-									});
+									});*/}
 									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
-										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}]
+										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}];
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
@@ -93,9 +93,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
 
-									console.log('about to subscribe to stop: ' + JSON.stringify(this.state.activeStops));
 									subscribeToStop({interval: 1000, stopID: this.state.activeStops[0].ID}, (err: any, busObjs: BusType[]) => {
-										console.log('got busses: ' + JSON.stringify(busObjs));
 										let busses: BusType[] = [];
 										for (let i = 0; i < busObjs.length; i++)
 											busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});

@@ -5,7 +5,7 @@ var request = require('request');
 const IO = require('socket.io')();
 const PORT = 8000;
 
-// realTimeInit();
+realTimeInit();
 
 export function realTimeInit() {
 	IO.listen(PORT);
