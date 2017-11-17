@@ -20,7 +20,7 @@ describe('BusMap', () => {
 		}
 		// Create a BusMap object to test on
 		busMapWrapper = mount(<BusMap {...props} />);
-		console.log('busMapWrapper is ' + busMapWrapper);
+		// print('busMapWrapper is ' + busMapWrapper);
 	});
 
 	it('should render a GoogleMap element.', () => {
