@@ -4,9 +4,12 @@
   "private": true,
   "dependencies": {
     "@google/maps": "^0.4.5",
+    "@types/enzyme": "^3.1.4",
     "@types/prop-types": "^15.5.2",
+    "enzyme": "^3.1.1",
     "google-map-react": "^0.24.0",
     "googlemaps": "^1.12.0",
+    "hashmap": "^2.3.0",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.1",
     "prop-types": "^15.6.0",
@@ -14,6 +17,9 @@
     "react-dom": "^16.0.0",
     "react-md": "^1.2.4",
     "react-scripts-ts": "2.8.0",
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.0.4",
+    "ts-node": "^3.3.0",
     "webfontloader": "^1.6.28"
   },
   "scripts": {
@@ -28,10 +34,12 @@
   "devDependencies": {
     "@types/google-map-react": "^0.23.0",
     "@types/googlemaps": "^3.29.2",
+    "@types/hashmap": "^2.0.29",
     "@types/jest": "^21.1.4",
     "@types/node": "^8.0.44",
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
+    "@types/socket.io-client": "^1.4.32",
     "@types/webfontloader": "^1.6.29",
     "install-peers": "^1.0.2"
   }
