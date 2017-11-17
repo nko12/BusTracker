@@ -3,6 +3,7 @@ import * as express from 'express';
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+import { realTimeInit } from './RealtimeBusTracker'
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -41,6 +42,9 @@ export class BusTrackerServer {
 
             // Initialize the database component.
             await this.storage.init();
+
+            // Initialize the realtime tracking.
+            realTimeInit();
 
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.
