@@ -52,7 +52,7 @@ export class BusTrackerServer {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-                
+
             });
 
         } catch (err) {
@@ -68,9 +68,14 @@ export class BusTrackerServer {
     public start(): void {
 
         // Begin listening for requests.
-        this.app.listen(serverConfig.serverPort, () => {
+        try {
+            this.app.listen(serverConfig.serverPort, () => {
 
-            console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
-        });
+                console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
+            });
+        } catch (err) {
+            console.log('Error on listen: ' + JSON.stringify(err));
+        }
+
     }
 }
