@@ -5,6 +5,7 @@ import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
 import { GraphQLHandler, GraphQLUser } from './GraphQLHandler';
+import * as cors from 'cors';
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -52,6 +53,13 @@ export class BusTrackerServer {
 
             // Initialize the graphql component.
             this.graphqlHandler.init();
+
+            // Enable Cross-Origin Resource Sharing.
+            const corsOptions = {
+                origin: ['http://localhost:3000']
+            }
+            this.app.options('/graphql', cors(corsOptions));
+            this.app.use(cors(corsOptions));
 
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.

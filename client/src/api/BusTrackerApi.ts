@@ -1,4 +1,7 @@
-import ApolloClient, { createNetworkInterface } from 'apollo-client';
+import { ApolloClient } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+
 import gql from 'graphql-tag';
 import * as md5 from 'md5';
 
@@ -7,13 +10,16 @@ import * as md5 from 'md5';
  */
 export class BusTrackerApi {
 
-    private readonly client: ApolloClient;
+    private readonly client: ApolloClient<InMemoryCache>;
     /**
      * Creates a new instance of the BusTrackerApi class.
      */
     public constructor() {
-        this.client = new ApolloClient({
-            networkInterface: createNetworkInterface({uri: 'localhost:5000/graphql'})
+        const httpLink: HttpLink = new HttpLink({uri: 'http://localhost:5000/graphql'});
+
+        this.client = new ApolloClient<InMemoryCache>({
+            link: httpLink,
+            cache: new InMemoryCache() as any
         });
     }
 
@@ -23,7 +29,7 @@ export class BusTrackerApi {
      * @param username 
      * @param password 
      */
-    public async login(username: string, password: string): Promise<{} | null> {
+    public async login(username: string, password: string): Promise<{}> {
 
         const loginQuery = gql`
             query LoginQuery {
@@ -38,7 +44,6 @@ export class BusTrackerApi {
             const data = await this.client.query({query: loginQuery});
             return data;
         } catch (err) {
-            alert(JSON.stringify(err));
             return null;
         }
     }
