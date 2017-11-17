@@ -23,7 +23,6 @@ export default class App extends React.Component<{}, AppState> {
 		super(props);
 
 		getAllStops((err: any, kvStopArray: [number, StopType][]) => {
-			console.log(kvStopArray.length);
 			this.state = {
 				busses: [{location: ORIGIN, ID: '256'}], // TODO: hashmap[0]
 				allStops: new Map<number, StopType>(kvStopArray),
