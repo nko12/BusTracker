@@ -54,8 +54,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			busses: this.props.busses,
 			stops: this.props.stops,
 
-			busMarkers: [new google.maps.Marker()],
-			stopMarkers: [new google.maps.Marker()]
+			busMarkers: [] as google.maps.Marker[],
+			stopMarkers: [] as google.maps.Marker[]
 		};
 	}
 

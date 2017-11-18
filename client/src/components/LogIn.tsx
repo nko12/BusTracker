@@ -4,6 +4,8 @@ import { BusTrackerApi } from '../api/BusTrackerApi';
 
 interface LogInState {
 	active: boolean;
+	username: string,
+	password: string
 }
 
 interface LogInProps { }
@@ -15,19 +17,29 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 	public constructor(props: LogInProps) {
 		super(props);
 		this.state = {
-			active: true
+			active: true,
+			username: '',
+			password: ''
 		};
 
 		this.api = new BusTrackerApi();
 	}
 
 	public async loginUser(): Promise<void> {
-		const result = await this.api.login('User', 'Password');
-		if (result != null) {
-			alert(JSON.stringify(result));
+		const result = await this.api.login(this.state.username, this.state.password);
+		if (result.success) {
 			this.hideLogin();
 		} else {
-			alert('Failed to login the user.');
+			alert(result.message);
+		}
+	}
+
+	public async registerUser(): Promise<void> {
+		const result = await this.api.register(this.state.username, this.state.password);
+		if (result.success) {
+			this.hideLogin();
+		} else {
+			alert(result.message)
 		}
 	}
 
@@ -53,22 +65,24 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 						<TextField
 							label="Username"
 							type="text"
+							onChange={(text: string) => this.setState({username: text})}
 						/>
 						<TextField
 							label="Password"
 							type="password"
+							onChange={(text: string) => this.setState({password: text})}
 						/>
 						<Button
 							raised={true}
 							primary={true}
-							onClick={() => { this.loginUser(); }}
+							onClick={async () => { await this.loginUser(); }}
 						>
 							Login
 						</Button>
 						<Button
 							raised={true}
 							secondary={true}
-							onClick={() => { this.hideLogin(); }}
+							onClick={async () => { await this.registerUser(); }}
 						>
 							Register
 						</Button>
