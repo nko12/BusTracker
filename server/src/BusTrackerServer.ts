@@ -4,7 +4,7 @@ var graphQLHTTP = require('express-graphql');
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
-import { GraphQLHandler, GraphQLUser } from './GraphQLHandler';
+import { GraphQLHandler } from './GraphQLHandler';
 import { User } from './Models';
 import { realTimeInit } from './RealtimeBusTracker'
 
