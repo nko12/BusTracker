@@ -3,6 +3,8 @@ import * as express from 'express';
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+import { User } from './Models';
+import { realTimeInit } from './RealtimeBusTracker'
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -42,13 +44,15 @@ export class BusTrackerServer {
             // Initialize the database component.
             await this.storage.init();
 
+            // Initialize the realtime tracking.
+            realTimeInit();
+
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.
             this.app.get('/', (req: express.Request, res: express.Response) => {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-                
             });
 
         } catch (err) {
@@ -64,9 +68,14 @@ export class BusTrackerServer {
     public start(): void {
 
         // Begin listening for requests.
-        this.app.listen(serverConfig.serverPort, () => {
+        try {
+            this.app.listen(serverConfig.serverPort, () => {
 
-            console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
-        });
+                console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
+            });
+        } catch (err) {
+            console.log('Error on listen: ' + JSON.stringify(err));
+        }
+
     }
 }
