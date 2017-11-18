@@ -2,7 +2,7 @@ import * as React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import GoogleMap from 'google-map-react';
 
-import BusMap, {BusMapProps, BusMapState} from './BusMap';
+import {BusMap, BusMapProps, BusMapState} from './BusMap';
 
 describe('BusMap', () => {
 
@@ -12,12 +12,6 @@ describe('BusMap', () => {
 	let props: BusMapProps;
 	
 	beforeAll(() => {
-		// Create some BusMap properties
-		props = {
-			pointA: {lat: 41.337716, lng: -74.35912},
-			pointB: {lat: 40.7588528, lng: -73.9852625},
-			zoom: 5
-		}
 		// Create a BusMap object to test on
 		busMapWrapper = mount(<BusMap {...props} />);
 		// print('busMapWrapper is ' + busMapWrapper);
