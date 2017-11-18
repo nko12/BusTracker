@@ -1,12 +1,11 @@
 import * as mongo from 'mongodb';
 import * as mongoose from 'mongoose';
+import * as faker from 'faker';
 
 import * as models from '../Models';
 import { serverConfig } from '../ServerConfig'
 import * as schema from './DBSchemas'
 import { Result, TypedResult } from '../Result';
-
-
 
 /**
  * An object that will perform communications with the MongoDB database, with methods to perform common
@@ -47,7 +46,7 @@ export class BusTrackerDB {
             } catch (err) {
 
                 throw new Error("Failed to connect to the database. Is MongoDB running?");
-            }    
+            }
         }
 
         try {
@@ -104,7 +103,7 @@ export class BusTrackerDB {
      * @param user An object representing the user to register.
      * @returns A promise containing the result of the operation.
      */
-    public async registerUser(user: models.User): Promise<Result> {
+    public async registerUserObject(user: models.User): Promise<Result> {
 
         // Before adding a new user to the database, verify no other user has their username.
         const verifyResult: TypedResult<boolean> = await this.verifyUsername(user.username);
@@ -122,6 +121,28 @@ export class BusTrackerDB {
         }
 
         return new Result(true);
+    }
+
+    /**
+     * Registers a new user to the database.
+     * @param username The new username for the user.
+     * @param passwordHash The password hash for the new user.
+     * @returns The new user object that was created from the registration.
+     */
+    public async registerUser(username: string, passwordHash: string): Promise<TypedResult<models.User>> {
+
+        // Create a blank user object and set the username and password hash on it.
+        const userData: models.User = new models.User();
+        userData.username = username;
+        userData.passwordHash = passwordHash;
+
+        // Call registerUserObject.
+        const result: Result = await this.registerUserObject(userData);
+        if (!result.success) {
+            return new TypedResult<models.User>(false, null, result.message);
+        }
+
+        return new TypedResult<models.User>(true, userData);
     }
 
     /**
@@ -148,12 +169,12 @@ export class BusTrackerDB {
     public async loginUser(username: string, passwordHash: string): Promise<TypedResult<models.User>> {
 
         // Find the user by their username.
-        const resultUser: models.User = await schema.UserType.findOne({ username: username}).lean().cursor().next();
+        const resultUser: models.User = await schema.UserType.findOne({ username: username }).lean().cursor().next();
 
         // If the user wasn't found, return a failing result.
         if (resultUser == null)
             return new TypedResult<models.User>(false, null, `User with username ${username} not found.`);
-        
+
         // If the provided password hash doesn't match the password hash of this username, return a failing result.
         if (resultUser.passwordHash !== passwordHash)
             return new TypedResult<models.User>(false, null, `User with username ${username} provided an invalid password.`);
@@ -172,7 +193,7 @@ export class BusTrackerDB {
     public async toggleAdminRights(grantingId: string, targetId: string, adminStatus: boolean): Promise<Result> {
 
         // Find the user attempting to grant admin rights.
-        const grantingUserData: models.User = await schema.UserType.findOne({id: grantingId}).lean().cursor().next();
+        const grantingUserData: models.User = await schema.UserType.findOne({ id: grantingId }).lean().cursor().next();
         if (grantingUserData == null)
             return new Result(false, `Granting user with id ${grantingId} not found.`);
 
@@ -181,32 +202,218 @@ export class BusTrackerDB {
             return new Result(false, `Granting user with id ${grantingId} does not have administrative rights.`);
 
         // Find the target user.
-        const targetUser: mongoose.Document = await schema.UserType.findOne({id: targetId}).cursor().next();
+        const targetUser: mongoose.Document = await schema.UserType.findOne({ id: targetId }).cursor().next();
         if (targetUser == null)
             return new Result(false, `Target user with id ${targetId} not found.`);
 
         // Change the target user admin rights. Nothing happens if the toggle value matches their current rights.
-        targetUser.set({isAdmin: adminStatus});
+        targetUser.set({ isAdmin: adminStatus });
         await targetUser.save();
 
         return new Result(true);
     }
 
     /**
+     * Edits the favorite bus stop ids of a particular user. Pass in all ids that should be considered
+     * favorited by the user.
+     * @param userID The user id of the user whose favorite bus stop ids should be edited.
+     * @param ids The list of bus stop ids to set on the user.
+     */
+    public async editFavoriteBusStopIDs(userId: string, ids: Array<string>): Promise<Result> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+
+        // Set the user's favorite bus stop ids to the value passed in.
+        user.set({ favoriteStopIds: ids });
+        await user.save();
+
+        return new Result(true);
+    }
+
+    /**
+     * Edits the favorite route ids of a particular user. Pass in all ids that should be considered
+     * favorited by the user.
+     * @param userId The user id of the user whose favorite route ids should be edited.
+     * @param ids The list of route ids to set on the user.
+     * @returns The result of the operation.
+     */
+    public async editFavoriteRouteIDs(userId: string, ids: Array<string>): Promise<Result> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+
+        // Set the user's favorite bus stop ids to the value passed in.
+        user.set({ favoriteRouteIds: ids });
+        await user.save();
+
+        return new Result(true);
+    }
+
+    /**
+     * Allows an admin to add a new fake route to the database.
+     * @param userId The user id of the user trying to add the new route.
+     * @param routeData The route object to add.
+     * @returns The id of the new route. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
+     */
+    public async addNewRoute(userId: string, routeData: models.Route): Promise<TypedResult<string | null>> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
+        if (user == null)
+            return new TypedResult(false, null, `User with id ${userId} not found.`);
+
+        // The user must be an admin.
+        if ((<boolean>user.get('isAdmin')) == false)
+            return new TypedResult(false, null, `User with id ${userId} is not an admin.`);
+
+        // Create a new route type and give it the route model.
+        routeData.id = 'FAKE_' + faker.random.uuid();
+        const route = new schema.RouteType(routeData);
+        await route.save();
+
+        return new TypedResult(true, routeData.id);
+    }
+
+    /**
+     * Allows an admin to add a new fake route to the database.
+     * @param userId The user id of the user trying to add the bus stop.
+     * @param stopData The bus stop object to add.
+     * @returns The id of the new bus stop. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
+     */
+    public async addNewBusStop(userId: string, stopData: models.BusStop): Promise<TypedResult<string | null>> {
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
+        if (user == null)
+            return new TypedResult(false, null, `User with id ${userId} not found.`);
+
+        // The user must be an admin.
+        if ((<boolean>user.get('isAdmin')) == false)
+            return new TypedResult(false, null, `User with id ${userId} is not an admin.`);
+
+        // Create a new bus stop type and give it the bus stop model.
+        stopData.id = 'FAKE_' + faker.random.uuid();
+        const busStop = new schema.BusStopType(stopData);
+        await busStop.save();
+
+        return new TypedResult(true, stopData.id);
+    }
+
+    /**
+ * Gets the specified route object by id.
+ * @param routeId The id of the route to get.
+ * @returns The requested route object.
+ */
+    public async getRoute(routeId: string): Promise<TypedResult<models.Route | null>> {
+
+        // Get the route object.
+        const route: models.Route = await schema.RouteType.findOne({ id: routeId }).lean().cursor().next();
+
+        // The route should exist.
+        if (route == null)
+            return new TypedResult(false, null, `Route with id ${routeId} not found.`);
+
+        return new TypedResult(true, route);
+    }
+
+    /**
+     * Gets the specified bus stop by id.
+     * @param stopId The id of the bus stop to get.
+     * @returns The requested bus stop id.
+     */
+    public async getBusStop(stopId: string): Promise<TypedResult<models.BusStop | null>> {
+
+        // Get the bus stop object.
+        const stop: models.BusStop = await schema.BusStopType.findOne({ id: stopId }).lean().cursor().next();
+
+        // The bus stop should exist.
+        if (stop == null)
+            return new TypedResult(false, null, `Bus Stop with id ${stopId} not found.`);
+
+        return new TypedResult(true, stop);
+    }
+
+    /**
+     * Allows an admin to remove an existing fake route from the database.
+     * @param userId The user id of the user trying to remove the route.
+     * @param routeId The id of the route to remove.
+     * @returns The result of the operation.
+     */
+    public async removeRoute(userId: string, routeId: string): Promise<Result> {
+
+        // TODO: When removing a route, it should be removed from all users who have it favorited.
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+
+        // The user must be an admin.
+        if ((<boolean>user.get('isAdmin')) == false)
+            return new Result(false, `User with id ${userId} is not an admin.`);
+
+        // Get the route to remove. The route must exist in order to remove it.
+        const route: mongoose.Document = await schema.RouteType.findOne({ id: routeId }).cursor().next();
+        if (route == null)
+            return new Result(false, `Route with id ${routeId} not found.`);
+
+        // Delete the route.
+        await route.remove();
+
+        return new Result(true);
+    } 
+
+    /**
+     * Allows an admin to remove an existing fake bus stop from the database.
+     * @param userId The user id of the user trying to remove the bus stop.
+     * @param stopId The id of the bus stop to remove.
+     * @returns The result of the operation.
+     */
+    public async removeBusStop(userId: string, stopId: string): Promise<Result> {
+
+        // TODO: When removing a bus stop, it should be removed from all users who have it favorited.
+
+        // Ensure the user exists.
+        const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
+        if (user == null)
+            return new Result(false, `User with id ${userId} not found.`);
+
+        // The user must be an admin.
+        if ((<boolean>user.get('isAdmin')) == false)
+            return new Result(false, `User with id ${userId} is not an admin.`);
+
+        // Get the bus stop to remove. The bus stop must exist in order to remove it.
+        const busStop: mongoose.Document = await schema.BusStopType.findOne({ id: stopId }).cursor().next();
+        if (busStop == null)
+            return new Result(false, `Bus Stop with id ${stopId} not found.`);
+
+        // Delete the bus stop.
+        await busStop.remove();
+
+        return new Result(true);
+    }
+    
+    /**
      * Attempts to connect to the database.
      * @returns The connection to the database if successful, otherwise an error.
      */
     private initConnection(): Promise<mongoose.Connection | undefined> {
-        const conn: mongoose.Connection =
-            mongoose.createConnection(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
+        /*  const conn: mongoose.Connection =
+             mongoose.createConnection(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true }); */
+        mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
         
         return new Promise<mongoose.Connection | undefined>((resolve, reject) => {
-            conn.on('error', (err) => {
+            mongoose.connection.on('error', (err) => {
                 reject(err);
             });
-            conn.once('open', () => { 
-                resolve(conn); 
+            mongoose.connection.once('open', () => {
+                resolve(mongoose.connection);
             });
-        }); 
+        });
     }
 }

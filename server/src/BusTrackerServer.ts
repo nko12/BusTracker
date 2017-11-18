@@ -6,6 +6,8 @@ import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
 import { GraphQLHandler, GraphQLUser } from './GraphQLHandler';
 import * as cors from 'cors';
+import { User } from './Models';
+import { realTimeInit } from './RealtimeBusTracker'
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -60,6 +62,9 @@ export class BusTrackerServer {
             }
             this.app.options('/graphql', cors(corsOptions));
             this.app.use(cors(corsOptions));
+            
+            // Initialize the realtime bus tracking.
+            realTimeInit();
 
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.
@@ -67,8 +72,9 @@ export class BusTrackerServer {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-
             });
+
+            // Set up the ability to use graphql.
             this.app.use('/graphql', graphQLHTTP({
               schema: this.graphqlHandler.schema,
               rootValue: this.graphqlHandler,
@@ -89,9 +95,14 @@ export class BusTrackerServer {
     public start(): void {
 
         // Begin listening for requests.
-        this.app.listen(serverConfig.serverPort, () => {
+        try {
+            this.app.listen(serverConfig.serverPort, () => {
 
-            console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
-        });
+                console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
+            });
+        } catch (err) {
+            console.log('Error on listen: ' + JSON.stringify(err));
+        }
+
     }
 }

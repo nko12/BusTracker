@@ -4,19 +4,9 @@
 export interface ServerConfig {
 
     /**
-     * The port to use for the MongoDB database.
+     * The connection string that should be used to connect to the database.
      */
-    dbPort: number;
-
-    /**
-     * The name of the BusTracker MongoDB database.
-     */
-    dbName: string;
-
-    /**
-     * The hostname that the BusTracker MongoDB database is being hosted at.
-     */
-    dbHost: string;
+    dbConnString: string;
 
     /**
      * The port that the server will listen on.
@@ -28,9 +18,7 @@ export interface ServerConfig {
  * Represents the server configuration, set by the current execution environment (prod, test, etc.)
  */
 export const serverConfig: ServerConfig = {
-    dbPort: 0,
-    dbName: '',
-    dbHost: '',
+    dbConnString: '',
     serverPort: 0
 };
 
@@ -38,22 +26,21 @@ export const serverConfig: ServerConfig = {
 const environmentName: string = <string>process.env.NODE_ENV;
 switch (environmentName.trim()) {
     case 'test':
-        serverConfig.dbName = 'TestBusTracker';
-        serverConfig.dbPort = 27017;
-        serverConfig.dbHost = 'localhost'
+        serverConfig.dbConnString = 'mongodb://localhost:27017/TestBusTracker';
         serverConfig.serverPort = 5000;
         break;
     case 'prod':
-        serverConfig.dbName = 'BusTracker';
-        serverConfig.dbPort = 27017;
-        serverConfig.dbHost = 'localhost'
+    {
+        if (!process.env.MONGODB_URI)
+            throw Error('The environment variable \'MONGODB_URI\' was expected to exist but is not defined.');
+        serverConfig.dbConnString = <string> process.env.MONGODB_URI;
         serverConfig.serverPort = 80;
         break;
+    }
+        
     case 'dev':
     default:
-        serverConfig.dbName = 'BusTracker';
-        serverConfig.dbPort = 27017;
-        serverConfig.dbHost = 'localhost'
+        serverConfig.dbConnString = 'mongodb://localhost:27017/BusTracker';
         serverConfig.serverPort = 5000;
         break;
 }
