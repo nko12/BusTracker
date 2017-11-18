@@ -2,7 +2,7 @@ import * as React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import GoogleMap from 'google-map-react';
 
-import {BusMap, BusMapProps, BusMapState} from './BusMap';
+import BusMap, {BusMapProps, BusMapState} from './BusMap';
 
 describe('BusMap', () => {
 
