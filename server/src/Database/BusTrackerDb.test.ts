@@ -5,13 +5,14 @@ import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as mongoose from 'mongoose';
 import * as md5 from 'md5';
+import * as faker from 'faker';
 var equal = require('deep-equal');
 
 import * as models from '../Models';
-import { Schemas, UserType, BusTrackerDB } from '../Database'
+import { Schemas, UserType, RouteType, BusStopType, BusTrackerDB } from '../Database'
 import { Result, TypedResult } from '../Result'
 import { serverConfig } from '../ServerConfig'
-import { copyInCommonProperties } from '../Util'
+import { copyInCommonProperties, arrayEquals } from '../Util'
 
 // TODO: Remove chai and sinon setup code if not used once more tests are written.
 // Set up Chai to use sinon-chai.
@@ -35,9 +36,9 @@ describe('BusTrackerDB Initialization', () => {
     it('should create missing collections if they don\'t exist.', (done) => {
 
         // Create and initialize a connection to the database.
-        mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });
+        mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
         mongoose.connection.once('open', async () => {
-            
+
             const conn: mongoose.Connection = mongoose.connection;
             const db: BusTrackerDB = new BusTrackerDB(conn);
             await db.init();
@@ -67,10 +68,21 @@ describe('BusTrackerDB', () => {
             // Initailization the BusTrackerDB object.
             appDB = new BusTrackerDB(mongoose.connection);
             appDB.init().then(() => {
-                // End test bootstrap.
-                done();
+
+                // Add a special user with id ADMIN who represents an administrator.
+                const userData: models.User = models.User.generateRandomUser();
+                userData.isAdmin = true;
+                userData.id = 'ADMIN';
+                const user = new UserType(userData);
+                user.save().then(() => {
+                    done();
+                }).catch((err) => {
+                    // Rethrow the error.
+                    throw err;
+                });
+
             }).catch((err) => {
-                
+
                 // Rethrow the error.
                 throw err;
             });
@@ -79,15 +91,15 @@ describe('BusTrackerDB', () => {
         // Create and initialize a connection to the database. (1 = connected)
         if (mongoose.connection.readyState == 1) {
 
-            initBusTrackerDBCallback();          
+            initBusTrackerDBCallback();
         } else {
 
-            mongoose.connect(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true });        
+            mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
             mongoose.connection.once('open', () => {
 
-                initBusTrackerDBCallback(); 
+                initBusTrackerDBCallback();
             });
-        }    
+        }
     });
 
     // Tests for BusTrackerDB's 'verifyUsername' method.
@@ -110,17 +122,17 @@ describe('BusTrackerDB', () => {
         });
     })
 
-    // Tests for BusTrackerDB's 'registerUser' method.
-    describe('#registerUser', () => {
+    // Tests for BusTrackerDB's 'registerUserObject' method.
+    describe('#registerUserObject', () => {
 
-        // BusTrackerDB's 'registerUser' method should successfully create a new user in the database.
+        // BusTrackerDB's 'registerUserObject' method should successfully create a new user in the database.
         it('should add a new user into the database with matching properties.', async () => {
 
             // Create a user to put in the database.
             const userData = models.User.generateRandomUser();
 
             // Attempt to register a new user.
-            const result: Result = await appDB.registerUser(userData);
+            const result: Result = await appDB.registerUserObject(userData);
 
             // Registration of the user should be successful.
             chai.expect(result.success).to.be.true;
@@ -139,7 +151,7 @@ describe('BusTrackerDB', () => {
             chai.expect(equal(resultUser, userData)).to.be.true;
         });
 
-        // BusTrackerDB's 'registerUser' method should fail if a user with the same username already exists.
+        // BusTrackerDB's 'registerUserObject' method should fail if a user with the same username already exists.
         it('should fail if a user with the same username already exists.', async () => {
 
             // Create a user to put in the database.
@@ -152,12 +164,30 @@ describe('BusTrackerDB', () => {
             secondUserData.username = firstUserData.username;
 
             // Attempt to register the new user who has the same username as the first.
-            const result: Result = await appDB.registerUser(secondUserData);
+            const result: Result = await appDB.registerUserObject(secondUserData);
 
             // The register operation should fail.
             chai.expect(result.success).to.be.false;
         });
     });
+
+    // Tests for BusTrackerDb's 'registerUser' method.
+    describe('#registerUser', () => {
+
+        // The 'registerUser' method should return a new user object with matching username and password hash.
+        it('should return a user object with matching username and password.', async () => {
+
+            const result = await appDB.registerUser('test_user', md5('password'));
+
+            // The operation should have succeeded.
+            chai.expect(result.success).to.be.true;
+                 
+            // The username and password hash of the registered user should match what was passed.
+            const userData: models.User = <models.User> result.data;
+            chai.expect(userData.username).to.equal('test_user');
+            chai.expect(userData.passwordHash).to.equal(md5('password'));
+        })
+    })
 
     // Tests for BusTrackerDB's 'deleteUser' method.
     describe('#deleteUser', () => {
@@ -174,7 +204,7 @@ describe('BusTrackerDB', () => {
             await appDB.deleteUser(userData.id);
 
             // The user should no longer exist.
-            const queryResult = await UserType.findOne({id: userData.id}).cursor().next();
+            const queryResult = await UserType.findOne({ id: userData.id }).cursor().next();
             chai.expect(queryResult).to.be.null;
         });
 
@@ -332,6 +362,401 @@ describe('BusTrackerDB', () => {
         });
     });
 
+    // Tests for BusTrackerDB's 'editFavoriteStopsIDs' method.
+    describe('#editFavoriteBusStopIDs', () => {
+
+        it('should correctly set the list of favorite bus stop ids for the user.', async () => {
+
+            // Create and save a random user.
+            const userData: models.User = models.User.generateRandomUser();
+            const user = new UserType(userData);
+            await user.save();
+
+            // Create the new set of ids to set on the user.
+            const ids = ['FAKE_481', 'FAKE_777', 'FAKE_983'];
+
+            // Change their favorite ids.
+            const result = await appDB.editFavoriteBusStopIDs(userData.id, ids);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+
+            // The ids of the user should be correct.
+            const locatedUser: models.User = await UserType.findOne({ id: userData.id }).lean().cursor().next();
+            chai.expect(arrayEquals(locatedUser.favoriteStopIds, ids)).to.be.true;
+        });
+
+        it('should fail if the user id does not exist.', async () => {
+
+            const result = await appDB.editFavoriteBusStopIDs('invalid_id', ['FAKE_481', 'FAKE_777', 'FAKE_983']);
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
+        });
+    })
+
+    // Tests for BusTrackerDB's 'editFavoriteRouteIDs' method.
+    describe('#editFavoriteRouteIDs', () => {
+
+        it('should correctly set the list of favorite route ids for the user.', async () => {
+
+            // Create and save a random user.
+            const userData: models.User = models.User.generateRandomUser();
+            const user = new UserType(userData);
+            await user.save();
+
+            // Create the new set of ids to set on the user.
+            const ids = ['FAKE_481', 'FAKE_777', 'FAKE_983'];
+
+            // Change their favorite ids.
+            const result = await appDB.editFavoriteRouteIDs(userData.id, ids);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+
+            // The ids of the user should be correct.
+            const locatedUser: models.User = await UserType.findOne({ id: userData.id }).lean().cursor().next();
+            chai.expect(arrayEquals(locatedUser.favoriteRouteIds, ids)).to.be.true;
+        });
+
+        it('should fail if the user id does not exist.', async () => {
+
+            const result = await appDB.editFavoriteRouteIDs('invalid_id', ['FAKE_481', 'FAKE_777', 'FAKE_983']);
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'addRoute' method.
+    describe('#addRoute', () => {
+
+        it('should add a new route into the database with matching properties.', async () => {
+
+            // Create a new route object.
+            const routeData: models.Route = new models.Route();
+            routeData.name = 'Test Route';
+            routeData.polyline = 'jaijosd82jnd';
+            routeData.busStopIDs = ['FAKE_222', 'FAKE_123', 'FAKE_888'];
+
+            const result = await appDB.addNewRoute('ADMIN', routeData);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+            chai.assert(result.data != null);
+
+            // The route object should exist.
+            const locatedRoute: models.Route = await RouteType.findOne({ id: routeData.id }).lean().cursor().next();
+
+            // Remove extra properties before comparison.
+            const resultRoute: models.Route = new models.Route();
+            copyInCommonProperties(locatedRoute, resultRoute);
+
+            // The id for the route is created when the route is added to the database. Before comparing, make sure
+            // to use the id returned by the addNewRoute method.
+            resultRoute.id = <string>result.data;
+
+            chai.expect(equal(resultRoute, routeData)).to.be.true;
+        });
+
+        it('should fail if the user id does not have admin status.', async () => {
+
+            // Create a new route object.
+            const routeData: models.Route = new models.Route();
+
+            // Create and save a new non-admin user.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.isAdmin = false;
+            const user = new UserType(userData);
+            await user.save();
+
+            // Attempt to create the new route object.
+            const result = await appDB.addNewRoute(userData.id, routeData);
+
+            // It should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should fail if the user id is invalid.', async () => {
+
+            // Create a new route object.
+            const routeData: models.Route = new models.Route();
+
+            // Attempt to create the new route object.
+            const result = await appDB.addNewRoute('invalid_user', routeData);
+
+            // It should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should return an id that starts with \'FAKE_\' on route creation.', async () => {
+
+            // Create a new route object.
+            const routeData: models.Route = new models.Route();
+
+            // Add the route using the admin account.
+            const result = await appDB.addNewRoute('ADMIN', routeData);
+
+            // The operation should have succeeded and the route id should start with "FAKE_".
+            chai.expect(result.success).to.be.true;
+            chai.expect(result.data).to.not.be.null;
+            chai.expect((<string>result.data).startsWith('FAKE_')).to.be.true;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'removeRoute' method.
+    describe('#removeRoute', () => {
+
+        it('should remove the route from the database with the specified id.', async () => {
+
+            // Create a new route object and add it to the database.
+            const routeData: models.Route = new models.Route();
+            routeData.id = 'FAKE_' + faker.random.uuid();
+            const route = new RouteType(routeData);
+            await route.save();
+
+            // Remove the route.
+            const result = await appDB.removeRoute('ADMIN', routeData.id);
+
+            // The operation should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // The route should not exist anymore.
+            const locatedRoute: mongoose.Document = await RouteType.findOne({ id: routeData.id }).lean().cursor().next();
+            chai.expect(locatedRoute).to.be.null;
+        });
+
+        it('should fail to remove the route if the user does not have admin status.', async () => {
+            // Create a new route object and add it to the database.
+            const routeData: models.Route = new models.Route();
+            const route = new RouteType(routeData);
+            await route.save();
+
+            // Create and save a new non-admin user.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.isAdmin = false;
+            const user = new UserType(userData);
+            await user.save();
+
+            // Attempt to remove the route.
+            const result = await appDB.removeRoute(userData.id, routeData.id);
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should fail if the route id is not valid.', async () => {
+
+            // Attempt to remove a route using an invalid id.
+            const result = await appDB.removeRoute('ADMIN', 'invalid_id');
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'addBusStop' method.
+    describe('#addBusStop', () => {
+
+        it('should add a new bus stop into the database with matching properties.', async () => {
+
+            // Create a new route object.
+            const stopData: models.BusStop = new models.BusStop();
+            stopData.name = 'Test Bus Stop';
+            stopData.latitude = '15.337167';
+            stopData.longitude = '11.777344'
+
+            const result = await appDB.addNewBusStop('ADMIN', stopData);
+
+            // Should have succeeded.
+            chai.expect(result.success).to.be.true;
+            chai.assert(result.data != null);
+
+            // The route object should exist.
+            const locatedStop: models.BusStop = await BusStopType.findOne({ id: stopData.id }).lean().cursor().next();
+
+            // Remove extra properties before comparison.
+            const resultStop: models.BusStop = new models.BusStop();
+            copyInCommonProperties(locatedStop, resultStop);
+
+            // The id for the route is created when the route is added to the database. Before comparing, make sure
+            // to use the id returned by the addNewRoute method.
+            resultStop.id = <string>result.data;
+
+            chai.expect(equal(resultStop, stopData)).to.be.true;
+        });
+
+        it('should fail if the user id does not have admin status.', async () => {
+
+            // Create a new bus stop object.
+            const stopData: models.BusStop = new models.BusStop();
+
+            // Create and save a new non-admin user.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.isAdmin = false;
+            const user = new UserType(userData);
+            await user.save();
+
+            // Attempt to create the new route object.
+            const result = await appDB.addNewBusStop(userData.id, stopData);
+
+            // It should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should fail if the user id is invalid.', async () => {
+
+            // Create a new route object.
+            const stopData: models.BusStop = new models.BusStop();
+
+            // Attempt to create the new route object.
+            const result = await appDB.addNewBusStop('invalid_user', stopData);
+
+            // It should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should return an id that starts with \'FAKE_\' on bus stop creation.', async () => {
+
+            // Create a new route object.
+            const stopData: models.BusStop = new models.BusStop();
+
+            // Add the route using the admin account.
+            const result = await appDB.addNewBusStop('ADMIN', stopData);
+
+            // The operation should have succeeded and the bus stop id should start with "FAKE_".
+            chai.expect(result.success).to.be.true;
+            chai.expect(result.data).to.not.be.null;
+            chai.expect((<string>result.data).startsWith('FAKE_')).to.be.true;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'removeBusStop' method.
+    describe('#removeBusStop', () => {
+
+        it('should remove the bus stop from the database with the specified id.', async () => {
+
+            // Create a new bus stop object and add it to the database.
+            const stopData: models.BusStop = new models.BusStop();
+            stopData.id = 'FAKE_' + faker.random.uuid();
+            const busStop = new BusStopType(stopData);
+            await busStop.save();
+
+            // Remove the bus stop.
+            const result = await appDB.removeBusStop('ADMIN', stopData.id);
+
+            // The operation should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // The bus stop should not exist anymore.
+            const locatedStop: mongoose.Document = await BusStopType.findOne({ id: stopData.id }).lean().cursor().next();
+            chai.expect(locatedStop).to.be.null;
+        });
+
+        it('should fail to remove the bus stop if the user does not have admin status.', async () => {
+
+            // Create a new bus stop object and add it to the database.
+            const stopData: models.BusStop = new models.BusStop();
+            const busStop = new BusStopType(stopData);
+            await busStop.save();
+
+            // Create and save a new non-admin user.
+            const userData: models.User = models.User.generateRandomUser();
+            userData.isAdmin = false;
+            const user = new UserType(userData);
+            await user.save();
+
+            // Attempt to remove the bus stop.
+            const result = await appDB.removeBusStop(userData.id, stopData.id);
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
+        });
+
+        it('should fail if the bus stop id is not valid.', async () => {
+
+            // Attempt to remove a route using an invalid id.
+            const result = await appDB.removeBusStop('ADMIN', 'invalid_id');
+
+            // The operation should fail.
+            chai.expect(result.success).to.be.false;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'getRoute' method.
+    describe('#getRoute', () => {
+
+        it('should get the route object associated with the specified id.', async () => {
+
+            // Create a route and save it to the database.
+            const routeData: models.Route = new models.Route();
+            routeData.id = 'FAKE_123';
+            routeData.name = 'Test Route';
+            routeData.polyline = 'joasdpoewasjdkif';
+            routeData.busStopIDs = ['FAKE_444', 'FAKE_000', 'FAKE_322'];
+            const route = new RouteType(routeData);
+            await route.save();
+
+            // Attempt to get the route.
+            const result = await appDB.getRoute('FAKE_123');
+
+            // This should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // Remove extra properties before comparison.
+            const resultRoute: models.Route = new models.Route();
+            copyInCommonProperties(result.data, resultRoute);
+
+            // The returned route data should match what was saved.
+            chai.expect(equal(resultRoute, routeData)).to.be.true;
+        });
+
+        it('should fail if the route id is not valid.', async () => {
+
+            const result = await appDB.getRoute('invalid_id');
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
+        });
+    });
+
+    // Tests for BusTrackerDB's 'getBusStop' method.
+    describe('#getBusStop', () => {
+
+        it('should get the bus stop object associated with the specified id.', async () => {
+
+            // Create a bus stop and save it to the database.
+            const stopData: models.BusStop = new models.BusStop();
+            stopData.id = 'FAKE_321';
+            stopData.name = 'Test Bus Stop';
+            stopData.latitude = '12.827461';
+            stopData.longitude = '10.496377'
+            const stop = new BusStopType(stopData);
+            await stop.save();
+
+            // Attempt to get the bus stop.
+            const result = await appDB.getBusStop('FAKE_321');
+
+            // This should succeed.
+            chai.expect(result.success).to.be.true;
+
+            // Remove extra properties before comparison.
+            const resultStop: models.BusStop = new models.BusStop();
+            copyInCommonProperties(result.data, resultStop);
+
+            // The returned route data should match what was saved.
+            chai.expect(equal(resultStop, stopData)).to.be.true;
+        });
+
+        it('should fail if the bus stop id is not valid.', async () => {
+
+            const result = await appDB.getBusStop('invalid_id');
+
+            // Should have failed.
+            chai.expect(result.success).to.be.false;
+        });
+    });
+
     after(async () => {
 
         // Ensure the connection to MongoDB is closed so Mocha doesn't hang.
@@ -340,7 +765,6 @@ describe('BusTrackerDB', () => {
 
             await conn.db.dropDatabase();
             await conn.close();
-            const readyState = conn.readyState;
         }
     });
 });

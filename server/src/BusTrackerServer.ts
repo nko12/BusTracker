@@ -4,7 +4,12 @@ var graphQLHTTP = require('express-graphql');
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+<<<<<<< HEAD
 import { GraphQLHandler, GraphQLUser } from './GraphQLHandler';
+=======
+import { User } from './Models';
+import { realTimeInit } from './RealtimeBusTracker'
+>>>>>>> master
 
 /**
  * Represents the primary class that handles most of the logic of the Bus Tracker server application.
@@ -50,8 +55,13 @@ export class BusTrackerServer {
             // Initialize the database component.
             await this.storage.init();
 
+<<<<<<< HEAD
             // Initialize the graphql component.
             this.graphqlHandler.init();
+=======
+            // Initialize the realtime tracking.
+            realTimeInit();
+>>>>>>> master
 
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
             // is running.
@@ -59,7 +69,10 @@ export class BusTrackerServer {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
             });
             this.app.use('/graphql', graphQLHTTP({
               schema: this.graphqlHandler.schema,
@@ -81,9 +94,14 @@ export class BusTrackerServer {
     public start(): void {
 
         // Begin listening for requests.
-        this.app.listen(serverConfig.serverPort, () => {
+        try {
+            this.app.listen(serverConfig.serverPort, () => {
 
-            console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
-        });
+                console.log(`BusTracker server started and listening on port ${serverConfig.serverPort}.`);
+            });
+        } catch (err) {
+            console.log('Error on listen: ' + JSON.stringify(err));
+        }
+
     }
 }
