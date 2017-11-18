@@ -9,6 +9,7 @@
     "enzyme": "^3.1.1",
     "google-map-react": "^0.24.0",
     "googlemaps": "^1.12.0",
+    "jest-cli": "^21.2.1",
     "hashmap": "^2.3.0",
     "node-sass-chokidar": "0.0.3",
     "npm-run-all": "^4.1.1",
@@ -32,6 +33,8 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.1.4",
+    "@types/enzyme-adapter-react-16": "^1.0.1",
     "@types/google-map-react": "^0.23.0",
     "@types/googlemaps": "^3.29.2",
     "@types/hashmap": "^2.0.29",
@@ -41,6 +44,8 @@
     "@types/react-dom": "^16.0.1",
     "@types/socket.io-client": "^1.4.32",
     "@types/webfontloader": "^1.6.29",
+    "enzyme": "^3.1.1",
+    "enzyme-adapter-react-16": "^1.0.4",
     "install-peers": "^1.0.2"
   }
 }
