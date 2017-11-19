@@ -4,6 +4,9 @@ import { Result, TypedResult } from './Result';
 import * as models from './Models';
 
 
+/*    GraphQL request/response classes    */
+
+
 /**
  * Represents the basic error interface for GraphQL responses
  */
@@ -50,15 +53,47 @@ interface LoginQueryData {
 /**
  * Represents the object sent from the client for an id query (route or stop)
  */
-interface IdQueryData {
+interface IDQueryData {
   id: string;
 }
+
 /**
  * Represents the object sent from the client for an id update (route or stop favorite update)
  */
-interface IdArrayMutationData {
-  userId: string
+interface IDArrayMutationData {
+  userId: string;
   objectIds: Array<string>;
+}
+
+/**
+ * Represents the object sent from the client for toggling admin rights
+ */
+interface AdminRightsMutationData {
+  grantingId: string;
+  targetId: string;
+  adminStatus: boolean;
+}
+
+/**
+ * Represents the object sent from the client for removing an object (route or stop)
+ */
+interface RemoveIDMutationData {
+  userId: string;
+  objectId: string;
+}
+
+/**
+ * Represents the object sent from the client for adding a fake route
+ */
+class AddRouteMutationData extends models.Route {
+  userId: string;
+}
+
+/**
+ * Represents the object sent from the client for adding a fake stop
+ */
+interface AddBusStopMutationData extends models.BusStop {
+  userId: string;
 }
 
 /**
@@ -111,7 +146,7 @@ class GraphQLHandler {
           id: String
           name: String
           polyline: String
-          busStopIDs: [String]
+          busStopIds: [String]
         }
 
         type BusStop implements IError {
@@ -130,13 +165,13 @@ class GraphQLHandler {
 
         type Mutation {
           register(username: String, passwordHash: String): User
-          toggleAdminRights(grantingId: String, targetId: String, adminStatus: Boolean): BasicResponse
+          # toggleAdminRights(grantingId: String, targetId: String, adminStatus: Boolean): BasicResponse
           editFavoriteBusStopIDs(userId: String, objectIds: [String]): BasicResponse
           editFavoriteRouteIDs(userId: String, objectIds: [String]): BasicResponse
-          addNewRoute(userId: String, routeData: Route): BasicResponse
-          addNewBusStop(userId: String, stopData: BusStop): BasicResponse
-          removeRoute(userId: String, routeId: String): BasicResponse
-          removeBusStop(userId: String, stopId: String): BasicResponse
+          # addNewRoute(userId: String, id: String, name: String, polyline: String, busStopIds: [String]): BasicResponse
+          # addNewBusStop(userId: String, id: String, name: String, latitude: String, longitude: String): BasicResponse
+          # removeRoute(userId: String, objectId: String): BasicResponse
+          # removeBusStop(userId: String, objectId: String): BasicResponse
         }
       `);
     }
@@ -165,7 +200,7 @@ class GraphQLHandler {
      * Handler that deals with the getRoute query.
      * @param data The id for the route to lookup.
      */
-    public async getRoute(data: IdQueryData): Promise<GraphQLRoute> {
+    public async getRoute(data: IDQueryData): Promise<GraphQLRoute> {
 
       let route: GraphQLRoute = new GraphQLRoute();
 
@@ -183,7 +218,7 @@ class GraphQLHandler {
      * Handler that deals with the getStop query.
      * @param data The id for the stop to lookup.
      */
-    public async getStop(data: IdQueryData): Promise<GraphQLBusStop> {
+    public async getStop(data: IDQueryData): Promise<GraphQLBusStop> {
 
       let stop: GraphQLBusStop = new GraphQLBusStop();
 
@@ -222,7 +257,7 @@ class GraphQLHandler {
      * Handler that deals with the editFavoriteBusStopIDs mutation.
      * @param data The bus stop ids and user data passed from the client.
      */
-    public async editFavoriteBusStopIDs(data: IdArrayMutationData): Promise<GraphQLBasicResponse> {
+    public async editFavoriteBusStopIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
 
       let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
@@ -237,7 +272,7 @@ class GraphQLHandler {
      * Handler that deals with the editFavoriteRouteIDs mutation.
      * @param data The route ids and user data passed from the client.
      */
-    public async editFavoriteRouteIDs(data: IdArrayMutationData): Promise<GraphQLBasicResponse> {
+    public async editFavoriteRouteIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
 
       let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
