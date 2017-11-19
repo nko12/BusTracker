@@ -185,6 +185,7 @@ class GraphQLHandler {
           addNewBusStop(userId: String, id: String, name: String, latitude: String, longitude: String): IDResponse
           removeRoute(userId: String, objectId: String): BasicResponse
           removeBusStop(userId: String, objectId: String): BasicResponse
+          deleteUser(id: String): BasicResponse
         }
       `);
     }
@@ -370,6 +371,21 @@ class GraphQLHandler {
       let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
       const result = await this.server.storage.removeBusStop(data.userId, data.objectId);
+      if (!result.success) {
+          response.error = result.message;
+      }
+      return response;
+    }
+
+    /**
+     * Handler that deals with the deleteUser mutation.
+     * @param data The user id to delete
+     */
+    public async deleteUser(data: IDQueryData): Promise<GraphQLBasicResponse> {
+
+      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+
+      const result = await this.server.storage.deleteUser(data.id);
       if (!result.success) {
           response.error = result.message;
       }
