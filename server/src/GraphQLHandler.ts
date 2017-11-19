@@ -22,6 +22,14 @@ class GraphQLBasicResponse implements IError {
 }
 
 /**
+ * Represents the object sent to the client for GraphQL to represent an id
+ */
+class GraphQLIDResponse implements IError {
+  error?: string;
+  id: string;
+}
+
+/**
  * Represents the object sent to the client with GraphQL to represent the user
  */
 class GraphQLUser extends models.User implements IError {
@@ -132,6 +140,11 @@ class GraphQLHandler {
           error: String
         }
 
+        type IDResponse implements IError {
+          error: String
+          id: String
+        }
+
         type User implements IError {
           error: String
           id: String
@@ -146,7 +159,7 @@ class GraphQLHandler {
           id: String
           name: String
           polyline: String
-          busStopIds: [String]
+          busStopIDs: [String]
         }
 
         type BusStop implements IError {
@@ -165,11 +178,11 @@ class GraphQLHandler {
 
         type Mutation {
           register(username: String, passwordHash: String): User
-          # toggleAdminRights(grantingId: String, targetId: String, adminStatus: Boolean): BasicResponse
+          toggleAdminRights(grantingId: String, targetId: String, adminStatus: Boolean): BasicResponse
           editFavoriteBusStopIDs(userId: String, objectIds: [String]): BasicResponse
           editFavoriteRouteIDs(userId: String, objectIds: [String]): BasicResponse
-          # addNewRoute(userId: String, id: String, name: String, polyline: String, busStopIds: [String]): BasicResponse
-          # addNewBusStop(userId: String, id: String, name: String, latitude: String, longitude: String): BasicResponse
+          addNewRoute(userId: String, id: String, name: String, polyline: String, busStopIDs: [String]): IDResponse
+          # addNewBusStop(userId: String, id: String, name: String, latitude: String, longitude: String): IDResponse
           # removeRoute(userId: String, objectId: String): BasicResponse
           # removeBusStop(userId: String, objectId: String): BasicResponse
         }
@@ -254,6 +267,21 @@ class GraphQLHandler {
     }
 
     /**
+     * Handler that deals with the toggleAdminRights mutation.
+     * @param data The toggleAdminRights data passed from the client.
+     */
+    public async toggleAdminRights(data: AdminRightsMutationData): Promise<GraphQLBasicResponse> {
+
+      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+
+      const result = await this.server.storage.toggleAdminRights(data.grantingId, data.targetId, data.adminStatus);
+      if (!result.success) {
+          response.error = result.message;
+      }
+      return response;
+    }
+
+    /**
      * Handler that deals with the editFavoriteBusStopIDs mutation.
      * @param data The bus stop ids and user data passed from the client.
      */
@@ -280,6 +308,24 @@ class GraphQLHandler {
       if (!result.success) {
           response.error = result.message;
       }
+      return response;
+    }
+
+
+    /**
+     * Handler that deals with the editFavoriteRouteIDs mutation.
+     * @param data The route ids and user data passed from the client.
+     */
+    public async addNewRoute(data: AddRouteMutationData): Promise<GraphQLIDResponse> {
+
+      let response: GraphQLIDResponse = new GraphQLIDResponse();
+
+      const result = await this.server.storage.addNewRoute(data.userId, data);
+      if (!result.success) {
+          response.error = result.message;
+          return response;
+      }
+      response.id = <string>result.data;
       return response;
     }
 }
