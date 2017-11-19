@@ -27,4 +27,4 @@ function subscribeToBus(param: any, cb: Function) {
 	socket.emit('subscribeToBus', param);
 }
 
-export {getStop, getAllStops, getStopsFromBus, subscribeToStop, subscribeToBus}
+export {getStop, getAllStops, getStopsFromBus, subscribeToStop, subscribeToBus};

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import * as GMapReact from 'google-map-react';
+import * as GoogleMapReact from 'google-map-react';
 import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
-import {getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus} from './api';
+import {getStop, subscribeToStop, subscribeToBus} from './api';
 import {BusType, StopType} from './BusMap';
 
 export interface SideBarState {
@@ -50,21 +50,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								flat
 								primary
 								onClick={() => {
-									{/*getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[]) => {
-										console.log(JSON.stringify(stopIDs));
-										let stops: StopType[] = [];
-										for (var i = 0; i < stopIDs.length; i++) {
-											let key = parseInt(stopIDs[i].split('_')[1]);
-											let stop = this.state.allStops.get(key);
-											console.log('searched map for ' + key + ' and found ' + stop);
-											if (stop != undefined)
-												stops.push({ID: stopIDs[i], location: stop.location})
-											console.log(stops);
-											this.setState({activeStops: stops});
-											this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
-										}
-									});*/}
-									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
+									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GoogleMapReact.Coords) => {
 										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}];
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
@@ -87,7 +73,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								primary
 								onClick={() => {
 									// TODO: ask the DB for this. No need to spend an API call on something that remains static
-									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
+									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GoogleMapReact.Coords) => {
 										let stops: StopType[] = [{location: stopLoc, ID: this.state.activeStops[0].ID}];
 										this.setState({activeStops: stops});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);

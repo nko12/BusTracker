@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as GMapReact from 'google-map-react';
+import * as GoogleMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
 
 const IMG = 'https://i.imgur.com/7f5HCOn.png';
@@ -9,22 +9,22 @@ const ORIGIN = {lat: 0.0, lng: 0.0};
 const NYC = {lat: 40.7588528, lng: -73.9852625};
 
 export interface BusType {
-	location: GMapReact.Coords;
+	location: GoogleMapReact.Coords;
 	ID: string;
 }
 
 export interface StopType {
-	location: GMapReact.Coords;
+	location: GoogleMapReact.Coords;
 	ID: string;
 	// name: string;
 }
 
 export interface BusMapState {
 	zoom: number;
-	center: GMapReact.Coords;
+	center: GoogleMapReact.Coords;
 
 	map?: google.maps.Map;
-	maps?: GMapReact.Maps;
+	maps?: GoogleMapReact.Maps;
 
 	mapLoaded: boolean;
 
@@ -54,8 +54,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			busses: this.props.busses,
 			stops: this.props.stops,
 
-			busMarkers: [new google.maps.Marker()],
-			stopMarkers: [new google.maps.Marker()]
+			busMarkers: [] as google.maps.Marker[],
+			stopMarkers: [] as google.maps.Marker[]
 		};
 	}
 
@@ -157,7 +157,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			oldMarkers[i].setMap(null);
 	}
 
-	midPoint(a: GMapReact.Coords, b: GMapReact.Coords) {
+	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {
 		return {
 			lat: (a.lat + b.lat) / 2,
 			lng: (a.lng + b.lng) / 2
