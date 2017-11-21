@@ -41,8 +41,10 @@
   /*color: white;*/
   /*padding: 4px;*/ }
 
-.tabs__page-layout .md-tab--inactive {
-  color: rgba(0, 0, 0, 0.54); }
+.tabs__page-layout {
+  padding: 16px; }
+  .tabs__page-layout .md-tab--inactive {
+    color: rgba(0, 0, 0, 0.54); }
 
 .busMarker {
   position: absolute;
@@ -59,7 +61,6 @@
   font-weight: bold;
   padding: 4; }
 
-  .tabFormat{
-    text-align: left;
-    padding: 4px;
-  }
+.tabFormat {
+  text-align: left;
+  padding: 4px; }

@@ -3152,7 +3152,8 @@ svg.md-icon {
   visibility: hidden; }
 
 .md-divider--text-field {
-  margin-top: 7px; }
+  margin-top: 7px;
+  overflow: visible; }
   .md-divider--text-field::after {
     background: #03a9f4;
     content: '';
