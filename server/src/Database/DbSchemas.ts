@@ -23,10 +23,33 @@ export class Schemas {
     }, {
             // Make sure the name of the collection is "User" and not "users".
             collection: 'User'
-        });
+    });
+
+    // The Route schema.
+    public static routeSchema: mongoose.Schema = new mongoose.Schema({
+        id: { type: String, index: true },
+        name: String,
+        polyline: String,
+        busStopIDs: []
+    }, {
+            // Make sure the name of the collection is "Route" and not "routes".
+            collection: 'Route'
+    });
+
+    // The BusStop schema.
+    public static busStopSchema: mongoose.Schema = new mongoose.Schema({
+        id: {type: String, index: true},
+        name: String,
+        latitude: Number,
+        longitude: Number
+    }, {
+        collection: 'BusStop'
+    });
 
     public static schemaNames: string[] = [
-        'User'
+        'User',
+        'Route',
+        'BusStop'
     ];
 }
 
@@ -34,3 +57,11 @@ export class Schemas {
  * Represents a 'User' Mongoose Model.
  */
 export const UserType = mongoose.model('User', Schemas.userSchema);
+/**
+ * Represents a 'Route' Mongoose Model.
+ */
+export const RouteType = mongoose.model('Route', Schemas.routeSchema);
+/**
+ * Represents a 'BusStop' Mongoose Model.
+ */
+export const BusStopType = mongoose.model('BusStop', Schemas.busStopSchema);

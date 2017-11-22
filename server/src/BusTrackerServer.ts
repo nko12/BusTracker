@@ -1,8 +1,12 @@
 import * as express from 'express';
+var graphQLHTTP = require('express-graphql');
 
 import { Result } from './Result'
 import { BusTrackerDB } from './Database';
 import { serverConfig } from './ServerConfig';
+import { GraphQLHandler } from './GraphQLHandler';
+import * as cors from 'cors';
+import { User } from './Models';
 import { realTimeInit } from './RealtimeBusTracker'
 
 /**
@@ -13,12 +17,17 @@ export class BusTrackerServer {
     /**
      * Represents the persistent storage component of the BusTrackerServer.
      */
-    private readonly storage: BusTrackerDB;
+    public readonly storage: BusTrackerDB;
 
     /**
      * Represents the underlying Express application that drives much of the very low level server logic.
      */
-    private readonly app: express.Application;
+    public readonly app: express.Application;
+
+    /**
+     * Represents the GraphQL handling component of the server.
+     */
+    public readonly graphqlHandler: GraphQLHandler;
 
     /**
      * Creates a new instance of the BusTracker server.
@@ -26,6 +35,7 @@ export class BusTrackerServer {
     public constructor() {
 
         this.storage = new BusTrackerDB();
+        this.graphqlHandler = new GraphQLHandler(this);
         this.app = express();
     }
 
@@ -43,7 +53,17 @@ export class BusTrackerServer {
             // Initialize the database component.
             await this.storage.init();
 
-            // Initialize the realtime tracking.
+            // Initialize the graphql component.
+            this.graphqlHandler.init();
+
+            // Enable Cross-Origin Resource Sharing.
+            const corsOptions = {
+                origin: ['http://localhost:3000']
+            }
+            this.app.options('/graphql', cors(corsOptions));
+            this.app.use(cors(corsOptions));
+
+            // Initialize the realtime bus tracking.
             realTimeInit();
 
             // Set up the '/' endpoint. For now, it will just print a simple string to demonstrate the server
@@ -52,8 +72,15 @@ export class BusTrackerServer {
 
                 // Respond with a simple string.
                 res.send('BusTracker Server');
-
             });
+
+            // Set up the ability to use graphql.
+            this.app.use('/graphql', graphQLHTTP({
+              schema: this.graphqlHandler.schema,
+              rootValue: this.graphqlHandler,
+              pretty: true,
+              graphiql: true,
+            }));
 
         } catch (err) {
 

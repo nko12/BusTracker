@@ -1,29 +1,12 @@
-import * as faker from 'faker';
-
 /**
  * Represents a User of the BusTracker app.
  */
 export class User {
 
     /**
-     * Generates a new User object with the properties set to random values.
-     * Note that the stop IDs and route IDs are not set.
-     */
-    static generateRandomUser(): User {
-
-        const user: User = new User();
-        user.username = faker.name.firstName() + "." + faker.name.lastName();
-        user.firstName = faker.name.firstName();
-        user.lastName = faker.name.lastName();
-        user.email = faker.internet.email(user.firstName, user.lastName);
-        user.passwordHash = faker.random.alphaNumeric(32);
-        return user;
-    }
-
-    /**
      * The ID of the user.
      */
-    public id: string = faker.random.uuid();
+    public id: string = '';
     /**
      * The first name of the user.
      */

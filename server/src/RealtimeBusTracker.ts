@@ -5,7 +5,7 @@ var request = require('request');
 const IO = require('socket.io')();
 const PORT = 8000;
 
-realTimeInit();
+// realTimeInit();
 
 export function realTimeInit() {
 	IO.listen(PORT);
@@ -108,7 +108,7 @@ IO.on('connection', (client: any) => {
 			getBussesFromStop(param.stopID, client, thisClientID);
 		stopTimer = setInterval(() => {
 			let got = hm.get(thisClientID);
-			if (got != undefined && got.stop == false)
+			if (got == undefined || got.stop == false)
 				clearInterval(stopTimer);
 			getBussesFromStop(param.stopID, client, thisClientID);
 			numClicks = 0;
@@ -131,7 +131,7 @@ IO.on('connection', (client: any) => {
 		busTimer = setInterval(() => {
 			let got = hm.get(thisClientID);
 			console.log(JSON.stringify(got));
-			if (got != undefined && got.bus == false)
+			if (got == undefined || got.bus == false)
 				clearInterval(busTimer);
 			getBus(param.busID, client, thisClientID);
 			numClicks = 0;
@@ -154,6 +154,7 @@ IO.on('connection', (client: any) => {
 	});
 
 	client.on('disconnect', () => {
+		console.log('disconnecting ' + thisClientID);
 		hm.delete(thisClientID);
 	});
 });

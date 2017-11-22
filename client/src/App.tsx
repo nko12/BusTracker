@@ -3,7 +3,8 @@ import * as GoogleMapReact from 'google-map-react'
 import {BusMap, BusType, StopType} from './components/BusMap';
 import {SideBar} from './components/SideBar';
 import {getAllStops} from './components/api';
-import './App.css';
+import LogIn from './components/LogIn';
+import './styles/App.css';
 
 const ORIGIN = {lat: 0.0, lng: 0.0};
 const NYC = {lat: 40.7588528, lng: -73.9852625};
@@ -50,6 +51,8 @@ export default class App extends React.Component<{}, AppState> {
 	render() {
 		return (
 			<div>
+				<LogIn />
+				<div className='blurr' />
 				<div className="SideBar">
 					<SideBar
 						busses={this.state.busses}
