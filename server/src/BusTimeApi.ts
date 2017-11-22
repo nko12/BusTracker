@@ -25,6 +25,11 @@ interface BusTimeStopObject {
     name: string,
 }
 
+interface BusTimeShapeObject {
+    points: string,
+    length: number
+}
+
 interface RoutesForLocationResult extends BusTimeResponse {
     data: {
         routes: [BusTimeRouteObject];
@@ -35,6 +40,10 @@ interface BusStopsForLocationResult extends BusTimeResponse {
     data: {
         stops: [BusTimeStopObject];
     }
+}
+
+interface ShapeResult extends BusTimeResponse {
+
 }
 
 /**
@@ -92,4 +101,13 @@ export class BusTimeApi {
             return new TypedResult(false, null, JSON.stringify(err));
         }
     }
+
+/*     public async GetPolylineForRoute(routeId: number): Promise<TypedResult<string>> {
+        const url: string = `${this.URL_BASE}shape/${routeId}.json?key=${this.KEY}`;
+        try {
+            const resultData: BusStopsForLocationResult = <BusStopsForLocationResult> JSON.parse(await request(url));
+        } catch (err) {
+            return new TypedResult(false, null, JSON.stringify(err));
+        }
+    } */
 }
