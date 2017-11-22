@@ -1,41 +1,30 @@
 import * as React from 'react';
 import { TabsContainer, CardText, TextField, SelectionControlGroup, Tabs, Tab, Button } from 'react-md';
 import * as GMapReact from 'google-map-react';
-// API: https://react-md.mlaursen.com/components/
+import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
+import {getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus} from './api';
+import {BusType, StopType} from './BusMap';
 
-//import {subscribeToTimer, subscribeToBus} from './api';
-
-interface BusType {
-	location: GMapReact.Coords;
-	ID: String;
+export interface SideBarState {
+	busses: BusType[];
+	allStops: Map<number, StopType>;
+	activeStops: StopType[];
 }
 
-interface SideBarState {
-	pointA: GMapReact.Coords;
-	pointB: GMapReact.Coords;
-	busses: [BusType];
-
-	tempString: String;
+export interface SideBarProps {
+	busses: BusType[];
+	allStops: Map<number, StopType>;
+	activeStops: StopType[];
+	onMarkerPositionsChanged: (busses: BusType[], activeStops: StopType[]) => void;
 }
 
-interface SideBarProps {
-	pointA: GMapReact.Coords;
-	pointB: GMapReact.Coords;
-	busses: [BusType];
-	onMarkerPositionsChanged: (pointA: GMapReact.Coords, pointB: GMapReact.Coords, busses?: [BusType]) => void;
-
-	tempString: String;
-}
-
-export default class SideBar extends React.Component<SideBarProps, SideBarState> {
+export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			pointA: this.props.pointA,
-			pointB: this.props.pointB,
 			busses: this.props.busses,
-			
-			tempString: this.props.tempString
+			allStops: this.props.allStops,
+			activeStops: this.props.activeStops
 		};
 	}
 	
@@ -47,96 +36,81 @@ export default class SideBar extends React.Component<SideBarProps, SideBarState>
 					panelClassName="md-grid"
 				>
 					<Tabs tabId="phone-stuffs">
-						<Tab label="Stops">
-							
-								
-								<TextField
-									//toolbar
-									placeholder = "Search"
-									type = "search"
-								/>
-								
-							<SelectionControlGroup 
-    							type="radio"
-    							label="Select stops to add: "
-    							defaultValue=" "
-								className="tabFormat"
-    							controls={[{
-      								label: 'Stop 1: ',
-      								value: 'A',
-    								}, {
-      									label: 'Stop 2: ',
-      									value: 'B',
-    								}, {
-      									label: 'Stop 3: ',
-      									value: 'C',
-    								}]}
+						<Tab label="Starks">
+							<h1>Winter is Coming</h1>
+							<TextField
+								label='BusID'
+								value={this.state.busses[0].ID}
+								onChange={(value) => {
+									let busses = this.state.busses;
+									busses[0].ID = String(value);
+									this.setState({busses: busses});
+								}}
 							/>
 							
 							<CardText> </CardText>
 							<Button
-								raised={true}
-								primary={true}
+								flat
+								primary
 								onClick={() => {
-									this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB);
-								}}
-							>
-							Add to Favorites
-							</Button>
-							{/* <Button
-								flat={true}
-								primary={true}
-								onClick={() => {
-									console.log('TODO: Get Route');
-								}}
-							>
-							Get Route
-							</Button>
-							<Button
-								flat={true}
-								primary={true}
-								onClick={() => {
-									subscribeToTimer(1000, (err: any, busses: any) => {
-										var newBusses: [BusType] = [{location: busses[0], ID: 'nil'}];
-										for (var i = 1; i < busses.length; i++)
-											newBusses.push({location: busses[i], ID: 'nil'});
-										this.setState({busses: newBusses});
-										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.busses);
-									});
-								}}
-							>
-							Get Busses
-							</Button>
-							<Button
-								flat={true}
-								primary={true}
-								onClick={() => {
-									subscribeToBus({interval: 1000, ID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
-										console.log(JSON.stringify(busLoc));
-										var busses: [BusType] = [{location: busLoc, ID: this.state.busses[0].ID}]
+									{/*getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[]) => {
+										console.log(JSON.stringify(stopIDs));
+										let stops: StopType[] = [];
+										for (var i = 0; i < stopIDs.length; i++) {
+											let key = parseInt(stopIDs[i].split('_')[1]);
+											let stop = this.state.allStops.get(key);
+											console.log('searched map for ' + key + ' and found ' + stop);
+											if (stop != undefined)
+												stops.push({ID: stopIDs[i], location: stop.location})
+											console.log(stops);
+											this.setState({activeStops: stops});
+											this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+										}
+									});*/}
+									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
+										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}];
 										this.setState({busses: busses});
-										this.props.onMarkerPositionsChanged(this.state.pointA, this.state.pointB, this.state.busses);
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
 								}}
 							>
 							Get Bus
 							</Button>
+							<TextField
+								label='StopID'
+								value={this.state.activeStops[0].ID}
+								onChange={(value) => {
+									let stops = this.state.activeStops;
+									stops[0].ID = String(value);
+									this.setState({activeStops: stops});
+								}}
+							/>
 							<Button
-								flat={true}
-								primary={true}
+								flat
+								primary
 								onClick={() => {
-									console.log('TODO: Get Stops');
+									// TODO: ask the DB for this. No need to spend an API call on something that remains static
+									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
+										let stops: StopType[] = [{location: stopLoc, ID: this.state.activeStops[0].ID}];
+										this.setState({activeStops: stops});
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+									});
+
+									subscribeToStop({interval: 1000, stopID: this.state.activeStops[0].ID}, (err: any, busObjs: BusType[]) => {
+										let busses: BusType[] = [];
+										for (let i = 0; i < busObjs.length; i++)
+											busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
+										this.setState({busses: busses});
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+									});
 								}}
 							>
 							Get Stop
-							</Button> */}
+							</Button>
+							<p> SideBar.state = {JSON.stringify(this.state)} </p>
 						</Tab>
-						<Tab label="Favorites">
-							<h3>Search Favorites</h3>
-						</Tab>
-						<Tab label="Buses">
-							<h3>Search Buses</h3>
-						</Tab>
+						<Tab label='Targaryans'><h1>Fire and Blood</h1></Tab>
+						<Tab label='Lannisters'><h1>A Lannister Always Pays His Debts</h1></Tab>
 					</Tabs>
 				</TabsContainer>
 			</div>

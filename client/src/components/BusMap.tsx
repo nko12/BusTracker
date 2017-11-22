@@ -1,55 +1,61 @@
 import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
-import BusMarker from './BusMarker';
 
-// google-map-react API:
-// 		https://github.com/istarkov/google-map-react/blob/master/API.md
-// There are a few other GoogleMaps packages for React that I know about:
-// google-maps-react
-// react-google-maps
-// react-gmaps
-// None of which have TypeScript definitions, which is why we're using google-map-react.
-// however, the documentation for google-map-react is sparse and it doesn't seem to do as much as the others
+const IMG = 'https://i.imgur.com/7f5HCOn.png';
+// const KRH = 'https://i.imgur.com/SUxfnuv.png';
 
-// TODO: ability to remove markers and routes
+const ORIGIN = {lat: 0.0, lng: 0.0};
+const NYC = {lat: 40.7588528, lng: -73.9852625};
 
-interface BusType {
+export interface BusType {
 	location: GMapReact.Coords;
-	ID: String;
+	ID: string;
+}
+
+export interface StopType {
+	location: GMapReact.Coords;
+	ID: string;
+	// name: string;
 }
 
 export interface BusMapState {
-	pointA: GMapReact.Coords;
-	pointB: GMapReact.Coords;
 	zoom: number;
 	center: GMapReact.Coords;
+
 	map?: google.maps.Map;
 	maps?: GMapReact.Maps;
-	mapLoaded: boolean;
-	busses: [BusType];
 
-	markers: google.maps.Marker[];
+	mapLoaded: boolean;
+
+	busses: BusType[];
+	stops: StopType[];
+
+	busMarkers: google.maps.Marker[];
+	stopMarkers: google.maps.Marker[];
 }
 
 export interface BusMapProps {
-	pointA: GMapReact.Coords;
-	pointB: GMapReact.Coords;
-	busses: [BusType];
+	busses: BusType[];
+	stops: StopType[];
+
 	zoom: number;
 }
 
-export default class BusMap extends React.Component<BusMapProps, BusMapState> {
+export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	public constructor(props: BusMapProps) {
 		super(props);
 		this.state = {
-			pointA: this.props.pointA,
-			pointB: this.props.pointB,
 			zoom: this.props.zoom,
-			center: this.midPoint(this.props.pointA, this.props.pointB),
+			center: NYC,
+
 			mapLoaded: false,
+
 			busses: this.props.busses,
-			markers: [new google.maps.Marker()]
+			stops: this.props.stops,
+
+			busMarkers: [] as google.maps.Marker[],
+			stopMarkers: [] as google.maps.Marker[]
 		};
 	}
 
@@ -66,26 +72,12 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// 	map: this.state.map,
 		// });
 
-		console.log(JSON.stringify(nextProps.busses));
-
-		var oldMarkers = this.state.markers;
-
-		var markers = []
-		for (var i = 0; i < nextProps.busses.length; i++)
-			markers.push(new google.maps.Marker({
-				position: nextProps.busses[i].location,
-				map: this.state.map,
-				icon: 'https://i.imgur.com/7f5HCOn.png'
-			}));
-
-		this.setState({markers: markers});
-
-		for (var i = 0; i < oldMarkers.length; i++)
-			oldMarkers[i].setMap(null);
+		this.updateStops(nextProps.stops);
+		this.updateBusses(nextProps.busses);
 
 		// directions
-		// var directionsService = new google.maps.DirectionsService;
-		// var directionsDisplay = new google.maps.DirectionsRenderer({
+		// let directionsService = new google.maps.DirectionsService;
+		// let directionsDisplay = new google.maps.DirectionsRenderer({
 		// 	suppressMarkers: true,
 		// 	map: this.state.map
 		// });
@@ -97,19 +89,78 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// 	if (status === google.maps.DirectionsStatus.OK) {
 		// 		directionsDisplay.setDirections(response);
 		// 	} else {
-		// 		// TODO: Lint reports calls to 'console.log' is not allowed. After looking it up, 
-		// 		// it's trying to help us prevent lines  like this from existing in production code. 
-		// 		// This kind of thing should only be seen in tests (according to TSLint).
-		// 		// We can figure out how to deal with this later.
 		// 		console.log(status);
 		// 	}
 		// });
 	}
 
-	midPoint(A: GMapReact.Coords, B: GMapReact.Coords) {
+	updateStops (newStops: StopType[]) {
+		// ignore stops at the origin
+		if (newStops.length == 0 || newStops.length > 0 && JSON.stringify(newStops[0].location) == JSON.stringify(ORIGIN))
+			return;
+
+		// the markers we're working with
+		let oldMarkers = this.state.stopMarkers;
+		let newMarkers = [];
+		// variables for centroid calculation
+		let centroid = {lat: 0.0, lng: 0.0};
+		let total = newStops.length;
+
+		// loop through new stops
+		for (let i = 0; i < newStops.length; i++) {
+			// create the new markers
+			newMarkers.push(new google.maps.Marker({
+				position: newStops[i].location,
+				map: this.state.map
+			}));
+
+			// part of centroid calculation
+			centroid.lat += newStops[i].location.lat;
+			centroid.lng += newStops[i].location.lng;
+		}
+		// finish centroid calculation
+		centroid.lat /= total;
+		centroid.lng /= total;
+
+		console.log('setting center to ' + JSON.stringify(centroid));
+
+		// finalize changes
+		this.setState({stops: newStops, stopMarkers: newMarkers, center: centroid});
+
+		// dispose of old markers
+		for (var i = 0; i < oldMarkers.length; i++)
+			oldMarkers[i].setMap(null);
+	}
+
+	updateBusses (newBusses: BusType[]) {
+		// ignore busses at the origin
+		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) == JSON.stringify(ORIGIN))
+			return;
+
+		// the markers we're working with
+		let oldMarkers = this.state.busMarkers;
+		let newMarkers = [] as google.maps.Marker[];
+
+		// loop through new stops to make their markers
+		for (let i = 0; i < newBusses.length; i++)
+			newMarkers.push(new google.maps.Marker({
+				position: newBusses[i].location,
+				map: this.state.map,
+				icon: IMG
+			}));
+
+		// finalize changes
+		this.setState({busses: newBusses, busMarkers: newMarkers});
+
+		// dispose of old markers
+		for (let i = 0; i < oldMarkers.length; i++)
+			oldMarkers[i].setMap(null);
+	}
+
+	midPoint(a: GMapReact.Coords, b: GMapReact.Coords) {
 		return {
-			lat: (A.lat + B.lat) / 2,
-			lng: (A.lng + B.lng) / 2,
+			lat: (a.lat + b.lat) / 2,
+			lng: (a.lng + b.lng) / 2
 		};
 	}
 
@@ -119,26 +170,10 @@ export default class BusMap extends React.Component<BusMapProps, BusMapState> {
 				zoom={this.state.zoom}
 				center={this.state.center}
 				yesIWantToUseGoogleMapApiInternals={true}
-				onGoogleApiLoaded={({ map, maps }) => {
-					this.setState({ map: map, maps: maps, mapLoaded: true });
-					// init marker at midpoint
-					new google.maps.Marker({
-						position: this.state.center,
-						map: map,
-					});
+				onGoogleApiLoaded={({map, maps}) => {
+					this.setState({map: map, maps: maps, mapLoaded: true});
 				}}
-			>
-				<BusMarker
-					lat={this.state.pointA.lat}
-					lng={this.state.pointA.lng}
-					text={'A'}
-				/>
-				<BusMarker
-					lat={this.state.pointB.lat}
-					lng={this.state.pointB.lng}
-					text={'B'}
-				/>
-			</GoogleMap>
+			/>
 		);
 	}
 }
