@@ -106,8 +106,18 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								}}
 							>
 							Get Stop
+<<<<<<< Updated upstream
 							</Button>
 							<p> SideBar.state = {JSON.stringify(this.state)} </p>
+=======
+							</Button> */}
+						</Tab>
+						<Tab label="Routes">
+							<h3>Search Favorites</h3>
+						</Tab>
+						<Tab label="Buses">
+							<h3>Search Buses</h3>
+>>>>>>> Stashed changes
 						</Tab>
 						<Tab label='Targaryans'><h1>Fire and Blood</h1></Tab>
 						<Tab label='Lannisters'><h1>A Lannister Always Pays His Debts</h1></Tab>
