@@ -27,6 +27,7 @@
     "mongodb": "^2.2.33",
     "mongoose": "^4.12.3",
     "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
     "socket.io": "^2.0.4",
     "ts-node": "^3.3.0"
   },
@@ -40,6 +41,7 @@
     "@types/mocha": "^2.2.43",
     "@types/mongodb": "^2.2.14",
     "@types/mongoose": "^4.7.24",
+    "@types/request-promise-native": "^1.0.10",
     "@types/sinon": "^2.3.6",
     "@types/sinon-chai": "^2.7.29",
     "chai": "^4.1.2",

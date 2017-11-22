@@ -18,10 +18,10 @@ export class BusStop {
     /**
      * The global latitude of the bus stop.
      */
-    public latitude: string = '';
+    public latitude: number = 0;
 
     /**
      * The global longitude of the bus stop.
      */
-    public longitude: string = '';
+    public longitude: number = 0;
 }
