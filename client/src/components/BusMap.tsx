@@ -132,12 +132,12 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 		console.log('setting center to ' + JSON.stringify(centroid));
 
+		// finalize changes
+		this.setState({stops: newStops, stopMarkers: newMarkers, center: centroid});
+
 		// dispose of old markers
 		for (var i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);
-
-		// finalize changes
-		this.setState({stops: newStops, center: centroid});
 	}
 
 	updateBusses(newBusses: BusType[]) {
@@ -157,12 +157,14 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				icon: IMG
 			}));
 
+		// finalize changes
+		this.setState({busses: newBusses, busMarkers: newMarkers});
+
 		// dispose of old markers
 		for (let i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);
 
-		// finalize changes
-		this.setState({busses: newBusses});
+		console.log(JSON.stringify(oldMarkers));
 	}
 
 	updatePolyline(newPolystring: string) {
@@ -187,7 +189,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 		oldPolyline.setMap(null);
 
-		this.setState({polystring: newPolystring, polyline: newPolyline})
+		this.setState({polystring: newPolystring, polyline: newPolyline});
 	}
 
 	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {
