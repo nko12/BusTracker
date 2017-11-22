@@ -80,7 +80,6 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			} while (b >= 0x20);
 
 			lat += ((result & 1) ? ~(result >> 1) : (result >> 1));
-
 			shift = result = 0;
 
 			do {
