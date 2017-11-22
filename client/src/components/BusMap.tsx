@@ -68,16 +68,10 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	}
 
 	convert(encoded: string) {
-		var len = encoded.length,
-				index = 0,
-				array = [],
-				lat = 0,
-				lng = 0;
+		let len = encoded.length, index = 0, array = [], lat = 0, lng = 0;
 
 		while (index < len) {
-			var b,
-					shift = 0,
-					result = 0;
+			let b, shift = 0, result = 0;
 			
 			do {
 				b = encoded.charCodeAt(index++) - 63;
@@ -85,11 +79,9 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				shift += 5;
 			} while (b >= 0x20);
 
-			var dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-			lat += dlat;
+			lat += ((result & 1) ? ~(result >> 1) : (result >> 1));
 
-			shift = 0;
-			result = 0;
+			shift = result = 0;
 
 			do {
 				b = encoded.charCodeAt(index++) - 63;
@@ -97,8 +89,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				shift += 5;
 			} while (b >= 0x20);
 
-			var dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-			lng += dlng;
+			lng += ((result & 1) ? ~(result >> 1) : (result >> 1));
 
 			array.push({lat: lat * 1e-5, lng: lng * 1e-5});
 		}
