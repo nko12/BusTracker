@@ -1,22 +1,26 @@
 import * as React from 'react';
+import * as GoogleMapReact from 'google-map-react'
 import {BusMap, BusType, StopType} from './components/BusMap';
 import {SideBar} from './components/SideBar';
 import {getAllStops} from './components/api';
 import './App.css';
 
 const ORIGIN = {lat: 0.0, lng: 0.0};
+const NYC = {lat: 40.7588528, lng: -73.9852625};
 
 interface AppState {
 	busses: BusType[];
 	allStops: Map<number, StopType>;
 	activeStops: StopType[];
+	currentLocation: GoogleMapReact.Coords;
 }
 
 export default class App extends React.Component<{}, AppState> {
 	state = {
 		busses: [{location: ORIGIN, ID: '256'}],
 		allStops: new Map<number, StopType>(),
-		activeStops: [{location: ORIGIN, ID: '256'}]
+		activeStops: [{location: ORIGIN, ID: '256'}],
+		currentLocation: NYC
 	};
 
 	public constructor(props: Object) {
@@ -26,8 +30,13 @@ export default class App extends React.Component<{}, AppState> {
 			this.state = {
 				busses: [{location: ORIGIN, ID: '256'}], // TODO: hashmap[0]
 				allStops: new Map<number, StopType>(kvStopArray),
-				activeStops: [{location: ORIGIN, ID: '400323'}] // TODO: hashmap[0]
+				activeStops: [{location: ORIGIN, ID: '400323'}], // TODO: hashmap[0]
+				currentLocation: NYC
 			};
+		});
+
+		navigator.geolocation.getCurrentPosition((position: any) => {
+			this.setState({currentLocation: {lat: position.coords.latitude, lng: position.coords.longitude}});
 		});
 	}
 

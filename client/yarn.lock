@@ -4911,6 +4911,12 @@ react-event-listener@^0.5.0:
     prop-types "^15.6.0"
     warning "^3.0.0"
 
+react-geolocated@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/react-geolocated/-/react-geolocated-2.2.1.tgz#816b88d3d88afc5afde08e4d071b36cd16b4c34a"
+  dependencies:
+    prop-types "^15.5.8"
+
 react-md@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/react-md/-/react-md-1.2.4.tgz#69c3a76fd6e0116f928034c80170fb66c4b76be1"

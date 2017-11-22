@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as GMapReact from 'google-map-react';
+import * as GoogleMapReact from 'google-map-react';
 import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
 import {getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus} from './api';
 import {BusType, StopType} from './BusMap';
@@ -64,7 +64,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 											this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 										}
 									});*/}
-									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GMapReact.Coords) => {
+									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GoogleMapReact.Coords) => {
 										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}];
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
@@ -87,7 +87,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								primary
 								onClick={() => {
 									// TODO: ask the DB for this. No need to spend an API call on something that remains static
-									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
+									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GoogleMapReact.Coords) => {
 										let stops: StopType[] = [{location: stopLoc, ID: this.state.activeStops[0].ID}];
 										this.setState({activeStops: stops});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);

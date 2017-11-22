@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as GMapReact from 'google-map-react';
+import * as GoogleMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
 
 const IMG = 'https://i.imgur.com/7f5HCOn.png';
@@ -9,22 +9,22 @@ const ORIGIN = {lat: 0.0, lng: 0.0};
 const NYC = {lat: 40.7588528, lng: -73.9852625};
 
 export interface BusType {
-	location: GMapReact.Coords;
+	location: GoogleMapReact.Coords;
 	ID: string;
 }
 
 export interface StopType {
-	location: GMapReact.Coords;
+	location: GoogleMapReact.Coords;
 	ID: string;
 	// name: string;
 }
 
 export interface BusMapState {
 	zoom: number;
-	center: GMapReact.Coords;
+	center: GoogleMapReact.Coords;
 
 	map?: google.maps.Map;
-	maps?: GMapReact.Maps;
+	maps?: GoogleMapReact.Maps;
 
 	mapLoaded: boolean;
 
@@ -59,42 +59,66 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		};
 	}
 
-	componentWillReceiveProps(nextProps: BusMapProps) {
-		// this.setState({
-		// 	zoom: nextProps.zoom,
-		// 	pointA: nextProps.pointA,
-		// 	pointB: nextProps.pointB,
-		// 	center: this.midPoint(nextProps.pointA, nextProps.pointB),
-		// });
-		// // marker (Google)
-		// new google.maps.Marker({
-		// 	position: this.state.center,
-		// 	map: this.state.map,
-		// });
+	convert(encoded: string) {
+		var len = encoded.length,
+				index = 0,
+				array = [],
+				lat = 0,
+				lng = 0;
 
+		while (index < len) {
+			var b,
+					shift = 0,
+					result = 0;
+			
+			do {
+				b = encoded.charCodeAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+
+			var dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+			lat += dlat;
+
+			shift = 0;
+			result = 0;
+
+			do {
+				b = encoded.charCodeAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+
+			var dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+			lng += dlng;
+
+			array.push({lat: lat * 1e-5, lng: lng * 1e-5});
+		}
+
+		console.log(JSON.stringify(array));
+
+		return array;
+	}
+
+	componentWillReceiveProps(nextProps: BusMapProps) {
 		this.updateStops(nextProps.stops);
 		this.updateBusses(nextProps.busses);
 
-		// directions
-		// let directionsService = new google.maps.DirectionsService;
-		// let directionsDisplay = new google.maps.DirectionsRenderer({
-		// 	suppressMarkers: true,
-		// 	map: this.state.map
-		// });
-		// directionsService.route({
-		// 	origin: nextProps.pointA,
-		// 	destination: nextProps.pointB,
-		// 	travelMode: google.maps.TravelMode.DRIVING
-		// }, (response: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) => {
-		// 	if (status === google.maps.DirectionsStatus.OK) {
-		// 		directionsDisplay.setDirections(response);
-		// 	} else {
-		// 		console.log(status);
-		// 	}
-		// });
+		var polyline = new google.maps.Polyline({
+			path: this.convert('ybpwFvxsbMuC_CUKWMaBe@gCo@A?_@Eg@O}DkAo@e@oCuB{BeBYSSOgCmBaAo@iAw@QKoBuAsBaBq@g@oI}GKIc@oAuBsAe@]}ASmCc@}B_@YEyC_@qACC?eADa@JgBRm@CWSs@e@AA{@g@MKm@c@aAm@KMq@e@y@i@uBqAsBwAuBsAYSaBgAcC_BgAs@}@m@yByAITsBrGIZ}B{AyByA{ByAm@a@mAw@{ByA{@k@}@m@{ByA{ByAeCaBwBwAMGyByA{ByAeBiASO}ByA{ByAmBqAMIcC_BqBuASM{ByA}B{AmBoAOK{ByAqBsAKG}B{AoBqAKG}B{A}B{AoBoAMI{B{A{B{AoBoAMIeCcByBwAMI{ByA}B{AeBiAUQ}ByA}B{Ak@_@oAy@}B{AiBmAQM}B{As@c@gAu@}B{Au@e@gAu@{ByAiCcBoA{@w@g@}B{A_C{A[UaBgA_C{AeAs@w@g@gCcBsA{@u@g@}B{A_C{AmBqAOK}B{A_C}AgCaBcAq@cAq@{ByAoBoAMK}B{A}B{AeAs@u@e@}B}AkAu@q@c@}B{AuA}@o@c@gCaBkBqAQK}B{AkFiDMK}B{AgAu@u@e@gBkAUM}B}AkBmAYSgCaB{@m@_Am@}B{A}@m@_Am@}B{Au@e@kAw@yE}CuCoB{@i@oA{@gCaB}B{Aq@e@iAu@gAs@y@c@q@]kAw@aAo@{@k@{B{AgAs@e@[MOOQuBuA}@m@gAs@}ByAo@c@kAw@{ByAu@e@gAu@{ByAaC_By@i@qH_FOIOh@Y|@{AxEsA}@s@c@{B{A{AcA_@WWOGEcBgAo@pBqDnL_@tAeAs@u@e@{ByA{ByAcAq@y@k@}ByAeBgAKEYC{@m@iAs@mBqAQ?c@rAsDhLM^M`@zBzALc@~EoO'),
+			geodesic: true,
+			strokeColor: '#ff0000',
+			strokeOpacity: 1.0,
+			strokeWeight: 2
+		});
+		
+		if (this.state.map != undefined)
+			polyline.setMap(this.state.map);
+		else
+			console.log('this.state.map is undefined?');
 	}
 
-	updateStops (newStops: StopType[]) {
+	updateStops(newStops: StopType[]) {
 		// ignore stops at the origin
 		if (newStops.length == 0 || newStops.length > 0 && JSON.stringify(newStops[0].location) == JSON.stringify(ORIGIN))
 			return;
@@ -157,7 +181,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			oldMarkers[i].setMap(null);
 	}
 
-	midPoint(a: GMapReact.Coords, b: GMapReact.Coords) {
+	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {
 		return {
 			lat: (a.lat + b.lat) / 2,
 			lng: (a.lng + b.lng) / 2

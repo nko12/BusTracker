@@ -5,6 +5,8 @@ var request = require('request');
 const IO = require('socket.io')();
 const PORT = 8000;
 
+realTimeInit();
+
 export function realTimeInit() {
 	IO.listen(PORT);
 	console.log('listening on port', PORT);
