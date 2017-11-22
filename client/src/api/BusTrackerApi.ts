@@ -9,6 +9,12 @@ import * as md5 from 'md5';
 import { ExecutionResult } from 'graphql/execution/execute'
 import * as polyline from 'polyline';
 
+export interface IDType
+{
+    id: string,
+    error: string
+}
+
 /**
  * Represents the connection that allows the client to communicate to the server.
  */
@@ -131,7 +137,7 @@ export class BusTrackerApi {
      * @param routePositions A two dimensional array representing the latitude/longitude pairs of points that make up the route.
      * @returns A Result dictating the result of the operation.
      */
-    public async addNewRoute(userId: string, routeName: string, routePositions: Array<Array<number>>): Promise<TypedResult<string>> {
+    public async addNewRoute(userId: string, routeName: string, routePositions: Array<Array<number>>): Promise<TypedResult<IDType>> {
 
         // Encode the list of latitude/longitude objects into a polyline string.
         const encodeResult: string = polyline.encode(routePositions, 5);
@@ -144,17 +150,18 @@ export class BusTrackerApi {
             }
         `;
 
-        return await this.makeGraphQLRequest<any>(mutation, 'addNewRoute', true, false);
+        return await this.makeGraphQLRequest<IDType>(mutation, 'addNewRoute', true, false);
     }
 
     /**
-     * 
-     * @param userId 
-     * @param stopName 
-     * @param latitude 
-     * @param longitude 
+     * Creates a new fake bus stop.
+     * @param userId The user id of the logged in user.
+     * @param stopName The new name of the stop.
+     * @param latitude The latitude of the bus stop.
+     * @param longitude The longitude of the bus stop.
+     * @returns The result of the operation, with the id of the new stop.
      */
-    public async addNewBusStop(userId: string, stopName: string, latitude: number, longitude: number): Promise<TypedResult<string>> {
+    public async addNewBusStop(userId: string, stopName: string, latitude: number, longitude: number): Promise<TypedResult<IDType>> {
 
         const mutation = gql`
             mutation AddBusStop {
@@ -164,7 +171,45 @@ export class BusTrackerApi {
             }
         `;
 
-        return (await this.makeGraphQLRequest<any>(mutation, 'addNewBusStop', true, false)).data['id'];
+        return (await this.makeGraphQLRequest<IDType>(mutation, 'addNewBusStop', true, false));
+    }
+
+    /**
+     * Removes a fake route from the database.
+     * @param userId The id of the logged in user.
+     * @param routeId The id of the route to remove.
+     * @returns The result of the operation. 
+     */
+    public async removeRoute(userId: string, routeId: string): Promise<Result> {
+
+        const mutation = gql`
+            mutation RemoveRoute {
+                removeRoute(userId: ${userId}, objectId: ${routeId}) {
+                    error
+                }
+            }
+        `;
+
+        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'removeRoute', true, false));
+    }
+
+    /**
+     * Removes a fake bus stop from the datbase.
+     * @param userId The id of the logged in user.
+     * @param stopId The id of the bus stop to remove.
+     * @returns The result of the operation.
+     */
+    public async removeBusStop(userId: string, stopId: string): Promise<Result> {
+
+        const mutation = gql`
+        mutation RemoveBusStop {
+            removeBusStop(userId: ${userId}, objectId: ${stopId}) {
+                error
+            }
+        }
+        `;
+
+        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'removeBusStop', true, false));
     }
 
     /**
