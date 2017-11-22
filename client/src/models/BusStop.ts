@@ -1,5 +1,3 @@
-import * as faker from 'faker';
-
 /**
  * Represents a Bus Stop.
  */
@@ -8,7 +6,7 @@ export class BusStop {
     /**
      * Represents the unique ID of the bus stop.
      */
-    public id: string = faker.random.uuid();
+    public id: string = '';
 
     /**
      * The name of the bus stop.

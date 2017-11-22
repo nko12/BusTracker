@@ -1,4 +1,5 @@
 import { BusTrackerServer } from './BusTrackerServer';
+import { BusTimeApi } from './BusTimeApi';
 var { buildSchema } = require('graphql');
 import { Result, TypedResult } from './Result';
 import * as models from './Models';
@@ -48,6 +49,16 @@ class GraphQLRoute extends models.Route implements IError {
  */
 class GraphQLBusStop extends models.BusStop implements IError {
   error?: string;
+}
+
+class GraphQLRouteArray implements IError {
+  error?: string;
+  routes?: Array<models.Route>;
+}
+
+class GraphQLBusStopArray implements IError {
+  error?: string;
+  stops?: Array<models.BusStop>;
 }
 
 /**
@@ -102,6 +113,11 @@ class AddRouteMutationData extends models.Route {
  */
 interface AddBusStopMutationData extends models.BusStop {
   userId: string;
+}
+
+interface GetObjectsNearPositionMutationData {
+  latitude: number,
+  longitude: number
 }
 
 /**
@@ -162,6 +178,16 @@ class GraphQLHandler {
           busStopIDs: [String]
         }
 
+        type RouteArray implements IError {
+          error: String
+          routes: [Route]
+        }
+
+        type BusStopArray implements IError {
+          error: String
+          stops: [BusStop]
+        }
+
         type BusStop implements IError {
           error: String
           id: String
@@ -174,6 +200,8 @@ class GraphQLHandler {
           login(username: String, passwordHash: String): User
           getRoute(id: String): Route
           getStop(id: String): BusStop
+          getRoutesNearLocation(latitude: Float, longitude: Float): RouteArray
+          getBusStopsNearLocation(latitude: Float, longitude: Float): BusStopArray
         }
 
         type Mutation {
@@ -244,6 +272,35 @@ class GraphQLHandler {
 
       stop = <GraphQLBusStop> result.data;
       return stop;
+    }
+
+    public async getRoutesNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLRouteArray> {
+
+      let routes: GraphQLRouteArray = new GraphQLRouteArray();
+
+      const api: BusTimeApi = new BusTimeApi();
+      const result = await api.GetRoutesNearPosition(data.latitude, data.longitude);
+      if (!result.success) {
+        routes.error = result.message;
+        return routes;
+      }
+
+      routes.routes = <Array<models.Route>> result.data;
+      return routes;
+    }
+
+    public async getBusStopsNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLBusStopArray> {
+      let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
+
+      const api: BusTimeApi = new BusTimeApi();
+      const result = await api.GetBusStopsNearPosition(data.latitude, data.longitude);
+      if (!result.success) {
+        stops.error = result.message;
+        return stops;
+      }
+
+      stops.stops = <Array<models.BusStop>> result.data;
+      return stops;
     }
 
 

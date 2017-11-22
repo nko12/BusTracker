@@ -38,6 +38,10 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 		const result = await this.api.register(this.state.username, this.state.password);
 		if (result.success) {
 			this.hideLogin();
+			const result2 = await this.api.getBusStopsNearLocation(40.706316, -73.927310);
+			const result3 = await this.api.getRoutesNearLocation(40.706316, -73.927310);
+			result2.message;
+			result3.message;
 		} else {
 			alert(result.message)
 		}
