@@ -13,6 +13,7 @@ interface AppState {
 	allStops: Map<number, StopType>;
 	activeStops: StopType[];
 	currentLocation: GoogleMapReact.Coords;
+	polystring: string;
 }
 
 export default class App extends React.Component<{}, AppState> {
@@ -20,7 +21,8 @@ export default class App extends React.Component<{}, AppState> {
 		busses: [{location: ORIGIN, ID: '256'}],
 		allStops: new Map<number, StopType>(),
 		activeStops: [{location: ORIGIN, ID: '256'}],
-		currentLocation: NYC
+		currentLocation: NYC,
+		polystring: '',
 	};
 
 	public constructor(props: Object) {
@@ -31,7 +33,8 @@ export default class App extends React.Component<{}, AppState> {
 				busses: [{location: ORIGIN, ID: '256'}], // TODO: hashmap[0]
 				allStops: new Map<number, StopType>(kvStopArray),
 				activeStops: [{location: ORIGIN, ID: '400323'}], // TODO: hashmap[0]
-				currentLocation: NYC
+				currentLocation: NYC,
+				polystring: '',
 			};
 		});
 
@@ -40,8 +43,8 @@ export default class App extends React.Component<{}, AppState> {
 		});
 	}
 
-	recieveFromSideBar = (busses = this.state.busses, activeStops = this.state.activeStops) => {
-		this.setState({busses: busses, activeStops: activeStops});
+	recieveFromSideBar = (busses = this.state.busses, activeStops = this.state.activeStops, polystring = this.state.polystring) => {
+		this.setState({busses: busses, activeStops: activeStops, polystring: polystring});
 	}
 
 	render() {
@@ -52,6 +55,7 @@ export default class App extends React.Component<{}, AppState> {
 						busses={this.state.busses}
 						allStops={this.state.allStops}
 						activeStops={this.state.activeStops}
+						polystring={this.state.polystring}
 						onMarkerPositionsChanged={this.recieveFromSideBar}
 					/>
 				</div>
@@ -60,6 +64,7 @@ export default class App extends React.Component<{}, AppState> {
 						zoom={12}
 						busses={this.state.busses}
 						stops={this.state.activeStops}
+						polystring={this.state.polystring}
 					/>
 				</div>
 			</div>

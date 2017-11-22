@@ -94,7 +94,6 @@ IO.on('connection', (client: any) => {
 		console.log('[' + key + '] = ' + JSON.stringify(value));
 	});
 	
-	
 	var stopTimer: any = undefined;
 	client.on('subscribeToStop', (param: any) => {
 		boolObj = {bus: false, stop: true};
@@ -137,7 +136,6 @@ IO.on('connection', (client: any) => {
 			getBus(param.busID, client, thisClientID);
 			numClicks = 0;
 		}, param.interval);
-	
 	});
 	
 	client.on('getStop', (stopID: any) => {

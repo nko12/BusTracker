@@ -8,22 +8,25 @@ export interface SideBarState {
 	busses: BusType[];
 	allStops: Map<number, StopType>;
 	activeStops: StopType[];
+	polystring: string;
 }
 
 export interface SideBarProps {
 	busses: BusType[];
 	allStops: Map<number, StopType>;
 	activeStops: StopType[];
-	onMarkerPositionsChanged: (busses: BusType[], activeStops: StopType[]) => void;
+	polystring: string;
+	onMarkerPositionsChanged: (busses: BusType[], activeStops: StopType[], polystring: string) => void;
 }
 
 export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			busses: this.props.busses,
-			allStops: this.props.allStops,
-			activeStops: this.props.activeStops
+			busses: props.busses,
+			allStops: props.allStops,
+			activeStops: props.activeStops,
+			polystring: props.polystring
 		};
 	}
 	
@@ -66,8 +69,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									});*/}
 									subscribeToBus({interval: 1000, busID: this.state.busses[0].ID}, (err: any, busLoc: GoogleMapReact.Coords) => {
 										let busses: BusType[] = [{location: busLoc, ID: this.state.busses[0].ID}];
-										this.setState({busses: busses});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+										this.setState({busses: busses, polystring: 'ybpwFvxsbMuC_CUKWMaBe@gCo@A?_@Eg@O}DkAo@e@oCuB{BeBYSSOgCmBaAo@iAw@QKoBuAsBaBq@g@oI}GKIc@oAuBsAe@]}ASmCc@}B_@YEyC_@qACC?eADa@JgBRm@CWSs@e@AA{@g@MKm@c@aAm@KMq@e@y@i@uBqAsBwAuBsAYSaBgAcC_BgAs@}@m@yByAITsBrGIZ}B{AyByA{ByAm@a@mAw@{ByA{@k@}@m@{ByA{ByAeCaBwBwAMGyByA{ByAeBiASO}ByA{ByAmBqAMIcC_BqBuASM{ByA}B{AmBoAOK{ByAqBsAKG}B{AoBqAKG}B{A}B{AoBoAMI{B{A{B{AoBoAMIeCcByBwAMI{ByA}B{AeBiAUQ}ByA}B{Ak@_@oAy@}B{AiBmAQM}B{As@c@gAu@}B{Au@e@gAu@{ByAiCcBoA{@w@g@}B{A_C{A[UaBgA_C{AeAs@w@g@gCcBsA{@u@g@}B{A_C{AmBqAOK}B{A_C}AgCaBcAq@cAq@{ByAoBoAMK}B{A}B{AeAs@u@e@}B}AkAu@q@c@}B{AuA}@o@c@gCaBkBqAQK}B{AkFiDMK}B{AgAu@u@e@gBkAUM}B}AkBmAYSgCaB{@m@_Am@}B{A}@m@_Am@}B{Au@e@kAw@yE}CuCoB{@i@oA{@gCaB}B{Aq@e@iAu@gAs@y@c@q@]kAw@aAo@{@k@{B{AgAs@e@[MOOQuBuA}@m@gAs@}ByAo@c@kAw@{ByAu@e@gAu@{ByAaC_By@i@qH_FOIOh@Y|@{AxEsA}@s@c@{B{A{AcA_@WWOGEcBgAo@pBqDnL_@tAeAs@u@e@{ByA{ByAcAq@y@k@}ByAeBgAKEYC{@m@iAs@mBqAQ?c@rAsDhLM^M`@zBzALc@~EoO'});
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops, this.state.polystring);
 									});
 								}}
 							>
@@ -90,7 +93,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GoogleMapReact.Coords) => {
 										let stops: StopType[] = [{location: stopLoc, ID: this.state.activeStops[0].ID}];
 										this.setState({activeStops: stops});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops, this.state.polystring);
 									});
 
 									subscribeToStop({interval: 1000, stopID: this.state.activeStops[0].ID}, (err: any, busObjs: BusType[]) => {
@@ -98,7 +101,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										for (let i = 0; i < busObjs.length; i++)
 											busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
 										this.setState({busses: busses});
-										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
+										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops, this.state.polystring);
 									});
 								}}
 							>

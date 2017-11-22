@@ -33,11 +33,16 @@ export interface BusMapState {
 
 	busMarkers: google.maps.Marker[];
 	stopMarkers: google.maps.Marker[];
+
+	polystring: string;
+	polyline: any;
 }
 
 export interface BusMapProps {
 	busses: BusType[];
 	stops: StopType[];
+
+	polystring: string;
 
 	zoom: number;
 }
@@ -46,16 +51,19 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	public constructor(props: BusMapProps) {
 		super(props);
 		this.state = {
-			zoom: this.props.zoom,
+			zoom: props.zoom,
 			center: NYC,
 
 			mapLoaded: false,
 
-			busses: this.props.busses,
-			stops: this.props.stops,
+			busses: props.busses,
+			stops: props.stops,
 
 			busMarkers: [new google.maps.Marker()],
-			stopMarkers: [new google.maps.Marker()]
+			stopMarkers: [new google.maps.Marker()],
+
+			polystring: props.polystring,
+			polyline: new google.maps.Polyline()
 		};
 	}
 
@@ -101,19 +109,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	componentWillReceiveProps(nextProps: BusMapProps) {
 		this.updateStops(nextProps.stops);
 		this.updateBusses(nextProps.busses);
-
-		var polyline = new google.maps.Polyline({
-			path: this.convert('ybpwFvxsbMuC_CUKWMaBe@gCo@A?_@Eg@O}DkAo@e@oCuB{BeBYSSOgCmBaAo@iAw@QKoBuAsBaBq@g@oI}GKIc@oAuBsAe@]}ASmCc@}B_@YEyC_@qACC?eADa@JgBRm@CWSs@e@AA{@g@MKm@c@aAm@KMq@e@y@i@uBqAsBwAuBsAYSaBgAcC_BgAs@}@m@yByAITsBrGIZ}B{AyByA{ByAm@a@mAw@{ByA{@k@}@m@{ByA{ByAeCaBwBwAMGyByA{ByAeBiASO}ByA{ByAmBqAMIcC_BqBuASM{ByA}B{AmBoAOK{ByAqBsAKG}B{AoBqAKG}B{A}B{AoBoAMI{B{A{B{AoBoAMIeCcByBwAMI{ByA}B{AeBiAUQ}ByA}B{Ak@_@oAy@}B{AiBmAQM}B{As@c@gAu@}B{Au@e@gAu@{ByAiCcBoA{@w@g@}B{A_C{A[UaBgA_C{AeAs@w@g@gCcBsA{@u@g@}B{A_C{AmBqAOK}B{A_C}AgCaBcAq@cAq@{ByAoBoAMK}B{A}B{AeAs@u@e@}B}AkAu@q@c@}B{AuA}@o@c@gCaBkBqAQK}B{AkFiDMK}B{AgAu@u@e@gBkAUM}B}AkBmAYSgCaB{@m@_Am@}B{A}@m@_Am@}B{Au@e@kAw@yE}CuCoB{@i@oA{@gCaB}B{Aq@e@iAu@gAs@y@c@q@]kAw@aAo@{@k@{B{AgAs@e@[MOOQuBuA}@m@gAs@}ByAo@c@kAw@{ByAu@e@gAu@{ByAaC_By@i@qH_FOIOh@Y|@{AxEsA}@s@c@{B{A{AcA_@WWOGEcBgAo@pBqDnL_@tAeAs@u@e@{ByA{ByAcAq@y@k@}ByAeBgAKEYC{@m@iAs@mBqAQ?c@rAsDhLM^M`@zBzALc@~EoO'),
-			geodesic: true,
-			strokeColor: '#ff0000',
-			strokeOpacity: 1.0,
-			strokeWeight: 2
-		});
-		
-		if (this.state.map != undefined)
-			polyline.setMap(this.state.map);
-		else
-			console.log('this.state.map is undefined?');
+		this.updatePolyline(nextProps.polystring);
 	}
 
 	updateStops(newStops: StopType[]) {
@@ -146,15 +142,15 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 		console.log('setting center to ' + JSON.stringify(centroid));
 
-		// finalize changes
-		this.setState({stops: newStops, stopMarkers: newMarkers, center: centroid});
-
 		// dispose of old markers
 		for (var i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);
+
+		// finalize changes
+		this.setState({stops: newStops, center: centroid});
 	}
 
-	updateBusses (newBusses: BusType[]) {
+	updateBusses(newBusses: BusType[]) {
 		// ignore busses at the origin
 		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) == JSON.stringify(ORIGIN))
 			return;
@@ -171,12 +167,37 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				icon: IMG
 			}));
 
-		// finalize changes
-		this.setState({busses: newBusses, busMarkers: newMarkers});
-
 		// dispose of old markers
 		for (let i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);
+
+		// finalize changes
+		this.setState({busses: newBusses});
+	}
+
+	updatePolyline(newPolystring: string) {
+		// ignore if the same
+		if (newPolystring == this.state.polyline)
+			return;
+
+		let oldPolyline = this.state.polyline;
+
+		var newPolyline = new google.maps.Polyline({
+			path: this.convert(newPolystring),
+			geodesic: true,
+			strokeColor: '#ff0000',
+			strokeOpacity: 1.0,
+			strokeWeight: 2
+		});
+		
+		if (this.state.map != undefined)
+			newPolyline.setMap(this.state.map);
+		else
+			console.log('this.state.map is undefined?');
+
+		oldPolyline.setMap(null);
+
+		this.setState({polystring: newPolystring, polyline: newPolyline})
 	}
 
 	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {
