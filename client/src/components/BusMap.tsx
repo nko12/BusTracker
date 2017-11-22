@@ -95,8 +95,6 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			array.push({lat: lat * 1e-5, lng: lng * 1e-5});
 		}
 
-		console.log(JSON.stringify(array));
-
 		return array;
 	}
 

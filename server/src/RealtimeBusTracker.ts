@@ -12,13 +12,48 @@ export function realTimeInit() {
 	console.log('listening on port', PORT);
 }
 
-var bus_active = false;
-var stop_active = false;
+interface MapValueType {
+	stop: boolean;
+	bus: boolean;
+}
+
+var hm = new Map<string, MapValueType>();
 
 var numClicks = 0;
 var clickLimit = 5;
 
 // getStopsFromBus(7790);
+
+function decycle(object : any) {
+  var objects: any[] = [], paths: any[] = [];
+  function resolve(value: any, path: any) {
+    var length: any, results: any;
+    if (typeof value == 'object' && value) {
+      length = objects.length;
+      while (length--) {
+        if (objects[length] == value) return {'$ref': paths[length]};
+      }
+      objects.push(value);
+      paths.push(path);
+      if (Object.prototype.toString.call(value) == '[object Array]') {
+        results = [];
+        length = value.length;
+        while (length--) {
+          results[length] = resolve(value[length], path + '[' + length + ']');
+        }
+      } else {
+        results = {};
+        for (length in value) {
+          results[length] = resolve(value[length], path + '[' + JSON.stringify(length) + ']');
+        }
+      }
+      return results;
+    } else {
+      return value;
+    }
+  }
+  return resolve(object, '$');
+}
 
 var stopInfoArray = [[0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];
 
@@ -40,7 +75,7 @@ function getStopInfo(client: any) {
 					stopInfoArray[i] = stopInnerArray;
 				}
 				client.emit('returnAllStops', stopInfoArray);
-				console.log(JSON.stringify(stopInfoArray));
+				// console.log(JSON.stringify(stopInfoArray));
 			} catch (err) {
 				console.log('JSON was invalid from API call in getStopInfo()!');
 				console.log(err);
@@ -51,27 +86,40 @@ function getStopInfo(client: any) {
 }
 
 IO.on('connection', (client: any) => {
-	console.log('connected');
+	var boolObj = {bus: false, stop: false};
+	var thisClientID = JSON.stringify(decycle(client.nsp.server.eio.clients)).split('\"')[1];
+	hm.set(thisClientID, boolObj);
+	
+	hm.forEach((value: any, key: any, map: any) => {
+		console.log('[' + key + '] = ' + JSON.stringify(value));
+	});
+	
+	
+	var stopTimer: any = undefined;
 	client.on('subscribeToStop', (param: any) => {
-		bus_active = false;
-		stop_active = true;
+		boolObj = {bus: false, stop: true};
+		hm.set(thisClientID, boolObj);
 		console.log('client asked for busses going to stop ' + param.stopID + ' with interval ' + param.interval);
 
+		if (stopTimer != undefined)
+			clearInterval(stopTimer);
+		
 		// pseudo-do-while loop
 		if (numClicks < clickLimit)
-			getBussesFromStop(param.stopID, client);
-		var stopTimer = setInterval(() => {
-			if (stop_active == false)
+			getBussesFromStop(param.stopID, client, thisClientID);
+		stopTimer = setInterval(() => {
+			let got = hm.get(thisClientID);
+			if (got != undefined && got.stop == false)
 				clearInterval(stopTimer);
-			getBussesFromStop(param.stopID, client);
+			getBussesFromStop(param.stopID, client, thisClientID);
 			numClicks = 0;
 		}, param.interval);
 	});
 	
 	var busTimer: any = undefined;
 	client.on('subscribeToBus', (param: any) => {
-		bus_active = true;
-		stop_active = false;
+		boolObj = {bus: true, stop: false};
+		hm.set(thisClientID, boolObj);
 		console.log('client asked for a bus ' + param.busID + ' with interval ' + param.interval);
 		
 		// end old interval, if there is one
@@ -80,11 +128,13 @@ IO.on('connection', (client: any) => {
 
 		// pseudo-do-while loop
 		if (numClicks < clickLimit)
-			getBus(param.busID, client);
+			getBus(param.busID, client, thisClientID);
 		busTimer = setInterval(() => {
-			if (bus_active == false)
+			let got = hm.get(thisClientID);
+			console.log(JSON.stringify(got));
+			if (got != undefined && got.bus == false)
 				clearInterval(busTimer);
-			getBus(param.busID, client);
+			getBus(param.busID, client, thisClientID);
 			numClicks = 0;
 		}, param.interval);
 	
@@ -103,6 +153,10 @@ IO.on('connection', (client: any) => {
 	client.on('getStopsFromBus', (busID: any) => {
 		console.log('client asked for all stops visited by bus ' + busID);
 		getStopsFromBus(busID, client);
+	});
+
+	client.on('disconnect', () => {
+		hm.delete(thisClientID);
 	});
 });
 
@@ -124,7 +178,7 @@ function getStop(stopID: any, client: any) {
 }
 
 var busLoc = {lat: 0, lng: 0};
-function getBus(busID: any, client: any) {
+function getBus(busID: any, client: any, clientID: any) {
 	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
@@ -132,7 +186,8 @@ function getBus(busID: any, client: any) {
 				busLoc.lat = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Latitude;
 				busLoc.lng = loc.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity[0].MonitoredVehicleJourney.VehicleLocation.Longitude;
 				console.log('getBus() set busLoc to ' + JSON.stringify(busLoc));
-				if (bus_active == true)
+				let got = hm.get(clientID);
+				if (got != undefined && got.bus == true)
 					client.emit('returnBusSingleton', busLoc);
 			} catch (err) {
 				console.log('JSON was invalid from API call in getBus()!');
@@ -144,7 +199,7 @@ function getBus(busID: any, client: any) {
 }
 
 var busLocArray = [{location: {lat: 0, lng: 0}, ID: 'nil'}];
-function getBussesFromStop(stopID: any, client: any) {
+function getBussesFromStop(stopID: any, client: any, clientID: any) {
 	request(URL + 'siri/stop-monitoring.json?key=' + KEY + '&MonitoringRef=' + stopID, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
 			try {
@@ -158,7 +213,8 @@ function getBussesFromStop(stopID: any, client: any) {
 					busLocArray[i] = thisBusLoc;
 					console.log('getBussesFromStop() setting busLocArray[' + i + '] to ' + JSON.stringify(thisBusLoc));
 				}
-				if (stop_active == true)
+				let got = hm.get(clientID);
+				if (got != undefined && got.stop == true)
 					client.emit('returnBussesFromStop', busLocArray);
 			} catch (err) {
 				console.log('JSON was invalid from API call in getBus()!');
