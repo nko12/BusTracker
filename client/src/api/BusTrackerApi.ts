@@ -3,14 +3,15 @@ import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { TypedResult, Result } from '../Result';
 import { User } from '../models/User';
+import { BusStop } from '../models/BusStop';
+import { Route } from '../models/Route';
 
 import gql from 'graphql-tag';
 import * as md5 from 'md5';
 import { ExecutionResult } from 'graphql/execution/execute'
 import * as polyline from 'polyline';
 
-export interface IDType
-{
+export interface IDType {
     id: string,
     error: string
 }
@@ -80,7 +81,7 @@ export class BusTrackerApi {
      * @returns A Result dictating the result of the operation. 
      */
     public async toggleAdminRights(userId: string, targetUsername: string, adminStatus: boolean): Promise<Result> {
-        
+
         const mutation = gql`
             mutation AdminStatusMutation {
                 toggleAdminRights(grantingId: ${userId}, targetId: ${targetUsername}, adminStatus: ${adminStatus}) {
@@ -89,7 +90,7 @@ export class BusTrackerApi {
             }
         `;
 
-        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'toggleAdminRights', true, false));
+        return <Result>(await this.makeGraphQLRequest<any>(mutation, 'toggleAdminRights', true, false));
     }
 
     /**
@@ -108,7 +109,7 @@ export class BusTrackerApi {
             }
         `;
 
-        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'editFavoriteBusStopIDs', true, false));
+        return <Result>(await this.makeGraphQLRequest<any>(mutation, 'editFavoriteBusStopIDs', true, false));
     }
 
     /**
@@ -127,7 +128,7 @@ export class BusTrackerApi {
             }
         `;
 
-        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'editFavoriteRouteIDs', true, false));
+        return <Result>(await this.makeGraphQLRequest<any>(mutation, 'editFavoriteRouteIDs', true, false));
     }
 
     /**
@@ -190,7 +191,7 @@ export class BusTrackerApi {
             }
         `;
 
-        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'removeRoute', true, false));
+        return <Result>(await this.makeGraphQLRequest<any>(mutation, 'removeRoute', true, false));
     }
 
     /**
@@ -209,7 +210,45 @@ export class BusTrackerApi {
         }
         `;
 
-        return <Result> (await this.makeGraphQLRequest<any>(mutation, 'removeBusStop', true, false));
+        return <Result>(await this.makeGraphQLRequest<any>(mutation, 'removeBusStop', true, false));
+    }
+
+    public async getRoutesNearLocation(latitude: number, longitude: number): Promise<TypedResult<Array<Route>>> {
+
+        const query = gql`
+        query {
+            getRoutesNearLocation(latitude:${latitude}, longitude:${longitude}) {
+              error,
+              routes {
+                id,
+                name,
+                busStopIDs,
+                polyline
+              }
+            }
+          }
+        `;
+
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutesNearLocation', false, true);
+
+        return new TypedResult(result.success, <Array<Route>>result.data['routes']);
+    }
+
+    public async getBusStopsNearLocation(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop>>> {
+
+        const query = gql`
+            query GetNearbyBusStops {
+                getBusStopsNearLocation(latitude: ${latitude}, longitude: ${longitude}) {
+                    error,
+                    stops {
+                        id, name, latitude, longitude
+                    }
+                }
+            }
+        `;
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getBusStopsNearLocation', false, true);
+
+        return new TypedResult(result.success, <Array<BusStop>>result.data['stops']);
     }
 
     /**
@@ -226,9 +265,9 @@ export class BusTrackerApi {
         try {
             let result: ExecutionResult;
             if (isMutation) {
-                result = await this.client.mutate({ mutation: interpolatedQuery});
+                result = await this.client.mutate({ mutation: interpolatedQuery });
             } else {
-                result = await this.client.query({ query: interpolatedQuery});
+                result = await this.client.query({ query: interpolatedQuery });
             }
 
             if (result.data[methodName]['error']) {
@@ -237,7 +276,7 @@ export class BusTrackerApi {
                 return new TypedResult(true, hasData ? result.data[methodName] : null);
             }
         } catch (err) {
-            return new TypedResult(false, null, 'Query failed to execute: ' + (<ApolloError> err).message);
+            return new TypedResult(false, null, 'Query failed to execute: ' + (<ApolloError>err).message);
         }
     }
 }
