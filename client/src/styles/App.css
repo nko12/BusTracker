@@ -41,10 +41,8 @@
   /*color: white;*/
   /*padding: 4px;*/ }
 
-.tabs__page-layout {
-  padding: 16px; }
-  .tabs__page-layout .md-tab--inactive {
-    color: rgba(0, 0, 0, 0.54); }
+.tabs__page-layout .md-tab--inactive {
+  color: rgba(0, 0, 0, 0.54); }
 
 .busMarker {
   position: absolute;
@@ -99,3 +97,16 @@
   -o-filter: blur(5px);
   -ms-filter: blur(5px);
   filter: blur(5px); }
+
+.toolbar-search__list {
+  margin: auto;
+  position: fixed;
+  top: auto;
+  width: auto; }
+
+  .listlayout {
+    position: relative;
+    text-align: left;
+    margin: auto;
+    display: block;
+  }

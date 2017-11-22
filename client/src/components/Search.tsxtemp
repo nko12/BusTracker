@@ -1,0 +1,102 @@
+import * as React from 'react';
+import * as PropTypes from 'prop-types';
+import { Autocomplete } from 'react-md';
+import { BusType, StopType } from './BusMap';
+
+export interface SearchState {
+    busses: BusType[];
+    allStops: Map<number, StopType>;
+    activeStops: StopType[];
+}
+
+export interface SearchProps {
+    busses: BusType[];
+    allStops: Map<number, StopType>;
+    activeStops: StopType[];
+}
+
+const data = busses.map(({name: {}}) => name);
+
+export default class Search extends React.Component<SearchState, SearchProps> {
+    // public constructor(props: SearchProps) {
+    //     super(props);
+    //     this.state = {
+    //         busses: this.props.busses,
+    //         allStops: this.props.allStops,
+    //         activeStops: this.props.activeStops
+    //     };
+    // }
+
+    static PropTypes = {
+        onFocus: PropTypes.func,
+        onChange: PropTypes.func,
+        onAutocomplete: PropTypes.func,
+        value: PropTypes.string
+    };
+    
+    // Filter the data in the array
+     state = {filteredData: [] };
+
+    /**
+     * This filter will take the current value and return all matches that start
+     * with the value ignoring case and then bold the letters in the search results that
+     * match.
+     */
+ 
+    filter = (value: string) => {
+        const r = new RegExp(`^${value}`, 'i');
+        const l = value.length;
+        const filteredData = data.reduce((matches: {}, busses: BusType) => {
+            if (r.test(state)) {
+                matches.push({
+                    label: [
+                        <span key="bold" className="md-font-bold">{state.substring(0, 1)}</span>,
+                        state.substring(l),
+                    ],
+                    value: state,
+                });
+            }
+            return matches;
+        }, []);
+
+        this.setState({filteredData});
+            
+        }
+
+        handleChange = (value: string) => {
+            if (this.props.onChange) {
+                this.props.onChange(value);
+            }
+
+            this.filter(value);
+        }
+
+        handleAutocomplete = (value: string) => {
+            if (this.props.onAutocomplete) {
+                this.props.onAutocomplete(value);
+            }
+
+            this.filter(value);
+        }
+
+        render() {
+            const { filteredData } = this.state; 
+            return(
+            <Autocomplete
+            {...this.props}
+            id="toolbar-search"
+            type="search"
+            data={filteredData}
+            placeholder="Search"
+            customSize="search"
+            filter={null}
+            onChange={this.handleChange}
+            onAutocomplete={this.handleAutocomplete}
+            block
+            dataLabel="label"
+            dataValue="value"
+            listClassName="toolbar-search__list"
+            />
+            );
+        }
+    }

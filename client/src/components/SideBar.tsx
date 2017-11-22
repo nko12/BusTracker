@@ -1,9 +1,24 @@
 import * as React from 'react';
-import { TabsContainer, CardText, TextField, SelectionControlGroup, Tabs, Tab, Button } from 'react-md';
 import * as GMapReact from 'google-map-react';
-import {TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
-import {getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus} from './api';
-import {BusType, StopType} from './BusMap';
+import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
+import { List, FontIcon, SelectionControlGroup } from 'react-md';
+import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from './api';
+import { BusType, StopType } from './BusMap';
+
+const bus = <FontIcon>star</FontIcon>;
+const checkboxControls = [{
+	label: 'Orlando Bus',
+	value: '1',
+	checkedCheckboxIcon: bus,
+	//defaultChecked={true}
+}, {
+	label: 'Tampa Bus',
+	value: '2',
+   },
+   {
+	   label: 'Miami Bus',
+	   value: '3',
+   }];
 
 export interface SideBarState {
 	busses: BusType[];
@@ -36,10 +51,71 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 					panelClassName="md-grid"
 				>
 					<Tabs tabId="phone-stuffs">
-						<Tab label="Starks">
-							<h1>Winter is Coming</h1>
+						<Tab label="Stops">
+							<h3>Bus Stops</h3>
+
+							{/*Simple Search Bar*/}
 							<TextField
-								label='BusID'
+									placeholder="Search"
+									type="search"
+							/>
+
+							{/*Current Favorites List*/}
+							<List>
+							<SelectionControlGroup
+								id="using-custom-checkbox-icons"
+								name="using-custom-icons"
+								label="Favorites"
+								type="checkbox"
+								controls={checkboxControls}
+								checkedCheckboxIcon={bus}
+								defaultChecked={true}
+							/>	
+							</List>
+							
+							{/* Nearby Stops List
+							<CardText>Nearby Buses</CardText>
+							<List className="listlayout">
+							<ListItemControl
+								//rightIcon={bus}
+								primaryAction={
+									<Checkbox
+										id="list-control-secondary-1"
+										name="list-control-secondary"
+										label="Seattle Bus"
+										labelBefore={false}
+										defaultChecked={false}
+									/>	
+								}
+							/>
+							<ListItemControl
+								//rightIcon={bus}
+								primaryAction={
+									<Checkbox
+										id="list-control-secondary-1"
+										name="list-control-secondary"
+										label="Austin Bus"
+										labelBefore={false}
+										defaultChecked={false}
+									/>	
+								}
+							/>
+							<ListItemControl
+								//rightIcon={bus}
+								primaryAction={
+									<Checkbox
+										id="list-control-secondary-1"
+										name="list-control-secondary"
+										label="Los Angeles Bus"
+										labelBefore={false}
+										defaultChecked={false}
+									/>	
+								}
+							/>
+							</List> */}
+
+							<TextField
+								label={'BusID'}
 								value={this.state.busses[0].ID}
 								onChange={(value) => {
 									let busses = this.state.busses;
@@ -48,10 +124,10 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								}}
 							/>
 							
-							<CardText> </CardText>
+							<CardText />
 							<Button
-								flat
-								primary
+								flat={true}
+								primary={true}
 								onClick={() => {
 									{/*getStopsFromBus(this.state.busses[0].ID, (err: any, stopIDs: string[]) => {
 										console.log(JSON.stringify(stopIDs));
@@ -77,7 +153,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							Get Bus
 							</Button>
 							<TextField
-								label='StopID'
+								label="StopID"
 								value={this.state.activeStops[0].ID}
 								onChange={(value) => {
 									let stops = this.state.activeStops;
@@ -86,8 +162,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								}}
 							/>
 							<Button
-								flat
-								primary
+								flat={true}
+								primary={true}
 								onClick={() => {
 									// TODO: ask the DB for this. No need to spend an API call on something that remains static
 									getStop(this.state.activeStops[0].ID, (err: any, stopLoc: GMapReact.Coords) => {
@@ -98,29 +174,26 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 									subscribeToStop({interval: 1000, stopID: this.state.activeStops[0].ID}, (err: any, busObjs: BusType[]) => {
 										let busses: BusType[] = [];
-										for (let i = 0; i < busObjs.length; i++)
+										for (let i = 0; i < busObjs.length; i++) {
 											busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
+										}
+											
 										this.setState({busses: busses});
 										this.props.onMarkerPositionsChanged(this.state.busses, this.state.activeStops);
 									});
 								}}
 							>
 							Get Stop
-<<<<<<< Updated upstream
 							</Button>
-							<p> SideBar.state = {JSON.stringify(this.state)} </p>
-=======
-							</Button> */}
 						</Tab>
 						<Tab label="Routes">
-							<h3>Search Favorites</h3>
+							<h3>Bus Routes</h3>
 						</Tab>
 						<Tab label="Buses">
 							<h3>Search Buses</h3>
->>>>>>> Stashed changes
 						</Tab>
-						<Tab label='Targaryans'><h1>Fire and Blood</h1></Tab>
-						<Tab label='Lannisters'><h1>A Lannister Always Pays His Debts</h1></Tab>
+						{/* <Tab label='Targaryans'><h1>Fire and Blood</h1></Tab>
+						<Tab label='Lannisters'><h1>A Lannister Always Pays His Debts</h1></Tab> */}
 					</Tabs>
 				</TabsContainer>
 			</div>

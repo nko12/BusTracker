@@ -40,7 +40,7 @@ export default class App extends React.Component<{}, AppState> {
 		return (
 			<div>
 				<LogIn />
-				<div className='blurr' />
+				<div className="blurr" />
 				<div className="SideBar">
 					<SideBar
 						busses={this.state.busses}
