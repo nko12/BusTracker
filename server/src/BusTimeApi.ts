@@ -1,6 +1,7 @@
 import * as request from 'request-promise-native';
 import { Route, BusStop } from './Models';
 import { Result, TypedResult } from './Result';
+import { BusTrackerDB } from './Database'
 
 interface BusTimeResponse {
     code: number,
@@ -51,6 +52,12 @@ interface ShapeResult extends BusTimeResponse {
  */
 export class BusTimeApi {
 
+    private readonly storage: BusTrackerDB;
+
+    public constructor(db: BusTrackerDB) {
+        this.storage = db;
+    }
+
     /**
      * Represents the bus time API key.
      */
@@ -61,7 +68,7 @@ export class BusTimeApi {
      */
     private URL_BASE = 'http://bustime.mta.info/api/where/';
 
-    public async GetRoutesNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<Route>>> {
+    public async GetRoutesNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<Route>> | TypedResult<null>> {
 
         const url: string = `${this.URL_BASE}routes-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
@@ -71,10 +78,12 @@ export class BusTimeApi {
             }
 
             const routes: Array<Route> = new Array<Route>();
-            resultData.data.routes.forEach(element => {
-                const busTimeRoute: BusTimeRouteObject = element;
-                routes.push({id: busTimeRoute.id, name: busTimeRoute.longName, polyline: '', busStopIDs: []});
-            });
+            for (let i = 0; i < resultData.data.routes.length; i++) {
+                const busTimeRoute: BusTimeRouteObject = resultData.data.routes[i];
+                const route: Route = {id: busTimeRoute.id, name: busTimeRoute.longName, polyline: '', busStopIDs: []};
+                routes.push(route);
+                await this.storage.addNewRealRoute(route);
+            }
 
             return new TypedResult(true, routes);
         } catch (err) {
@@ -82,7 +91,7 @@ export class BusTimeApi {
         }
     }
 
-    public async GetBusStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop>>> {
+    public async GetBusStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop>> | TypedResult<null>> {
         const url: string = `${this.URL_BASE}stops-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
             const resultData: BusStopsForLocationResult = <BusStopsForLocationResult> JSON.parse(await request(url));
@@ -91,10 +100,12 @@ export class BusTimeApi {
             }
 
             const stops: Array<BusStop> = new Array<BusStop>();
-            resultData.data.stops.forEach(element => {
-                const busTimeStop: BusTimeStopObject = element;
-                stops.push({id: busTimeStop.id, name: busTimeStop.name, latitude: busTimeStop.lat, longitude: busTimeStop.lon});
-            });
+            for (let i = 0; i < resultData.data.stops.length; i++) {
+                const busTimeStop: BusTimeStopObject = resultData.data.stops[i];
+                const stop: BusStop = {id: busTimeStop.id, name: busTimeStop.name, latitude: busTimeStop.lat, longitude: busTimeStop.lon};
+                stops.push(stop);
+                await this.storage.addNewRealBusStop(stop);
+            }
 
             return new TypedResult(true, stops);
         } catch (err) {
@@ -102,12 +113,12 @@ export class BusTimeApi {
         }
     }
 
-/*     public async GetPolylineForRoute(routeId: number): Promise<TypedResult<string>> {
+    public async GetPolylineForRoute(routeId: number): Promise<TypedResult<string> | TypedResult<null>> {
         const url: string = `${this.URL_BASE}shape/${routeId}.json?key=${this.KEY}`;
         try {
             const resultData: BusStopsForLocationResult = <BusStopsForLocationResult> JSON.parse(await request(url));
         } catch (err) {
             return new TypedResult(false, null, JSON.stringify(err));
         }
-    } */
+    }
 }
