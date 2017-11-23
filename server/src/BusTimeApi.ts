@@ -167,9 +167,12 @@ export class BusTimeApi {
             if (longestPolylineIndex != -1) {
                 // Create an array of strings to represent the bus stop ids.
                 const stopIds: Array<string> = new Array<string>();
-                resultData.data.stops.forEach((stop: BusTimeStopObject) => {
+                for (let stop of resultData.data.stops) {
+                    
+                    // Add this stop data to the database. If it already exists, the add is ignored.
+                    await this.storage.addNewRealBusStop({id: stop.id, name: stop.name, latitude: stop.lat, longitude: stop.lon});
                     stopIds.push(stop.id);
-                });
+                }
 
                 return new TypedResult(true, { polyline: resultData.data.polylines[longestPolylineIndex], stops: stopIds });
             } else {

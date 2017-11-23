@@ -356,6 +356,48 @@ export class BusTrackerDB {
     }
 
     /**
+     * Gets the specified routes by id.
+     * @param routeIds The ids of the route objects to get.
+     * @returns A result containing the list of routes.
+     */
+    public async getRoutes(routeIds: Array<string>): Promise<TypedResult<Array<models.Route> | null>> {
+
+        // Search for all routes matching the specified ids.
+        try {
+            const cursor = schema.RouteType.find({id: {"$in": routeIds}}).lean().cursor();
+            const routes: Array<models.Route> = new Array<models.Route>();
+            await cursor.eachAsync((route: models.Route) => {
+                routes.push(route);
+            });
+    
+            return new TypedResult(true, routes);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get the requested routes: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
+     * Gets the specified bus stops by id.
+     * @param stopIds The ids of the bus stop objects to get.
+     * @returns A result containing the list of bus stops.
+     */
+    public async getBusStops(stopIds: Array<string>): Promise<TypedResult<Array<models.BusStop> | null>> {
+
+        // Search for all bus stops matching the specified ids.
+        try {
+            const cursor = schema.BusStopType.find({id: {"$in": stopIds}}).lean().cursor();
+            const stops: Array<models.BusStop> = new Array<models.BusStop>();
+            await cursor.eachAsync((stop: models.BusStop) => {
+                stops.push(stop);
+            });
+
+            return new TypedResult(true, stops);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get the requested bus stops: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
      * Gets the specified bus stop by id.
      * @param stopId The id of the bus stop to get.
      * @returns The requested bus stop id.

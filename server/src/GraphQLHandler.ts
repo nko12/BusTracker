@@ -4,7 +4,6 @@ var { buildSchema } = require('graphql');
 import { Result, TypedResult } from './Result';
 import * as models from './Models';
 
-
 /*    GraphQL request/response classes    */
 
 
@@ -120,37 +119,41 @@ interface GetObjectsNearPositionMutationData {
   longitude: number
 }
 
+interface GetObjectsByIdQueryData {
+  ids: Array<string>
+}
+
 /**
  * Represents the GraphQL handling component of the server.
  */
 class GraphQLHandler {
-    /**
-     * Represents the central part of the server which handles communication between components
-     */
-    public server: BusTrackerServer;
+  /**
+   * Represents the central part of the server which handles communication between components
+   */
+  public server: BusTrackerServer;
 
-    /**
-     * Represents the GraphQL schema object, used when creating GraphQL endpoint
-     * The type should be GraphQLSchema but importing @types/graphql has issues
-     */
-    public schema: any;
+  /**
+   * Represents the GraphQL schema object, used when creating GraphQL endpoint
+   * The type should be GraphQLSchema but importing @types/graphql has issues
+   */
+  public schema: any;
 
-    private readonly busApi: BusTimeApi;
+  private readonly busApi: BusTimeApi;
 
-    /**
-     * Creates a new instance of the GraphQLHandler class.
-     * @param server The server object to use.
-     */
-    public constructor(server: BusTrackerServer) {
-        this.server = server;
-        this.busApi = new BusTimeApi(this.server.storage);
-    }
+  /**
+   * Creates a new instance of the GraphQLHandler class.
+   * @param server The server object to use.
+   */
+  public constructor(server: BusTrackerServer) {
+    this.server = server;
+    this.busApi = new BusTimeApi(this.server.storage);
+  }
 
-    /**
-     * Initializes the schema data.
-     */
-    public init(): void {
-      this.schema = buildSchema(`
+  /**
+   * Initializes the schema data.
+   */
+  public init(): void {
+    this.schema = buildSchema(`
         interface IError {
           error: String
         }
@@ -203,6 +206,8 @@ class GraphQLHandler {
           login(username: String, passwordHash: String): User
           getRoute(id: String): Route
           getStop(id: String): BusStop
+          getRoutes(ids: [String]): RouteArray
+          getStops(ids: [String]): BusStopArray
           getRoutesNearLocation(latitude: Float, longitude: Float): RouteArray
           getBusStopsNearLocation(latitude: Float, longitude: Float): BusStopArray
         }
@@ -219,236 +224,279 @@ class GraphQLHandler {
           deleteUser(id: String): BasicResponse
         }
       `);
-    }
+  }
 
-    /**    Queries     */
+  /**    Queries     */
 
-    /**
-     * Handler that deals with the login query.
-     * @param data The login data passed from the client.
-     */
-    public async login(data: LoginQueryData): Promise<GraphQLUser> {
-      let user: GraphQLUser = new GraphQLUser();
+  /**
+   * Handler that deals with the login query.
+   * @param data The login data passed from the client.
+   */
+  public async login(data: LoginQueryData): Promise<GraphQLUser> {
+    let user: GraphQLUser = new GraphQLUser();
 
-      const result = await this.server.storage.loginUser(data.username, data.passwordHash);
-      if (!result.success) {
-          // Failed to login the user.
-          user.error = result.message;
-          return user;
-      }
-
-      user = <GraphQLUser> result.data;
+    const result = await this.server.storage.loginUser(data.username, data.passwordHash);
+    if (!result.success) {
+      // Failed to login the user.
+      user.error = result.message;
       return user;
     }
 
-    /**
-     * Handler that deals with the getRoute query.
-     * @param data The id for the route to lookup.
-     */
-    public async getRoute(data: IDQueryData): Promise<GraphQLRoute> {
+    user = <GraphQLUser>result.data;
+    return user;
+  }
 
-      let route: GraphQLRoute = new GraphQLRoute();
+  /**
+   * Handler that deals with the getRoute query.
+   * @param data The id for the route to lookup.
+   */
+  public async getRoute(data: IDQueryData): Promise<GraphQLRoute> {
 
-      const result = await this.server.storage.getRoute(data.id);
-      if (!result.success) {
-          route.error = result.message;
-          return route;
-      }
+    let route: GraphQLRoute = new GraphQLRoute();
 
-      route = <GraphQLRoute> result.data;
+    const result = await this.server.storage.getRoute(data.id);
+    if (!result.success) {
+      route.error = result.message;
       return route;
     }
 
-    /**
-     * Handler that deals with the getStop query.
-     * @param data The id for the stop to lookup.
-     */
-    public async getStop(data: IDQueryData): Promise<GraphQLBusStop> {
+    route = <GraphQLRoute>result.data;
+    return route;
+  }
 
-      let stop: GraphQLBusStop = new GraphQLBusStop();
+  /**
+   * Handler that deals with the getStop query.
+   * @param data The id for the stop to lookup.
+   */
+  public async getStop(data: IDQueryData): Promise<GraphQLBusStop> {
 
-      const result = await this.server.storage.getBusStop(data.id);
-      if (!result.success) {
-          stop.error = result.message;
-          return stop;
-      }
+    let stop: GraphQLBusStop = new GraphQLBusStop();
 
-      stop = <GraphQLBusStop> result.data;
+    const result = await this.server.storage.getBusStop(data.id);
+    if (!result.success) {
+      stop.error = result.message;
       return stop;
     }
 
-    public async getRoutesNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLRouteArray> {
+    stop = <GraphQLBusStop>result.data;
+    return stop;
+  }
 
-      let routes: GraphQLRouteArray = new GraphQLRouteArray();
+  /**
+   * Handler that gets the routes associated with a list of ids.
+   * @param data The ids for the routes to look up.
+   */
+  public async getRoutes(data: GetObjectsByIdQueryData): Promise<GraphQLRouteArray> {
 
-      const result = await this.busApi.GetRoutesNearPosition(data.latitude, data.longitude);
-      if (!result.success) {
-        routes.error = result.message;
-        return routes;
-      }
-
-      routes.routes = <Array<models.Route>> result.data;
+    let routes: GraphQLRouteArray = new GraphQLRouteArray();
+    const result = await this.server.storage.getRoutes(data.ids);
+    if (!result.success) {
+      routes.error = result.message;
       return routes;
     }
 
-    public async getBusStopsNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLBusStopArray> {
-      let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
+    routes.routes = <models.Route[]> result.data;
 
-      const result = await this.busApi.GetBusStopsNearPosition(data.latitude, data.longitude);
-      if (!result.success) {
-        stops.error = result.message;
-        return stops;
-      }
+    return routes;
+  }
 
-      stops.stops = <Array<models.BusStop>> result.data;
+  /**
+   * Handler that gets the bus stops associated with a list of ids.
+   * @param data The ids of the stops to look up.
+   */
+  public async getStops(data: GetObjectsByIdQueryData): Promise<GraphQLBusStopArray> {
+
+    let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
+    const result = await this.server.storage.getBusStops(data.ids);
+    if (!result.success) {
+      stops.error = result.message;
       return stops;
     }
 
+    stops.stops = <models.BusStop[]> result.data;
 
-    /*     Mutations    */
+    return stops;
+  }
 
-    /**
-     * Handler that deals with the register mutation.
-     * @param data The register data (same form as login data) passed from the client.
-     */
-    public async register(data: LoginQueryData): Promise<GraphQLUser> {
+  /**
+   * Handler that gets the list of routes that are near a particular location.
+   * @param data The parameters for the handler as an object.
+   */
+  public async getRoutesNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLRouteArray> {
 
-      let user: GraphQLUser = new GraphQLUser();
+    let routes: GraphQLRouteArray = new GraphQLRouteArray();
 
-      const result = await this.server.storage.registerUser(data.username, data.passwordHash);
-      if (!result.success) {
-          user.error = result.message;
-          return user;
-      }
+    const result = await this.busApi.GetRoutesNearPosition(data.latitude, data.longitude);
+    if (!result.success) {
+      routes.error = result.message;
+      return routes;
+    }
 
-      user = <GraphQLUser> result.data;
+    routes.routes = <Array<models.Route>>result.data;
+    return routes;
+  }
+
+  /**
+   * Handler that gets the list of bus stops that are near a particular location.
+   * @param data The parameters for the handler as an object.
+   */
+  public async getBusStopsNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLBusStopArray> {
+    let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
+
+    const result = await this.busApi.GetBusStopsNearPosition(data.latitude, data.longitude);
+    if (!result.success) {
+      stops.error = result.message;
+      return stops;
+    }
+
+    stops.stops = <Array<models.BusStop>>result.data;
+    return stops;
+  }
+
+
+  /*     Mutations    */
+
+  /**
+   * Handler that deals with the register mutation.
+   * @param data The register data (same form as login data) passed from the client.
+   */
+  public async register(data: LoginQueryData): Promise<GraphQLUser> {
+
+    let user: GraphQLUser = new GraphQLUser();
+
+    const result = await this.server.storage.registerUser(data.username, data.passwordHash);
+    if (!result.success) {
+      user.error = result.message;
       return user;
     }
 
-    /**
-     * Handler that deals with the toggleAdminRights mutation.
-     * @param data The toggleAdminRights data passed from the client.
-     */
-    public async toggleAdminRights(data: AdminRightsMutationData): Promise<GraphQLBasicResponse> {
+    user = <GraphQLUser>result.data;
+    return user;
+  }
 
-      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+  /**
+   * Handler that deals with the toggleAdminRights mutation.
+   * @param data The toggleAdminRights data passed from the client.
+   */
+  public async toggleAdminRights(data: AdminRightsMutationData): Promise<GraphQLBasicResponse> {
 
-      const result = await this.server.storage.toggleAdminRights(data.grantingId, data.targetId, data.adminStatus);
-      if (!result.success) {
-          response.error = result.message;
-      }
+    let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+
+    const result = await this.server.storage.toggleAdminRights(data.grantingId, data.targetId, data.adminStatus);
+    if (!result.success) {
+      response.error = result.message;
+    }
+    return response;
+  }
+
+  /**
+   * Handler that deals with the editFavoriteBusStopIDs mutation.
+   * @param data The bus stop ids and user data passed from the client.
+   */
+  public async editFavoriteBusStopIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
+
+    let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+
+    const result = await this.server.storage.editFavoriteBusStopIDs(data.userId, data.objectIds);
+    if (!result.success) {
+      response.error = result.message;
+    }
+    return response;
+  }
+
+  /**
+   * Handler that deals with the editFavoriteRouteIDs mutation.
+   * @param data The route ids and user data passed from the client.
+   */
+  public async editFavoriteRouteIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
+
+    let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+
+    const result = await this.server.storage.editFavoriteRouteIDs(data.userId, data.objectIds);
+    if (!result.success) {
+      response.error = result.message;
+    }
+    return response;
+  }
+
+  /**
+   * Handler that deals with the addNewRoute mutation.
+   * @param data The route to create and user id
+   */
+  public async addNewRoute(data: AddRouteMutationData): Promise<GraphQLIDResponse> {
+
+    let response: GraphQLIDResponse = new GraphQLIDResponse();
+
+    const result = await this.server.storage.addNewRoute(data.userId, data);
+    if (!result.success) {
+      response.error = result.message;
       return response;
     }
+    response.id = <string>result.data;
+    return response;
+  }
 
-    /**
-     * Handler that deals with the editFavoriteBusStopIDs mutation.
-     * @param data The bus stop ids and user data passed from the client.
-     */
-    public async editFavoriteBusStopIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
+  /**
+   * Handler that deals with the addNewBusStop mutation.
+   * @param data The stop to create and user id
+   */
+  public async addNewBusStop(data: AddBusStopMutationData): Promise<GraphQLIDResponse> {
 
-      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+    let response: GraphQLIDResponse = new GraphQLIDResponse();
 
-      const result = await this.server.storage.editFavoriteBusStopIDs(data.userId, data.objectIds);
-      if (!result.success) {
-          response.error = result.message;
-      }
+    const result = await this.server.storage.addNewBusStop(data.userId, data);
+    if (!result.success) {
+      response.error = result.message;
       return response;
     }
+    response.id = <string>result.data;
+    return response;
+  }
 
-    /**
-     * Handler that deals with the editFavoriteRouteIDs mutation.
-     * @param data The route ids and user data passed from the client.
-     */
-    public async editFavoriteRouteIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
+  /**
+   * Handler that deals with the removeRoute mutation.
+   * @param data The user id and route id to remove
+   */
+  public async removeRoute(data: RemoveIDMutationData): Promise<GraphQLBasicResponse> {
 
-      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
+    let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
-      const result = await this.server.storage.editFavoriteRouteIDs(data.userId, data.objectIds);
-      if (!result.success) {
-          response.error = result.message;
-      }
-      return response;
+    const result = await this.server.storage.removeRoute(data.userId, data.objectId);
+    if (!result.success) {
+      response.error = result.message;
     }
+    return response;
+  }
 
+  /**
+   * Handler that deals with the removeBusStop mutation.
+   * @param data The user id and route id to remove
+   */
+  public async removeBusStop(data: RemoveIDMutationData): Promise<GraphQLBasicResponse> {
 
-    /**
-     * Handler that deals with the addNewRoute mutation.
-     * @param data The route to create and user id
-     */
-    public async addNewRoute(data: AddRouteMutationData): Promise<GraphQLIDResponse> {
+    let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
-      let response: GraphQLIDResponse = new GraphQLIDResponse();
-
-      const result = await this.server.storage.addNewRoute(data.userId, data);
-      if (!result.success) {
-          response.error = result.message;
-          return response;
-      }
-      response.id = <string>result.data;
-      return response;
+    const result = await this.server.storage.removeBusStop(data.userId, data.objectId);
+    if (!result.success) {
+      response.error = result.message;
     }
+    return response;
+  }
 
-    /**
-     * Handler that deals with the addNewBusStop mutation.
-     * @param data The stop to create and user id
-     */
-    public async addNewBusStop(data: AddBusStopMutationData): Promise<GraphQLIDResponse> {
+  /**
+   * Handler that deals with the deleteUser mutation.
+   * @param data The user id to delete
+   */
+  public async deleteUser(data: IDQueryData): Promise<GraphQLBasicResponse> {
 
-      let response: GraphQLIDResponse = new GraphQLIDResponse();
+    let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
-      const result = await this.server.storage.addNewBusStop(data.userId, data);
-      if (!result.success) {
-          response.error = result.message;
-          return response;
-      }
-      response.id = <string>result.data;
-      return response;
+    const result = await this.server.storage.deleteUser(data.id);
+    if (!result.success) {
+      response.error = result.message;
     }
-
-    /**
-     * Handler that deals with the removeRoute mutation.
-     * @param data The user id and route id to remove
-     */
-    public async removeRoute(data: RemoveIDMutationData): Promise<GraphQLBasicResponse> {
-
-      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
-
-      const result = await this.server.storage.removeRoute(data.userId, data.objectId);
-      if (!result.success) {
-          response.error = result.message;
-      }
-      return response;
-    }
-
-    /**
-     * Handler that deals with the removeBusStop mutation.
-     * @param data The user id and route id to remove
-     */
-    public async removeBusStop(data: RemoveIDMutationData): Promise<GraphQLBasicResponse> {
-
-      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
-
-      const result = await this.server.storage.removeBusStop(data.userId, data.objectId);
-      if (!result.success) {
-          response.error = result.message;
-      }
-      return response;
-    }
-
-    /**
-     * Handler that deals with the deleteUser mutation.
-     * @param data The user id to delete
-     */
-    public async deleteUser(data: IDQueryData): Promise<GraphQLBasicResponse> {
-
-      let response: GraphQLBasicResponse = new GraphQLBasicResponse();
-
-      const result = await this.server.storage.deleteUser(data.id);
-      if (!result.success) {
-          response.error = result.message;
-      }
-      return response;
-    }
+    return response;
+  }
 }
 
-export {GraphQLHandler}
+export { GraphQLHandler }
