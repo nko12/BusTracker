@@ -105,7 +105,7 @@
   width: auto; }
 
   .listlayout {
-    position: relative;
+    position: auto;
     text-align: left;
     margin: auto;
     display: block;

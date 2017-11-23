@@ -1,24 +1,23 @@
 import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
-import { List, FontIcon, SelectionControlGroup } from 'react-md';
+import { List, ListItemControl, Checkbox, FontIcon, SelectionControlGroup } from 'react-md';
 import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from './api';
 import { BusType, StopType } from './BusMap';
 
 const bus = <FontIcon>star</FontIcon>;
-const checkboxControls = [{
-	label: 'Orlando Bus',
-	value: '1',
-	checkedCheckboxIcon: bus,
-	//defaultChecked={true}
-}, {
-	label: 'Tampa Bus',
-	value: '2',
-   },
-   {
-	   label: 'Miami Bus',
-	   value: '3',
-   }];
+// const checkboxControls = [{
+// 	label: 'Orlando Bus',
+// 	value: '1',
+// 	checkedCheckboxIcon: bus,
+// }, {
+// 	label: 'Tampa Bus',
+// 	value: '2',
+//    },
+//    {
+// 	   label: 'Miami Bus',
+// 	   value: '3',
+//    }];
 
 export interface SideBarState {
 	busses: BusType[];
@@ -61,59 +60,53 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							/>
 
 							{/*Current Favorites List*/}
-							<List>
 							<SelectionControlGroup
-								id="using-custom-checkbox-icons"
-								name="using-custom-icons"
-								label="Favorites"
+								className="listlayout"
+								id="favorites-checkbox"
+								name="favorites"
 								type="checkbox"
-								controls={checkboxControls}
+								label="Favorites"
+								defaultValue="A,B,C"
 								checkedCheckboxIcon={bus}
-								defaultChecked={true}
-							/>	
-							</List>
+								controls={[
+									{
+										label: 'Orlando Stop',
+										value: 'A',
+									},
+									{
+										label: 'Tampa Stop',
+										value: 'B',
+									},
+									{
+										label: 'Miami Stop',
+										value: 'C',
+									}
+								]}
+							/>
+							{/* Nearby Stops List*/}
+							<SelectionControlGroup 
+								className="listlayout"
+								id="nearby-checkbox"
+								name="nearby"
+								type="checkbox"
+								label="Nearby Buses"
+								checkedCheckboxIcon={bus}
+								controls={[
+									{
+										label: 'Austin Stop',
+										value: '1',
+									},
+									{
+										label: 'Seattle Stop',
+										value: '2',
+									},
+									{
+										label: 'San Francisco Stop',
+										value: '3',
+									}
+								]}
+							/>
 							
-							{/* Nearby Stops List
-							<CardText>Nearby Buses</CardText>
-							<List className="listlayout">
-							<ListItemControl
-								//rightIcon={bus}
-								primaryAction={
-									<Checkbox
-										id="list-control-secondary-1"
-										name="list-control-secondary"
-										label="Seattle Bus"
-										labelBefore={false}
-										defaultChecked={false}
-									/>	
-								}
-							/>
-							<ListItemControl
-								//rightIcon={bus}
-								primaryAction={
-									<Checkbox
-										id="list-control-secondary-1"
-										name="list-control-secondary"
-										label="Austin Bus"
-										labelBefore={false}
-										defaultChecked={false}
-									/>	
-								}
-							/>
-							<ListItemControl
-								//rightIcon={bus}
-								primaryAction={
-									<Checkbox
-										id="list-control-secondary-1"
-										name="list-control-secondary"
-										label="Los Angeles Bus"
-										labelBefore={false}
-										defaultChecked={false}
-									/>	
-								}
-							/>
-							</List> */}
-
 							<TextField
 								label={'BusID'}
 								value={this.state.busses[0].ID}
@@ -188,6 +181,20 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 						</Tab>
 						<Tab label="Routes">
 							<h3>Bus Routes</h3>
+							<List>
+								<ListItemControl
+									primaryAction={(
+										<Checkbox
+											id="routes-list"
+											name="routes"
+											label="Orlando Route"
+											defaultChecked={true}
+
+										/>
+										
+									)}
+								/>
+							</List>
 						</Tab>
 						<Tab label="Buses">
 							<h3>Search Buses</h3>
