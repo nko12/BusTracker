@@ -16,7 +16,7 @@ export interface BusType {
 export interface StopType {
 	location: GoogleMapReact.Coords;
 	ID: string;
-	// name: string;
+	name: string;
 }
 
 export interface BusMapState {
@@ -34,15 +34,15 @@ export interface BusMapState {
 	busMarkers: google.maps.Marker[];
 	stopMarkers: google.maps.Marker[];
 
-	polystring: string;
-	polyline: any;
+	polyString: string;
+	polyLine: any;
 }
 
 export interface BusMapProps {
 	busses: BusType[];
 	stops: StopType[];
 
-	polystring: string;
+	polyString: string;
 
 	zoom: number;
 }
@@ -62,8 +62,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			busMarkers: [] as google.maps.Marker[],
 			stopMarkers: [] as google.maps.Marker[],
 
-			polystring: props.polystring,
-			polyline: new google.maps.Polyline()
+			polyString: props.polyString,
+			polyLine: new google.maps.Polyline()
 		};
 	}
 
@@ -99,7 +99,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	componentWillReceiveProps(nextProps: BusMapProps) {
 		this.updateStops(nextProps.stops);
 		this.updateBusses(nextProps.busses);
-		this.updatePolyline(nextProps.polystring);
+		this.updatePolyline(nextProps.polyString);
 	}
 
 	updateStops(newStops: StopType[]) {
@@ -163,19 +163,17 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// dispose of old markers
 		for (let i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);
-
-		console.log(JSON.stringify(oldMarkers));
 	}
 
-	updatePolyline(newPolystring: string) {
+	updatePolyline(newPolyString: string) {
 		// ignore if the same
-		if (newPolystring == this.state.polyline)
+		if (newPolyString == this.state.polyLine)
 			return;
 
-		let oldPolyline = this.state.polyline;
+		let oldPolyLine = this.state.polyLine;
 
-		var newPolyline = new google.maps.Polyline({
-			path: this.convert(newPolystring),
+		var newPolyLine = new google.maps.Polyline({
+			path: this.convert(newPolyString),
 			geodesic: true,
 			strokeColor: '#ff0000',
 			strokeOpacity: 1.0,
@@ -183,13 +181,13 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		});
 		
 		if (this.state.map != undefined)
-			newPolyline.setMap(this.state.map);
+			newPolyLine.setMap(this.state.map);
 		else
 			console.log('this.state.map is undefined?');
 
-		oldPolyline.setMap(null);
+		oldPolyLine.setMap(null);
 
-		this.setState({polystring: newPolystring, polyline: newPolyline});
+		this.setState({polyString: newPolyString, polyLine: newPolyLine});
 	}
 
 	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {

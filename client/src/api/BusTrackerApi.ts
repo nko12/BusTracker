@@ -1,14 +1,15 @@
-import { ApolloClient, ApolloError } from 'apollo-client';
-import { HttpLink } from 'apollo-link-http';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { TypedResult, Result } from '../Result';
-import { User } from '../models/User';
-import { BusStop } from '../models/BusStop';
-import { Route } from '../models/Route';
+import {ApolloClient, ApolloError} from 'apollo-client';
+import {HttpLink} from 'apollo-link-http';
+import {InMemoryCache} from 'apollo-cache-inmemory';
+import {TypedResult, Result} from '../Result';
+import {User} from '../models/User';
+import {BusStop} from '../models/BusStop';
+import {Route} from '../models/Route';
+import {Coords} from 'google-map-react';
 
 import gql from 'graphql-tag';
 import * as md5 from 'md5';
-import { ExecutionResult } from 'graphql/execution/execute'
+import {ExecutionResult} from 'graphql/execution/execute'
 import * as polyline from 'polyline';
 
 export interface IDType {
@@ -213,11 +214,11 @@ export class BusTrackerApi {
         return <Result>(await this.makeGraphQLRequest<any>(mutation, 'removeBusStop', true, false));
     }
 
-    public async getRoutesNearLocation(latitude: number, longitude: number): Promise<TypedResult<Array<Route>>> {
+    public async getRoutesNearLocation(location: Coords): Promise<TypedResult<Array<Route>>> {
 
         const query = gql`
         query {
-            getRoutesNearLocation(latitude:${latitude}, longitude:${longitude}) {
+            getRoutesNearLocation(latitude:${location.lat}, longitude:${location.lng}) {
               error,
               routes {
                 id,
@@ -234,11 +235,11 @@ export class BusTrackerApi {
         return new TypedResult(result.success, <Array<Route>>result.data['routes']);
     }
 
-    public async getBusStopsNearLocation(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop>>> {
+    public async getBusStopsNearLocation(location: Coords): Promise<TypedResult<Array<BusStop>>> {
 
         const query = gql`
             query GetNearbyBusStops {
-                getBusStopsNearLocation(latitude: ${latitude}, longitude: ${longitude}) {
+                getBusStopsNearLocation(latitude: ${location.lat}, longitude: ${location.lng}) {
                     error,
                     stops {
                         id, name, latitude, longitude

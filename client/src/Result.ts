@@ -35,7 +35,7 @@ export class TypedResult<T> extends Result {
     public data: T | null;
 
     /**
-     * Creates a new typd Result object with specified success value, error message, and result data.
+     * Creates a new typed Result object with specified success value, error message, and result data.
      * @param success 
      * @param message 
      * @param data 
