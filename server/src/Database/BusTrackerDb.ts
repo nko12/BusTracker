@@ -272,7 +272,7 @@ export class BusTrackerDB {
             return new TypedResult(false, null, `User with id ${userId} is not an admin.`);
 
         // Create a new route type and give it the route model.
-        routeData.id = 'FAKE_' + faker.random.uuid();    
+        routeData.id = 'FAKE_' + faker.random.uuid();
         const route = new schema.RouteType(routeData);
         await route.save();
 
@@ -308,17 +308,17 @@ export class BusTrackerDB {
      * Adds a new real bus stop to the database. The id should already be set.
      * @param stopData The stop data to add to the database. If it already exists, it is overwritten.
      */
-    public async addNewRealBusStop(stopData: models.BusStop): Promise<Result> {        
-        
+    public async addNewRealBusStop(stopData: models.BusStop): Promise<Result> {
+
         // Check if the bus stop already exists. If it does, ignore this request.
         let busStop: mongoose.Document = await schema.BusStopType.findOne({ id: stopData.id }).cursor().next();
         if (busStop != null) {
-            return Result(true);
+            return new Result(true);
         }
 
         busStop = new schema.BusStopType(stopData);
         await busStop.save();
-        return Result(true);
+        return new Result(true);
     }
 
     /**
@@ -326,23 +326,23 @@ export class BusTrackerDB {
      * @param routeData The route data to add to the database. if it already exists, it is overwritten.
      */
     public async addNewRealRoute(routeData: models.Route): Promise<Result> {
-        
+
         // Check if the route already exists. If it does, ignore this request.
-        let route: mongoose.Document = await schema.RouteType.findOne({ id: routeData.id}).cursor().next();
+        let route: mongoose.Document = await schema.RouteType.findOne({ id: routeData.id }).cursor().next();
         if (route != null) {
-            return Result(true);
+            return new Result(true);
         }
 
         route = new schema.RouteType(routeData);
         await route.save();
-        return Result(true);
+        return new Result(true);
     }
 
     /**
- * Gets the specified route object by id.
- * @param routeId The id of the route to get.
- * @returns The requested route object.
- */
+     * Gets the specified route object by id.
+     * @param routeId The id of the route to get.
+     * @returns The requested route object.
+     */
     public async getRoute(routeId: string): Promise<TypedResult<models.Route | null>> {
 
         // Get the route object.
@@ -400,7 +400,7 @@ export class BusTrackerDB {
         await route.remove();
 
         return new Result(true);
-    } 
+    }
 
     /**
      * Allows an admin to remove an existing fake bus stop from the database.
@@ -431,7 +431,7 @@ export class BusTrackerDB {
 
         return new Result(true);
     }
-    
+
     /**
      * Attempts to connect to the database.
      * @returns The connection to the database if successful, otherwise an error.
@@ -440,7 +440,7 @@ export class BusTrackerDB {
         /*  const conn: mongoose.Connection =
              mongoose.createConnection(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true }); */
         mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
-        
+
         return new Promise<mongoose.Connection | undefined>((resolve, reject) => {
             mongoose.connection.on('error', (err) => {
                 reject(err);

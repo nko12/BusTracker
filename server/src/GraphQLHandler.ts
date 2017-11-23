@@ -135,12 +135,15 @@ class GraphQLHandler {
      */
     public schema: any;
 
+    private readonly busApi: BusTimeApi;
+
     /**
      * Creates a new instance of the GraphQLHandler class.
      * @param server The server object to use.
      */
     public constructor(server: BusTrackerServer) {
         this.server = server;
+        this.busApi = new BusTimeApi(this.server.storage);
     }
 
     /**
@@ -278,8 +281,7 @@ class GraphQLHandler {
 
       let routes: GraphQLRouteArray = new GraphQLRouteArray();
 
-      const api: BusTimeApi = new BusTimeApi();
-      const result = await api.GetRoutesNearPosition(data.latitude, data.longitude);
+      const result = await this.busApi.GetRoutesNearPosition(data.latitude, data.longitude);
       if (!result.success) {
         routes.error = result.message;
         return routes;
@@ -292,8 +294,7 @@ class GraphQLHandler {
     public async getBusStopsNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLBusStopArray> {
       let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
 
-      const api: BusTimeApi = new BusTimeApi();
-      const result = await api.GetBusStopsNearPosition(data.latitude, data.longitude);
+      const result = await this.busApi.GetBusStopsNearPosition(data.latitude, data.longitude);
       if (!result.success) {
         stops.error = result.message;
         return stops;
