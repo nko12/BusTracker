@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { BusTrackerEvents } from '../BusTrackerEvents';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
-import {Coords} from 'google-map-react';
+import { Coords } from 'google-map-react';
 import {BusTrackerApi} from '../api/BusTrackerApi';
 
 interface StopTypeDB {
@@ -17,8 +18,8 @@ interface LogInState {
 }
 
 interface LogInProps {
-	currentLocation: Coords;
-	sendToParent: (stops: StopTypeDB[]) => void;
+	/* currentLocation: Coords;
+	sendToParent: (stops: StopTypeDB[]) => void; */
 }
 
 export default class LogIn extends React.Component<LogInProps, LogInState> {
@@ -50,14 +51,8 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 
 		if (loginRegisterResult.success) {
 			this.hideLogin();
-			
-			const stopResult = await this.api.getBusStopsNearLocation(this.props.currentLocation);
-			const routeResult = await this.api.getRoutesNearLocation(this.props.currentLocation);
-			
-			stopResult.message;
-			routeResult.message;
-
-			this.props.sendToParent(stopResult.data);
+			BusTrackerEvents.login.loginSucceeded.dispatch()
+			// this.props.sendToParent(stopResult.data);
 		} else
 			alert(loginRegisterResult.message)
 	}

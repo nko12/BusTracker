@@ -1,62 +1,64 @@
-
-
 // Define the different types of actions.
+import { ReduxAction } from './BusTrackerActions';
+import * as cookies from 'js-cookie';
 
 /**
- * Occurs when a user successfully logs in or registers.
+ * The type of a selected object.
  */
-export const ACTION_LOGIN_SUCCESS = 'ACTION_LOGIN_SUCCESS';
-
-/**
- * Occurs when a user login or register fails.
- */
-export const ACTION_LOGIN_FAIL = 'ACTION_LOGIN_FAIL';
-
-export interface ReduxAction {
-    type: string;
+enum SelectedObjectType {
+    None,
+    Route,
+    BusStop,
+    Bus
 }
 
-export interface LoginSuccessAction extends ReduxAction {
-    isRegister: boolean
-}
-
-export interface LoginFailAction extends ReduxAction {
-    errorMessage: string
-}
-
-/**
- * Action creator for the successful login action. 
- * @param isRegister Whether or not the login is actual login or registration.
- */
-export function loginSuccessAction(isRegister: boolean): LoginSuccessAction {
-    return {
-        type: ACTION_LOGIN_SUCCESS,
-        isRegister: isRegister
-    };
-}
-
-/**
- * Action creator for the fail login action.
- * @param errorMessage The error message as to why user login or register failed.
- */
-export function loginFailAction(errorMessage: string): LoginFailAction {
-    return {
-        type: ACTION_LOGIN_FAIL,
-        errorMessage: errorMessage
-    };
-}
-
-export interface BusTrackerAppState {
+export interface UserState {
     isLoggedIn: boolean,
+    userId: string,
+    isAdmin: boolean,
+    favoriteRouteIds: Array<string>,
+    favoriteStopIds: Array<string>
+}
+
+export interface SelectedObjectState {
+    selectedObjectId: string,
+    selectedObjectType: SelectedObjectType
+}
+
+/**
+ * Represents the shape of the BusTracker Application's state.
+ */
+export interface BusTrackerAppState {
+    user: UserState
+    selectedObject: SelectedObjectState
 }
 
 // Represents the intiial state of the app on startup.
 export const initialState: BusTrackerAppState =  {
-    isLoggedIn: false
+    user: {
+        isLoggedIn: cookies.get('userId') != null,
+        userId: cookies.get('userId'),
+        isAdmin: false,
+        favoriteRouteIds: [],
+        favoriteStopIds: []
+    },
+    selectedObject: {
+        selectedObjectId: null,
+        selectedObjectType: SelectedObjectType.None
+    }
 }
 
-export function busTrackerRootReducer(state: BusTrackerAppState = initialState, action: ReduxAction) {
+function loginReducer(state: UserState, action: ReduxAction) {
+    
+}
+
+export default function busTrackerRootReducer(state: BusTrackerAppState = initialState, action: ReduxAction) {
     switch (action.type) {
+        case ACTION_APP_STARTUP:
+
+            return Object.assign({}, state, {
+                isLoggedIn: (<AppStartupAction> action).loggedInUserId != undefined
+            });
         case ACTION_LOGIN_SUCCESS:
             return Object.assign({}, state, {
                 isLoggedIn: true

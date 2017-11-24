@@ -6,51 +6,38 @@ import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from '.
 import { BusType, StopType } from './BusMap';
 
 const bus = <FontIcon>star</FontIcon>;
-// const checkboxControls = [{
-// 	label: 'Orlando Bus',
-// 	value: '1',
-// 	checkedCheckboxIcon: bus,
-// }, {
-// 	label: 'Tampa Bus',
-// 	value: '2',
-//    },
-//    {
-// 	   label: 'Miami Bus',
-// 	   value: '3',
-//    }];
-
 
 
 export interface SideBarState {
-	allStops: Map<number, StopType>;
+	/* allStops: Map<number, StopType>;
 
 	busses: BusType[];
 	activeStops: StopType[];
 
-	polyString: string;
+	polyString: string; */
 }
 
 export interface SideBarProps {
-	allStops: Map<number, StopType>;
+	/* allStops: Map<number, StopType>;
 
 	busses: BusType[];
 	activeStops: StopType[];
 
 	polyString: string;
 
-	sendToParent: (busses: BusType[], stops: StopType[], polystring: string) => void;
+	sendToParent: (busses: BusType[], stops: StopType[], polystring: string) => void; */
 }
 
 export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			allStops: props.allStops,
+			/* allStops: props.allStops,
 
 			busses: props.busses,
 			activeStops: props.activeStops,
 
-			polyString: props.polyString
+			polyString: props.polyString */
 		};
 	}
 	
@@ -119,7 +106,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								]}
 							/>
 							
-							<TextField
+							{/* <TextField
 								label={'BusID'}
 								value={this.state.busses[0].ID}
 								onChange={(value: any) => {
@@ -127,10 +114,10 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									busses[0].ID = String(value);
 									this.setState({busses: busses});
 								}}
-							/>
+							/> */}
 							
 							<CardText />
-							<Button
+							{/* <Button
 								flat={true}
 								primary={true}
 								onClick={() => {
@@ -175,7 +162,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								}}
 							>
 							Get Stop
-							</Button>
+							</Button> */}
 						</Tab>
 						
 						<Tab label="Routes">
