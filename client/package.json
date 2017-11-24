@@ -30,6 +30,7 @@
     "react-geolocated": "^2.2.1",
     "react-md": "^1.2.4",
     "react-scripts-ts": "2.8.0",
+    "redux": "^3.7.2",
     "sass-watch": "^0.1.0",
     "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
