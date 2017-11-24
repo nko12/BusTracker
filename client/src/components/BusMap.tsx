@@ -35,7 +35,7 @@ export interface BusMapState {
 	stopMarkers: google.maps.Marker[];
 
 	polyString: string;
-	polyLine: any;
+	polyLine: google.maps.Polyline;
 }
 
 export interface BusMapProps {
@@ -59,11 +59,11 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			busses: props.busses,
 			stops: props.stops,
 
-			busMarkers: [] as google.maps.Marker[],
-			stopMarkers: [] as google.maps.Marker[],
+			busMarkers: null,
+			stopMarkers: null,
 
 			polyString: props.polyString,
-			polyLine: new google.maps.Polyline()
+			polyLine: null
 		};
 	}
 
@@ -94,6 +94,14 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		}
 
 		return array;
+	}
+
+	componentDidMount(): void {
+		this.setState({
+			busMarkers: [] as google.maps.Marker[],
+			stopMarkers: [] as google.maps.Marker[],
+			polyLine: null
+		});
 	}
 
 	componentWillReceiveProps(nextProps: BusMapProps) {
@@ -167,7 +175,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 	updatePolyline(newPolyString: string) {
 		// ignore if the same
-		if (newPolyString == this.state.polyLine)
+		if (newPolyString == this.state.polyString)
 			return;
 
 		let oldPolyLine = this.state.polyLine;
