@@ -12,8 +12,8 @@ interface StopTypeDB {
 
 interface LogInState {
 	active: boolean;
-	username: string,
-	password: string
+	username: string;
+	password: string;
 }
 
 interface LogInProps {
@@ -63,7 +63,7 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 	}
 
 	public hideLogin = () => {
-		// get rid of the blurr
+		// get rid of the blurr once buttons 
 		document.getElementsByClassName('blurr')[0].classList.remove('blurr');
 
 		// janky way to stop this from rendering
