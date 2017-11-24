@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as GMapReact from 'google-map-react';
 import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
-import { List, ListItemControl, Checkbox, FontIcon, SelectionControlGroup } from 'react-md';
+import { FontIcon, SelectionControlGroup } from 'react-md';
 import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from './api';
 import { BusType, StopType } from './BusMap';
 
@@ -55,7 +55,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 							{/*Simple Search Bar*/}
 							<TextField
-									placeholder="Search"
+									placeholder="Search Stops"
 									type="search"
 							/>
 
@@ -89,7 +89,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								id="nearby-checkbox"
 								name="nearby"
 								type="checkbox"
-								label="Nearby Buses"
+								label="Nearby Stops"
 								checkedCheckboxIcon={bus}
 								controls={[
 									{
@@ -179,28 +179,125 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							Get Stop
 							</Button>
 						</Tab>
+						
 						<Tab label="Routes">
 							<h3>Bus Routes</h3>
-							<List>
-								<ListItemControl
-									primaryAction={(
-										<Checkbox
-											id="routes-list"
-											name="routes"
-											label="Orlando Route"
-											defaultChecked={true}
 
-										/>
-										
-									)}
-								/>
-							</List>
+							{/*Simple Search Bar*/}
+							<TextField
+									placeholder="Search Routes"
+									type="search"
+							/>
+
+							{/*Current Favorites List*/}
+							<SelectionControlGroup
+								className="listlayout"
+								id="favorites-checkbox-2"
+								name="favorites-2"
+								type="checkbox"
+								label="Favorite Routes"
+								defaultValue="a,b,c"
+								checkedCheckboxIcon={bus}
+								controls={[
+								{
+									label: 'Orlando Route',
+									value: 'a',
+								},
+								{
+									label: 'Tampa Route',
+									value: 'b',
+								},
+								{
+									label: 'Miami Route',
+									value: 'c',
+								}
+								]}
+							/>
+
+						{/* Nearby Routes List*/}
+						<SelectionControlGroup 
+							className="listlayout"
+							id="nearby-checkbox-2"
+							name="nearby-2"
+							type="checkbox"
+							label="Nearby Routes"
+							checkedCheckboxIcon={bus}
+							controls={[
+								{
+									label: 'Austin Route',
+									value: '11',
+								},
+								{
+									label: 'Seattle Route',
+									value: '22',
+								},
+								{
+									label: 'San Francisco Route',
+									value: '33',
+								}
+							]}
+						/>
 						</Tab>
+
 						<Tab label="Buses">
-							<h3>Search Buses</h3>
+							<h3>Buses</h3>
+
+							{/*Simple Search Bar*/}
+							<TextField
+									placeholder="Search Buses"
+									type="search"
+							/>
+
+							{/*Current Favorites List*/}
+							<SelectionControlGroup
+								className="listlayout"
+								id="favorites-checkbox-3"
+								name="favorites-3"
+								type="checkbox"
+								label="Favorite Buses"
+								defaultValue="AAA,BBB,CCC"
+								checkedCheckboxIcon={bus}
+								controls={[
+									{
+										label: 'Orlando Bus',
+										value: 'AAA',
+									},
+									{
+										label: 'Tampa Bus',
+										value: 'BBB',
+									},
+									{
+										label: 'Miami Bus',
+										value: 'CCC',
+									}
+								]}
+							/>
+
+							{/* Nearby Buses List*/}
+							<SelectionControlGroup 
+								className="listlayout"
+								id="nearby-checkbox-3"
+								name="nearby-3"
+								type="checkbox"
+								label="Nearby Buses"
+								checkedCheckboxIcon={bus}
+								controls={[
+									{
+										label: 'Austin Bus',
+										value: '111',
+									},
+									{
+										label: 'Seattle Bus',
+										value: '222',
+									},
+									{
+										label: 'San Francisco Bus',
+										value: '333',
+									}
+								]}
+							/>
+
 						</Tab>
-						{/* <Tab label='Targaryans'><h1>Fire and Blood</h1></Tab>
-						<Tab label='Lannisters'><h1>A Lannister Always Pays His Debts</h1></Tab> */}
 					</Tabs>
 				</TabsContainer>
 			</div>

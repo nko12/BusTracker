@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {BusMap, BusType, StopType} from './components/BusMap';
-import {SideBar} from './components/SideBar';
-import {getAllStops} from './components/api';
+import { BusMap, BusType, StopType } from './components/BusMap';
+import { SideBar } from './components/SideBar';
+import { getAllStops } from './components/api';
 import LogIn from './components/LogIn';
 import './styles/App.css';
 

@@ -104,9 +104,12 @@
   top: auto;
   width: auto; }
 
-  .listlayout {
-    position: auto;
-    text-align: left;
-    margin: auto;
-    display: block;
-  }
+.listlayout {
+  position: relative;
+  text-align: left;
+  margin: auto;
+  display: table;
+
+}
+
+
