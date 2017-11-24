@@ -119,7 +119,7 @@ export class BusTimeApi {
 
             return new TypedResult(true, routes);
         } catch (err) {
-            return new TypedResult(false, null, JSON.stringify(err));
+            return new TypedResult(false, null);
         }
     }
 
@@ -141,7 +141,7 @@ export class BusTimeApi {
 
             return new TypedResult(true, stops);
         } catch (err) {
-            return new TypedResult(false, null, JSON.stringify(err));
+            return new TypedResult(false, null);
         }
     }
 
