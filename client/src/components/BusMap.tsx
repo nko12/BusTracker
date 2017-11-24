@@ -16,7 +16,7 @@ export interface BusType {
 export interface StopType {
 	location: GoogleMapReact.Coords;
 	ID: string;
-	// name: string;
+	name: string;
 }
 
 export interface BusMapState {
@@ -33,11 +33,16 @@ export interface BusMapState {
 
 	busMarkers: google.maps.Marker[];
 	stopMarkers: google.maps.Marker[];
+
+	polyString: string;
+	polyLine: google.maps.Polyline;
 }
 
 export interface BusMapProps {
 	busses: BusType[];
 	stops: StopType[];
+
+	polyString: string;
 
 	zoom: number;
 }
@@ -46,55 +51,66 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	public constructor(props: BusMapProps) {
 		super(props);
 		this.state = {
-			zoom: this.props.zoom,
+			zoom: props.zoom,
 			center: NYC,
 
 			mapLoaded: false,
 
-			busses: this.props.busses,
-			stops: this.props.stops,
+			busses: props.busses,
+			stops: props.stops,
 
-			busMarkers: [] as google.maps.Marker[],
-			stopMarkers: [] as google.maps.Marker[]
+			busMarkers: null,
+			stopMarkers: null,
+
+			polyString: props.polyString,
+			polyLine: null
 		};
 	}
 
-	componentWillReceiveProps(nextProps: BusMapProps) {
-		// this.setState({
-		// 	zoom: nextProps.zoom,
-		// 	pointA: nextProps.pointA,
-		// 	pointB: nextProps.pointB,
-		// 	center: this.midPoint(nextProps.pointA, nextProps.pointB),
-		// });
-		// // marker (Google)
-		// new google.maps.Marker({
-		// 	position: this.state.center,
-		// 	map: this.state.map,
-		// });
+	convert(encoded: string) {
+		let len = encoded.length, index = 0, array = [], lat = 0, lng = 0;
 
-		this.updateStops(nextProps.stops);
-		this.updateBusses(nextProps.busses);
+		while (index < len) {
+			let b, shift = 0, result = 0;
+			
+			do {
+				b = encoded.charCodeAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
 
-		// directions
-		// let directionsService = new google.maps.DirectionsService;
-		// let directionsDisplay = new google.maps.DirectionsRenderer({
-		// 	suppressMarkers: true,
-		// 	map: this.state.map
-		// });
-		// directionsService.route({
-		// 	origin: nextProps.pointA,
-		// 	destination: nextProps.pointB,
-		// 	travelMode: google.maps.TravelMode.DRIVING
-		// }, (response: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) => {
-		// 	if (status === google.maps.DirectionsStatus.OK) {
-		// 		directionsDisplay.setDirections(response);
-		// 	} else {
-		// 		console.log(status);
-		// 	}
-		// });
+			lat += ((result & 1) ? ~(result >> 1) : (result >> 1));
+			shift = result = 0;
+
+			do {
+				b = encoded.charCodeAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+
+			lng += ((result & 1) ? ~(result >> 1) : (result >> 1));
+
+			array.push({lat: lat * 1e-5, lng: lng * 1e-5});
+		}
+
+		return array;
 	}
 
-	updateStops (newStops: StopType[]) {
+	componentDidMount(): void {
+		this.setState({
+			busMarkers: [] as google.maps.Marker[],
+			stopMarkers: [] as google.maps.Marker[],
+			polyLine: new google.maps.Polyline()
+		});
+	}
+
+	componentWillReceiveProps(nextProps: BusMapProps) {
+		this.updateStops(nextProps.stops);
+		this.updateBusses(nextProps.busses);
+		this.updatePolyline(nextProps.polyString);
+	}
+
+	updateStops(newStops: StopType[]) {
 		// ignore stops at the origin
 		if (newStops.length == 0 || newStops.length > 0 && JSON.stringify(newStops[0].location) == JSON.stringify(ORIGIN))
 			return;
@@ -132,7 +148,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			oldMarkers[i].setMap(null);
 	}
 
-	updateBusses (newBusses: BusType[]) {
+	updateBusses(newBusses: BusType[]) {
 		// ignore busses at the origin
 		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) == JSON.stringify(ORIGIN))
 			return;
@@ -155,6 +171,31 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// dispose of old markers
 		for (let i = 0; i < oldMarkers.length; i++)
 			oldMarkers[i].setMap(null);
+	}
+
+	updatePolyline(newPolyString: string) {
+		// ignore if the same
+		if (newPolyString == this.state.polyString)
+			return;
+
+		let oldPolyLine = this.state.polyLine;
+
+		var newPolyLine = new google.maps.Polyline({
+			path: this.convert(newPolyString),
+			geodesic: true,
+			strokeColor: '#ff0000',
+			strokeOpacity: 1.0,
+			strokeWeight: 2
+		});
+		
+		if (this.state.map != undefined)
+			newPolyLine.setMap(this.state.map);
+		else
+			console.log('this.state.map is undefined?');
+
+		oldPolyLine.setMap(null);
+
+		this.setState({polyString: newPolyString, polyLine: newPolyLine});
 	}
 
 	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {

@@ -62,7 +62,6 @@ export class BusTimeApi {
     private URL_BASE = 'http://bustime.mta.info/api/where/';
 
     public async GetRoutesNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<Route> | null>> {
-
         const url: string = `${this.URL_BASE}routes-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
             const resultData: RoutesForLocationResult = <RoutesForLocationResult> JSON.parse(await request(url));
@@ -78,7 +77,7 @@ export class BusTimeApi {
 
             return new TypedResult(true, routes);
         } catch (err) {
-            return new TypedResult(false, null, JSON.stringify(err));
+            return new TypedResult(false, null);
         }
     }
 
@@ -98,7 +97,7 @@ export class BusTimeApi {
 
             return new TypedResult(true, stops);
         } catch (err) {
-            return new TypedResult(false, null, JSON.stringify(err));
+            return new TypedResult(false, null);
         }
     }
 
