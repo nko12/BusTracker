@@ -563,8 +563,8 @@ describe('BusTrackerDB', () => {
             // Create a new route object.
             const stopData: models.BusStop = new models.BusStop();
             stopData.name = 'Test Bus Stop';
-            stopData.latitude = '15.337167';
-            stopData.longitude = '11.777344'
+            stopData.latitude = 15.337167;
+            stopData.longitude = 11.777344;
 
             const result = await appDB.addNewBusStop('ADMIN', stopData);
 
@@ -729,8 +729,8 @@ describe('BusTrackerDB', () => {
             const stopData: models.BusStop = new models.BusStop();
             stopData.id = 'FAKE_321';
             stopData.name = 'Test Bus Stop';
-            stopData.latitude = '12.827461';
-            stopData.longitude = '10.496377'
+            stopData.latitude = 12.827461;
+            stopData.longitude = 10.496377;
             const stop = new BusStopType(stopData);
             await stop.save();
 
