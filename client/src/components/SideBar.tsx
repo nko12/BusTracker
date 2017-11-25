@@ -1,6 +1,9 @@
 import * as React from 'react';
 /* import * as GoogleMapReact from 'google-map-react'; */
 import { BusTrackerEvents } from '../BusTrackerEvents';
+import { appState } from '../BusTrackerState';
+import { BusStop } from '../models/BusStop';
+import { Route } from '../models/Route';
 import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
 import { FontIcon, SelectionControlGroup } from 'react-md';
 // import {getStop, /* getStopsFromBus, */ subscribeToStop, subscribeToBus} from './api';
@@ -15,6 +18,12 @@ export interface SideBarState {
 	activeStops: StopType[];
 
 	polyString: string; */
+
+	favoriteBusStops: Array<BusStop>;
+	favoriteRoutes: Array<Route>;
+	detectedBusStops: Array<BusStop>;
+	detectedRoutes: Array<Route>;
+	selectedTabId: string;
 }
 
 export interface SideBarProps {
@@ -38,75 +47,98 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 			activeStops: props.activeStops,
 
 			polyString: props.polyString */
+
+			favoriteBusStops: new Array<BusStop>(),
+			favoriteRoutes: new Array<Route>(),
+			detectedBusStops: new Array<BusStop>(),
+			detectedRoutes: new Array<Route>(),
+			selectedTabId: 'tabBusStops'
 		};
+
+		this.onLogin = this.onLogin.bind(this);
 	}
-	
+
+	public componentDidMount(): void {
+		BusTrackerEvents.login.loginSucceeded.add(this.onLogin);
+	}
+
+	private async onLogin(): Promise<void> {
+
+		// Get the list of bus stops that are nearby.
+		const busStopResult = await appState.api.getBusStopsNearLocation({ lat: 40.7588528, lng: -73.9852625 });
+		if (!busStopResult.success) {
+
+		}
+
+		// Get the list of bus stops that the user has favorited, and request them from the server.
+		const favoriteBusStopResult = await appState.api.getBusStops(appState.user.favoriteStopIds);
+		if (!favoriteBusStopResult.success) {
+
+		}
+
+		// Get the list of routes that are nearby.
+		const routeResult = await appState.api.getRoutesNearLocation({ lat: 40.7588528, lng: -73.9852625 });
+		if (!routeResult.success) {
+
+		}
+
+		// Get the list of routes that the user has favorited, and request them from the server.
+		const favoriteRouteResult = await appState.api.getRoutes(appState.user.favoriteStopIds);
+		if (!favoriteRouteResult.success) {
+
+		}
+
+		// TODO: Remove duplicates between what is nearby and what the user has favorited.
+		this.setState({
+			favoriteBusStops: favoriteBusStopResult.data, detectedBusStops: busStopResult.data,
+			favoriteRoutes: favoriteRouteResult.data, detectedRoutes: routeResult.data
+		});
+	}
+
 	render() {
 		return (
-			<div>
-				<TabsContainer
-					className="tabs__page-layout"
-					panelClassName="md-grid"
-				>
-					<Tabs tabId="phone-stuffs">
-						<Tab label="Stops">
-							<h3>Bus Stops</h3>
+			<div style={{overflow: 'auto'}}>
+					<TabsContainer
+						className="tabs__page-layout"
+						panelClassName="md-grid"
+					>
+						<Tabs tabId="phone-stuffs">
+							<Tab label="Stops" id={'tabBusStops'}>
+								<h3>Bus Stops</h3>
 
-							{/*Simple Search Bar*/}
-							<TextField
+								{/*Simple Search Bar*/}
+								<TextField
 									placeholder="Search Stops"
 									type="search"
-							/>
+								/>
 
-							{/*Current Favorites List*/}
-							<SelectionControlGroup
-								className="listlayout"
-								id="favorites-checkbox"
-								name="favorites"
-								type="checkbox"
-								label="Favorites"
-								defaultValue="A,B,C"
-								checkedCheckboxIcon={bus}
-								controls={[
-									{
-										label: 'Orlando Stop',
-										value: 'A',
-									},
-									{
-										label: 'Tampa Stop',
-										value: 'B',
-									},
-									{
-										label: 'Miami Stop',
-										value: 'C',
-									}
-								]}
-							/>
-							{/* Nearby Stops List*/}
-							<SelectionControlGroup 
-								className="listlayout"
-								id="nearby-checkbox"
-								name="nearby"
-								type="checkbox"
-								label="Nearby Stops"
-								checkedCheckboxIcon={bus}
-								controls={[
-									{
-										label: 'Austin Stop',
-										value: '1',
-									},
-									{
-										label: 'Seattle Stop',
-										value: '2',
-									},
-									{
-										label: 'San Francisco Stop',
-										value: '3',
-									}
-								]}
-							/>
-							
-							{/* <TextField
+								{/*Current Favorites List*/}
+								<SelectionControlGroup
+									className="listlayout"
+									id="favorites-checkbox"
+									name="favorites"
+									type="checkbox"
+									label="Favorites"
+									defaultValue="A,B,C"
+									checkedCheckboxIcon={bus}
+									controls={this.state.favoriteBusStops.map((stop: BusStop) => {
+										return { label: stop.name, value: stop.id };
+									})}
+								/>
+								{/* Nearby Stops List*/}
+								<SelectionControlGroup
+									className="listlayout"
+									id="nearby-checkbox"
+									name="nearby"
+									type="checkbox"
+									label="Nearby Stops"
+									checkedCheckboxIcon={bus}
+									controls={this.state.detectedBusStops.map((stop: BusStop) => {
+										return { label: stop.name, value: stop.id };
+									})}
+								/>
+
+								{/* <TextField
 								label={'BusID'}
 								value={this.state.busses[0].ID}
 								onChange={(value: any) => {
@@ -115,9 +147,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									this.setState({busses: busses});
 								}}
 							/> */}
-							
-							<CardText />
-							{/* <Button
+
+								<CardText />
+								{/* <Button
 								flat={true}
 								primary={true}
 								onClick={() => {
@@ -163,133 +195,111 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							>
 							Get Stop
 							</Button> */}
-						</Tab>
-						
-						<Tab label="Routes">
-							<h3>Bus Routes</h3>
+							</Tab>
 
-							{/*Simple Search Bar*/}
-							<TextField
+							<Tab label="Routes" id={'tabRoutes'}>
+								<h3>Bus Routes</h3>
+
+								{/*Simple Search Bar*/}
+								<TextField
 									placeholder="Search Routes"
 									type="search"
-							/>
+								/>
 
-							{/*Current Favorites List*/}
-							<SelectionControlGroup
-								className="listlayout"
-								id="favorites-checkbox-2"
-								name="favorites-2"
-								type="checkbox"
-								label="Favorite Routes"
-								defaultValue="a,b,c"
-								checkedCheckboxIcon={bus}
-								controls={[
-								{
-									label: 'Orlando Route',
-									value: 'a',
-								},
-								{
-									label: 'Tampa Route',
-									value: 'b',
-								},
-								{
-									label: 'Miami Route',
-									value: 'c',
-								}
-								]}
-							/>
+								{/*Current Favorites List*/}
+								<SelectionControlGroup
+									className="listlayout"
+									id="favorites-checkbox-2"
+									name="favorites-2"
+									type="checkbox"
+									label="Favorite Routes"
+									defaultValue="a,b,c"
+									checkedCheckboxIcon={bus}
+									controls={this.state.favoriteRoutes.map((route: Route) => {
+										return { label: route.name, value: route.id };
+									})}
+								/>
 
-						{/* Nearby Routes List*/}
-						<SelectionControlGroup 
-							className="listlayout"
-							id="nearby-checkbox-2"
-							name="nearby-2"
-							type="checkbox"
-							label="Nearby Routes"
-							checkedCheckboxIcon={bus}
-							controls={[
-								{
-									label: 'Austin Route',
-									value: '11',
-								},
-								{
-									label: 'Seattle Route',
-									value: '22',
-								},
-								{
-									label: 'San Francisco Route',
-									value: '33',
-								}
-							]}
-						/>
-						</Tab>
+								{/* Nearby Routes List*/}
+								<SelectionControlGroup
+									className="listlayout"
+									id="nearby-checkbox-2"
+									name="nearby-2"
+									type="checkbox"
+									label="Nearby Routes"
+									checkedCheckboxIcon={bus}
+									controls={this.state.detectedRoutes.map((route: Route) => {
+										return { label: route.name, value: route.id };
+									})}
+								/>
+							</Tab>
 
-						<Tab label="Buses">
-							<h3>Buses</h3>
+							<Tab label="Buses" id='tabBuses'>
+								<h3>Busses</h3>
 
-							{/*Simple Search Bar*/}
-							<TextField
+								{/*Simple Search Bar*/}
+								<TextField
 									placeholder="Search Buses"
 									type="search"
-							/>
+								/>
 
-							{/*Current Favorites List*/}
-							<SelectionControlGroup
-								className="listlayout"
-								id="favorites-checkbox-3"
-								name="favorites-3"
-								type="checkbox"
-								label="Favorite Buses"
-								defaultValue="AAA,BBB,CCC"
-								checkedCheckboxIcon={bus}
-								controls={[
-									{
-										label: 'Orlando Bus',
-										value: 'AAA',
-									},
-									{
-										label: 'Tampa Bus',
-										value: 'BBB',
-									},
-									{
-										label: 'Miami Bus',
-										value: 'CCC',
-									}
-								]}
-							/>
+								{/*Current Favorites List*/}
+								<SelectionControlGroup
+									className="listlayout"
+									id="favorites-checkbox-3"
+									name="favorites-3"
+									type="checkbox"
+									label="Favorite Buses"
+									defaultValue="AAA,BBB,CCC"
+									checkedCheckboxIcon={bus}
+									controls={[
+										{
+											label: 'Orlando Bus',
+											value: 'AAA',
+										},
+										{
+											label: 'Tampa Bus',
+											value: 'BBB',
+										},
+										{
+											label: 'Miami Bus',
+											value: 'CCC',
+										}
+									]}
+								/>
 
-							{/* Nearby Buses List*/}
-							<SelectionControlGroup 
-								className="listlayout"
-								id="nearby-checkbox-3"
-								name="nearby-3"
-								type="checkbox"
-								label="Nearby Buses"
-								checkedCheckboxIcon={bus}
-								controls={[
-									{
-										label: 'Austin Bus',
-										value: '111',
-									},
-									{
-										label: 'Seattle Bus',
-										value: '222',
-									},
-									{
-										label: 'San Francisco Bus',
-										value: '333',
-									}
-								]}
-							/>
+								{/* Nearby Buses List*/}
+								<SelectionControlGroup
+									className="listlayout"
+									id="nearby-checkbox-3"
+									name="nearby-3"
+									type="checkbox"
+									label="Nearby Buses"
+									checkedCheckboxIcon={bus}
+									controls={[
+										{
+											label: 'Austin Bus',
+											value: '111',
+										},
+										{
+											label: 'Seattle Bus',
+											value: '222',
+										},
+										{
+											label: 'San Francisco Bus',
+											value: '333',
+										}
+									]}
+								/>
 
-						</Tab>
-					</Tabs>
-				</TabsContainer>
-				<Button
-					raised
-					onClick={(evt) => BusTrackerEvents.login.logoutRequested.dispatch()}
-				>
-					Logout
+							</Tab>
+						</Tabs>
+					</TabsContainer>
+					<Button
+						raised
+						onClick={(evt) => BusTrackerEvents.login.logoutRequested.dispatch()}
+					>
+						Logout
 				</Button>
 			</div>
 		);

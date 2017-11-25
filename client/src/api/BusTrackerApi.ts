@@ -1,14 +1,14 @@
-import {ApolloClient, ApolloError} from 'apollo-client';
-import {HttpLink} from 'apollo-link-http';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {TypedResult, Result} from '../Result';
-import {User} from '../models/User';
-import {BusStop} from '../models/BusStop';
-import {Route} from '../models/Route';
-import {Coords} from 'google-map-react';
+import { ApolloClient, ApolloError } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { TypedResult, Result } from '../Result';
+import { User } from '../models/User';
+import { BusStop } from '../models/BusStop';
+import { Route } from '../models/Route';
+import { Coords } from 'google-map-react';
 
 import gql from 'graphql-tag';
-import {ExecutionResult} from 'graphql/execution/execute'
+import { ExecutionResult } from 'graphql/execution/execute'
 import * as polyline from 'polyline';
 
 export interface IDType {
@@ -231,7 +231,7 @@ export class BusTrackerApi {
 
         const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutesNearLocation', false, true);
 
-        return new TypedResult(result.success, <Array<Route>>result.data['routes']);
+        return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
     }
 
     public async getBusStopsNearLocation(location: Coords): Promise<TypedResult<Array<BusStop>>> {
@@ -248,7 +248,41 @@ export class BusTrackerApi {
         `;
         const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getBusStopsNearLocation', false, true);
 
-        return new TypedResult(result.success, <Array<BusStop>>result.data['stops']);
+        return new TypedResult(result.success, <Array<BusStop>>result.data['stops'], result.message);
+    }
+
+    public async getBusStops(stopIds: Array<string>): Promise<TypedResult<Array<BusStop>>> {
+
+        const query = gql`
+            query GetBusStops {
+                getStops(ids: [${stopIds}]) {
+                    error, stops {
+                        id, name, latitude, longitude
+                    }
+                }
+            }
+        `;
+
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getStops', false, true);
+
+        return new TypedResult(result.success, <Array<BusStop>>result.data['stops'], result.message);
+    }
+
+    public async getRoutes(routeIds: Array<string>): Promise<TypedResult<Array<Route>>> {
+
+        const query = gql`
+        query {
+            getRoutes(ids: [${routeIds}]) {
+              error, routes {
+                id, name, busStopIDs, polyline
+              }
+            }
+          }
+        `;
+
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutes', false, true);
+
+        return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
     }
 
     /**

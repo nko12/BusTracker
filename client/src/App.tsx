@@ -101,7 +101,7 @@ export default class App extends React.Component<{}, AppState> {
 		this.setState({ isUserLoggedIn: true });
 
 		// Have to manually remove the blur.
-		document.getElementsByClassName('blurr')[0].classList.remove('blurr');
+		document.getElementById('appBlur').classList.remove('blurr');
 
 		// Show a message welcoming the user.
 		this.showToast('Welcome ' + appState.user.username);
@@ -115,6 +115,9 @@ export default class App extends React.Component<{}, AppState> {
 
 		// Show a message telling the user they've been logged out.
 		this.showToast('Goodbye ' + appState.user.username);
+
+		// Have to manually remove the blur.
+		document.getElementById('appBlur').classList.add('blurr');
 
 		// Reset the app state accordingly.
 		appState.user = null;
@@ -157,7 +160,7 @@ export default class App extends React.Component<{}, AppState> {
 		return (
 			<div>
 				{this.state.isUserLoggedIn ? null : <LogIn />}
-				<div className='blurr'>
+				<div id={'appBlur'} className='blurr'>
 					<div className='SideBar'>
 						<SideBar
 						/* busses={this.state.activeBusses}
