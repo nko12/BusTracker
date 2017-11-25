@@ -219,7 +219,7 @@ export class BusTrackerDB {
      * @param userID The user id of the user whose favorite bus stop ids should be edited.
      * @param ids The list of bus stop ids to set on the user.
      */
-    public async editFavoriteBusStopIDs(userId: string, ids: Array<string>): Promise<Result> {
+    public async editFavoriteStopIDs(userId: string, ids: Array<string>): Promise<Result> {
 
         // Ensure the user exists.
         const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
@@ -285,7 +285,7 @@ export class BusTrackerDB {
      * @param stopData The bus stop object to add.
      * @returns The id of the new bus stop. The id will start with 'FAKE_' to help set this route apart from BusTime routes.
      */
-    public async addNewBusStop(userId: string, stopData: models.BusStop): Promise<TypedResult<string | null>> {
+    public async addNewStop(userId: string, stopData: models.Stop): Promise<TypedResult<string | null>> {
 
         // Ensure the user exists.
         const user: mongoose.Document = await schema.UserType.findOne({ id: userId }).cursor().next();
@@ -298,8 +298,8 @@ export class BusTrackerDB {
 
         // Create a new bus stop type and give it the bus stop model.
         stopData.id = 'FAKE_' + faker.random.uuid();
-        const busStop = new schema.BusStopType(stopData);
-        await busStop.save();
+        const stop = new schema.StopType(stopData);
+        await stop.save();
 
         return new TypedResult(true, stopData.id);
     }
@@ -308,16 +308,16 @@ export class BusTrackerDB {
      * Adds a new real bus stop to the database. The id should already be set.
      * @param stopData The stop data to add to the database. If it already exists, it is overwritten.
      */
-    public async addNewRealBusStop(stopData: models.BusStop): Promise<Result> {
+    public async addNewRealStop(stopData: models.Stop): Promise<Result> {
 
         // Check if the bus stop already exists. If it does, ignore this request.
-        let busStop: mongoose.Document = await schema.BusStopType.findOne({ id: stopData.id }).cursor().next();
-        if (busStop != null) {
+        let stop: mongoose.Document = await schema.StopType.findOne({ id: stopData.id }).cursor().next();
+        if (stop != null) {
             return new Result(true);
         }
 
-        busStop = new schema.BusStopType(stopData);
-        await busStop.save();
+        stop = new schema.StopType(stopData);
+        await stop.save();
         return new Result(true);
     }
 
@@ -381,13 +381,13 @@ export class BusTrackerDB {
      * @param stopIds The ids of the bus stop objects to get.
      * @returns A result containing the list of bus stops.
      */
-    public async getBusStops(stopIds: Array<string>): Promise<TypedResult<Array<models.BusStop> | null>> {
+    public async getStops(stopIds: Array<string>): Promise<TypedResult<Array<models.Stop> | null>> {
 
         // Search for all bus stops matching the specified ids.
         try {
-            const cursor = schema.BusStopType.find({id: {"$in": stopIds}}).lean().cursor();
-            const stops: Array<models.BusStop> = new Array<models.BusStop>();
-            await cursor.eachAsync((stop: models.BusStop) => {
+            const cursor = schema.StopType.find({id: {"$in": stopIds}}).lean().cursor();
+            const stops: Array<models.Stop> = new Array<models.Stop>();
+            await cursor.eachAsync((stop: models.Stop) => {
                 stops.push(stop);
             });
 
@@ -402,10 +402,10 @@ export class BusTrackerDB {
      * @param stopId The id of the bus stop to get.
      * @returns The requested bus stop id.
      */
-    public async getBusStop(stopId: string): Promise<TypedResult<models.BusStop | null>> {
+    public async getStop(stopId: string): Promise<TypedResult<models.Stop | null>> {
 
         // Get the bus stop object.
-        const stop: models.BusStop = await schema.BusStopType.findOne({ id: stopId }).lean().cursor().next();
+        const stop: models.Stop = await schema.StopType.findOne({ id: stopId }).lean().cursor().next();
 
         // The bus stop should exist.
         if (stop == null)
@@ -450,7 +450,7 @@ export class BusTrackerDB {
      * @param stopId The id of the bus stop to remove.
      * @returns The result of the operation.
      */
-    public async removeBusStop(userId: string, stopId: string): Promise<Result> {
+    public async removeStop(userId: string, stopId: string): Promise<Result> {
 
         // TODO: When removing a bus stop, it should be removed from all users who have it favorited.
 
@@ -464,12 +464,12 @@ export class BusTrackerDB {
             return new Result(false, `User with id ${userId} is not an admin.`);
 
         // Get the bus stop to remove. The bus stop must exist in order to remove it.
-        const busStop: mongoose.Document = await schema.BusStopType.findOne({ id: stopId }).cursor().next();
-        if (busStop == null)
+        const stop: mongoose.Document = await schema.StopType.findOne({ id: stopId }).cursor().next();
+        if (stop == null)
             return new Result(false, `Bus Stop with id ${stopId} not found.`);
 
         // Delete the bus stop.
-        await busStop.remove();
+        await stop.remove();
 
         return new Result(true);
     }

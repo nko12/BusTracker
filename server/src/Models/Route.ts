@@ -24,5 +24,5 @@ export class Route {
     /**
      * A list of the bus stop IDs that make up this route.
      */
-    public busStopIDs: Array<string> = [];
+    public stopIDs: Array<string> = [];
 }
