@@ -1,4 +1,3 @@
-import * as cookies from 'js-cookie';
 import { User } from '../models/User';
 import { BusTrackerApi } from '../api/BusTrackerApi';
 

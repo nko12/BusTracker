@@ -1,17 +1,15 @@
 import * as React from 'react';
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
 import { appState } from './state/BusTrackerState';
 import { BusTrackerEvents } from './BusTrackerEvents';
 import * as cookies from 'js-cookie';
-import * as GoogleMapReact from 'google-map-react';
-import { BusMap, BusType, StopType } from './components/BusMap';
+/* import * as GoogleMapReact from 'google-map-react'; */
+import { BusMap } from './components/BusMap';
 import { SideBar } from './components/SideBar';
 import LogIn from './components/LogIn';
 import { Snackbar } from 'react-md';
 import './styles/App.css';
 
-const ORIGIN = { lat: 0.0, lng: 0.0 };
+/* const ORIGIN = { lat: 0.0, lng: 0.0 };
 const NYC = { lat: 40.7588528, lng: -73.9852625 };
 
 interface StopTypeDB {
@@ -19,11 +17,7 @@ interface StopTypeDB {
 	name: string;
 	latitude: number;
 	longitude: number;
-}
-
-interface AppProps {
-	dispatch: Dispatch<{}>
-}
+} */
 
 interface Toast {
 	text: string
@@ -42,7 +36,7 @@ interface AppState {
 	polyString: string; */
 }
 
-class App extends React.Component<AppProps, AppState> {
+export default class App extends React.Component<{}, AppState> {
 	state = {
 		/* allStops: new Map<number, StopType>(),
 		allBusses: new Map<number, BusType>(),
@@ -57,7 +51,7 @@ class App extends React.Component<AppProps, AppState> {
 		toasts: new Array<Toast>()
 	};
 
-	public constructor(props: AppProps) {
+	public constructor(props: {}) {
 		super(props);
 
 		this.setState({
@@ -67,19 +61,23 @@ class App extends React.Component<AppProps, AppState> {
 			polyString: '' */
 		});
 
+		this.onLogin = this.onLogin.bind(this);
+		this.onDismissToast = this.onDismissToast.bind(this);
+		this.showToast = this.showToast.bind(this);
+
 		// TODO: uncomment this after debugging
 		// navigator.geolocation.getCurrentPosition((position: any) => {
 		// 	this.setState({currentLocation: {lat: position.coords.latitude, lng: position.coords.longitude}});
 		// });
 	}
 
-	async componentDidMount() {
+	public async componentDidMount(): Promise<void> {
 
 		// Listen to certain events.
 		BusTrackerEvents.login.loginSucceeded.add(this.onLogin);
 
 		// Is the user already logged in?
-		const userIdAndHash = cookies.getJSON('userNameAndHash');
+		const userIdAndHash = cookies.getJSON('usernameAndHash');
 		if (userIdAndHash != null) {
 			// Retrieve the user's data.
 			const result = await appState.api.login(userIdAndHash['username'], userIdAndHash['passwordHash']);
@@ -95,7 +93,7 @@ class App extends React.Component<AppProps, AppState> {
 		}
 	}
 
-	onLogin() {
+	public onLogin(): void {
 
 		// Hide the blur background and login window.
 		this.setState({ isUserLoggedIn: true });
@@ -107,17 +105,16 @@ class App extends React.Component<AppProps, AppState> {
 		this.showToast('Welcome ' + appState.user.username);
 	}
 
-	onDismissToast() {
+	public onDismissToast(): void {
 		const [, ...toasts] = this.state.toasts;
 		this.setState({ toasts });
 	}
 
-	showToast(message: string) {
-		this.setState((state: AppState) => {
-			const toasts = state.toasts.slice();
-			toasts.push({ text: message });
-			return toasts;
-		});
+	public showToast(message: string): void {
+		
+		const toasts = this.state.toasts.slice();
+		toasts.push({ text: message });
+		this.setState({ toasts });
 	}
 
 	/* recieveFromLogin = (stopsFromLogin: StopTypeDB[]) => {
@@ -144,7 +141,7 @@ class App extends React.Component<AppProps, AppState> {
 	render() {
 		return (
 			<div>
-				{this.state.isUserLoggedIn ? <LogIn /> : null}
+				{this.state.isUserLoggedIn ? null : <LogIn />}
 				<div className='blurr'>
 					<div className='SideBar'>
 						<SideBar
@@ -174,5 +171,3 @@ class App extends React.Component<AppProps, AppState> {
 		);
 	}
 }
-
-export default connect()(App);

@@ -12,13 +12,10 @@
     "googlemaps": "^1.12.0",
     "hashmap": "^2.3.0",
     "jest-cli": "^21.2.1",
-<<<<<<< HEAD
     "js-cookie": "^2.2.0",
-=======
     "load-script": "^1.0.0",
     "graphql": "^0.11.7",
     "graphql-tag": "^2.5.0",
->>>>>>> master
     "md5": "^2.2.1",
     "node-sass": "^4.6.1",
     "node-sass-chokidar": "0.0.3",
@@ -67,15 +64,10 @@
     "@types/jest": "^21.1.4",
     "@types/js-cookie": "^2.1.0",
     "@types/node": "^8.0.44",
-<<<<<<< HEAD
     "@types/react": "^16.0.13",
     "@types/react-dom": "^16.0.1",
     "@types/react-redux": "^5.0.13",
     "@types/signals": "^1.0.1",
-=======
-    "@types/react": "^16.0.25",
-    "@types/react-dom": "^16.0.3",
->>>>>>> master
     "@types/socket.io-client": "^1.4.32",
     "@types/webfontloader": "^1.6.29",
     "enzyme": "^3.1.1",

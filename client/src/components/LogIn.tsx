@@ -1,20 +1,20 @@
 import * as React from 'react';
-import { BusTrackerEvents, LoginEvent } from '../BusTrackerEvents';
+import { BusTrackerEvents } from '../BusTrackerEvents';
 import { appState } from '../state/BusTrackerState';
 import * as cookies from 'js-cookie';
 import * as md5 from 'md5';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
-import { Coords } from 'google-map-react';
+/* import { Coords } from 'google-map-react'; */
 import {BusTrackerApi} from '../api/BusTrackerApi';
 import { User } from '../models/User';
 import { TypedResult } from '../Result';
 
-interface StopTypeDB {
+/* interface StopTypeDB {
 	id: string;
 	name: string;
 	latitude: number;
 	longitude: number;
-}
+} */
 
 interface LogInState {
 	active: boolean;
@@ -57,7 +57,7 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 		if (loginRegisterResult.success) {
 			
 			// Store the user id in a cookie so they don't have to log in again.
-			cookies.set('usernameAndHash', {userId: loginRegisterResult.data.username, passwordHash: loginRegisterResult.data.passwordHash});
+			cookies.set('usernameAndHash', {username: loginRegisterResult.data.username, passwordHash: md5(this.state.password)});
 			// Store the user object to the state and alert the rest of the UI that login has occurred.
 			appState.user = loginRegisterResult.data;
 			BusTrackerEvents.login.loginSucceeded.dispatch();
