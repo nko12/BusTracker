@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as GoogleMapReact from 'google-map-react';
-import {BusMap, BusType, StopType} from './components/BusMap';
-import {SideBar} from './components/SideBar';
+import { BusMap, BusType, StopType } from './components/BusMap';
+//import { SideBar } from './components/SideBar';
+import { AdminView } from './components/AdminView';
 import LogIn from './components/LogIn';
 import './styles/App.css';
 
@@ -84,7 +85,7 @@ export default class App extends React.Component<{}, AppState> {
 				/>
 				<div className='blurr'>
 					<div className='SideBar'>
-						<SideBar
+						<AdminView
 							busses={this.state.activeBusses}
 							allStops={this.state.allStops}
 							activeStops={this.state.activeStops}

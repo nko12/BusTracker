@@ -6,20 +6,6 @@ import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from '.
 import { BusType, StopType } from './BusMap';
 
 const bus = <FontIcon>star</FontIcon>;
-// const checkboxControls = [{
-// 	label: 'Orlando Bus',
-// 	value: '1',
-// 	checkedCheckboxIcon: bus,
-// }, {
-// 	label: 'Tampa Bus',
-// 	value: '2',
-//    },
-//    {
-// 	   label: 'Miami Bus',
-// 	   value: '3',
-//    }];
-
-
 
 export interface SideBarState {
 	allStops: Map<number, StopType>;
