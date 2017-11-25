@@ -1,5 +1,5 @@
 import * as io from 'socket.io-client';
-import {StopType} from './BusMap';
+import {StopType} from './../components/BusMap';
 const socket = io('http://localhost:8000');
 
 function getAllStops(cb: Function) {

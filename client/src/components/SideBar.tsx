@@ -5,13 +5,14 @@ import {Stop} from '../models/Stop';
 import {Route} from '../models/Route';
 import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup} from 'react-md';
 
-const bus = <FontIcon>star</FontIcon>;
+const favorite = <FontIcon>star</FontIcon>;
+const unfavorite = <FontIcon>star_border</FontIcon>;
 
 export interface SideBarState {
-	favoriteStops: Array<Stop>;
-	favoriteRoutes: Array<Route>;
-	detectedStops: Array<Stop>;
-	detectedRoutes: Array<Route>;
+	favoriteStops: Stop[];
+	favoriteRoutes: Route[];
+	detectedStops: Stop[];
+	detectedRoutes: Route[];
 	selectedTabId: string;
 }
 
@@ -21,10 +22,10 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			favoriteStops: new Array<Stop>(),
-			favoriteRoutes: new Array<Route>(),
-			detectedStops: new Array<Stop>(),
-			detectedRoutes: new Array<Route>(),
+			favoriteStops: [] as Stop[],
+			favoriteRoutes: [] as Route[],
+			detectedStops: [] as Stop[],
+			detectedRoutes: [] as Route[],
 			selectedTabId: 'tabStops'
 		};
 
@@ -72,35 +73,65 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							<Tab label='Stops' id={'tabStops'}>
 								<h3>Bus Stops</h3>
 
-								{/*Simple Search Bar*/}
+								{/* Simple Search Bar */}
 								<TextField
 									placeholder='Search Stops'
 									type='search'
 								/>
 
-								{/*Current Favorites List*/}
+								{/* Current Favorites List */}
 								<SelectionControlGroup
 									className='listlayout'
 									id='favorites-checkbox'
 									name='favorites'
 									type='checkbox'
 									label='Favorites'
-									defaultValue='A,B,C'
-									checkedCheckboxIcon={bus}
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.favoriteStops.map((stop: Stop) => {
-										return { label: stop.name, value: stop.id };
+										return {label: stop.name, value: stop.id, checked: true, onChange: () => {
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove stop from favorite list
+												let stops = this.state.favoriteStops.slice(); // slice() performs shallow copy
+												stops.splice(stops.indexOf(stop), 1);
+												this.setState({favoriteStops: stops});
+
+												// add it to detected list
+												stops = this.state.detectedStops.slice();
+												stops.push(stop);
+												this.setState({detectedStops: stops});
+											}, 250);
+										}};
 									})}
 								/>
-								{/* Nearby Stops List*/}
+
+								{/* Nearby Stops List */}
 								<SelectionControlGroup
 									className='listlayout'
 									id='nearby-checkbox'
 									name='nearby'
 									type='checkbox'
 									label='Nearby Stops'
-									checkedCheckboxIcon={bus}
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedStops.map((stop: Stop) => {
-										return {label: stop.name, value: stop.id};
+										return {label: stop.name, value: stop.id, checked: false, onChange: () => {
+											console.log(JSON.stringify(stop));
+
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove stop from detected list
+												let stops = this.state.detectedStops.slice(); // slice() performs shallow copy
+												stops.splice(stops.indexOf(stop), 1);
+												this.setState({detectedStops: stops});
+
+												// add it to favorites list
+												stops = this.state.favoriteStops.slice();
+												stops.push(stop);
+												this.setState({favoriteStops: stops});
+											}, 250);
+										}};
 									})}
 								/>
 
@@ -110,34 +141,35 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							<Tab label='Routes' id={'tabRoutes'}>
 								<h3>Bus Routes</h3>
 
-								{/*Simple Search Bar*/}
+								{/* Simple Search Bar */}
 								<TextField
 									placeholder='Search Routes'
 									type='search'
 								/>
 
-								{/*Current Favorites List*/}
+								{/* Current Favorites List */}
 								<SelectionControlGroup
 									className='listlayout'
 									id='favorites-checkbox-2'
 									name='favorites-2'
 									type='checkbox'
 									label='Favorite Routes'
-									defaultValue='a,b,c'
-									checkedCheckboxIcon={bus}
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.favoriteRoutes.map((route: Route) => {
 										return { label: route.name, value: route.id };
 									})}
 								/>
 
-								{/* Nearby Routes List*/}
+								{/* Nearby Routes List */}
 								<SelectionControlGroup
 									className='listlayout'
 									id='nearby-checkbox-2'
 									name='nearby-2'
 									type='checkbox'
 									label='Nearby Routes'
-									checkedCheckboxIcon={bus}
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedRoutes.map((route: Route) => {
 										return { label: route.name, value: route.id };
 									})}
@@ -147,21 +179,21 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							<Tab label='Buses' id='tabBuses'>
 								<h3>Busses</h3>
 
-								{/*Simple Search Bar*/}
+								{/* Simple Search Bar */}
 								<TextField
 									placeholder='Search Buses'
 									type='search'
 								/>
 
-								{/*Current Favorites List*/}
+								{/* Current Favorites List */}
 								<SelectionControlGroup
 									className='listlayout'
 									id='favorites-checkbox-3'
 									name='favorites-3'
 									type='checkbox'
 									label='Favorite Buses'
-									defaultValue='AAA,BBB,CCC'
-									checkedCheckboxIcon={bus}
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
 									controls={[
 										{
 											label: 'Orlando Bus',
@@ -178,14 +210,15 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									]}
 								/>
 
-								{/* Nearby Buses List*/}
+								{/* Nearby Buses List */}
 								<SelectionControlGroup
 									className='listlayout'
 									id='nearby-checkbox-3'
 									name='nearby-3'
 									type='checkbox'
 									label='Nearby Buses'
-									checkedCheckboxIcon={bus}
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
 									controls={[
 										{
 											label: 'Austin Bus',

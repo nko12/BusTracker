@@ -119,6 +119,7 @@ export default class App extends React.Component<{}, AppState> {
 					toasts={this.state.toasts}
 					onDismiss={this.onDismissToast}
 					autohideTimeout={1500}
+					// TODO: align text center
 				/>
 			</div>
 		);
