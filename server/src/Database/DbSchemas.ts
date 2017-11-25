@@ -40,8 +40,8 @@ export class Schemas {
     public static busStopSchema: mongoose.Schema = new mongoose.Schema({
         id: {type: String, index: true},
         name: String,
-        latitude: String,
-        longitude: String
+        latitude: Number,
+        longitude: Number
     }, {
         collection: 'BusStop'
     });

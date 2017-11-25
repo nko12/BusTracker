@@ -18,7 +18,10 @@ function getStop(stopID: string, cb: Function) {
 }
 
 function subscribeToStop(param: any, cb: Function) {
-	socket.on('returnBussesFromStop', (cbParam: any) => cb(null, cbParam));
+	socket.on('returnBussesFromStop', (cbParam: any) => {
+		console.log(JSON.stringify(cbParam));
+		cb(null, cbParam)
+	});
 	socket.emit('subscribeToStop', param);
 }
 
