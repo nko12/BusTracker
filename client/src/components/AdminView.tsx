@@ -233,7 +233,8 @@ export class AdminView extends React.Component<AdminViewProps, AdminViewState> {
 						<Button primary={true} raised={true}>+ Add New Route</Button>
 						<CardText/>
 						<Button primary={true} raised={true}>- Delete Route</Button>
-						
+						<CardText className="center">Strange</CardText>
+						<Button raised={true}>View as User</Button>
 						</Tab>
 
 						<Tab label="Buses">

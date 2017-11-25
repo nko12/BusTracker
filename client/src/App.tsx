@@ -3,7 +3,7 @@ import * as GoogleMapReact from 'google-map-react';
 import { BusMap, BusType, StopType } from './components/BusMap';
 //import { SideBar } from './components/SideBar';
 import { AdminView } from './components/AdminView';
-import LogIn from './components/LogIn';
+//import LogIn from './components/LogIn';
 import './styles/App.css';
 
 const ORIGIN = {lat: 0.0, lng: 0.0};
@@ -79,10 +79,10 @@ export default class App extends React.Component<{}, AppState> {
 	render() {
 		return (
 			<div>
-				<LogIn 
+				{/* <LogIn 
 					currentLocation={this.state.currentLocation}
 					sendToParent={this.recieveFromLogin}
-				/>
+				/> */}
 				<div className='blurr'>
 					<div className='SideBar'>
 						<AdminView
