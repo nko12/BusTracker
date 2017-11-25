@@ -100,7 +100,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		this.setState({
 			busMarkers: [] as google.maps.Marker[],
 			stopMarkers: [] as google.maps.Marker[],
-			polyLine: null
+			polyLine: new google.maps.Polyline()
 		});
 	}
 

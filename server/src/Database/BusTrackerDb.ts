@@ -49,35 +49,35 @@ export class BusTrackerDB {
             }
         }
 
-        try {
+        // try {
 
-            // Get the names of the existing collections.        
-            const cursor: mongo.CommandCursor = this.dbConn.db.listCollections({});
-            const collectionList = await cursor.toArray();
+        //     // Get the names of the existing collections.        
+        //     const cursor: mongo.CommandCursor = this.dbConn.db.listCollections({});
+        //     const collectionList = await cursor.toArray();
 
-            // For each schema name, there should be dbConnesponding collection for it. Loop through each schema name, and
-            // if a collection does not exist for it, create the collection.
-            const pendingCollectionNames: string[] = [];
-            schema.Schemas.schemaNames.forEach((schemaName: string) => {
+        //     // For each schema name, there should be dbConnesponding collection for it. Loop through each schema name, and
+        //     // if a collection does not exist for it, create the collection.
+        //     const pendingCollectionNames: string[] = [];
+        //     schema.Schemas.schemaNames.forEach((schemaName: string) => {
 
-                if (collectionList.findIndex((collection: mongo.Collection): boolean => {
-                    return collection.collectionName === schemaName;
-                }) == -1) {
-                    // The given schema name does not have a matching collection. Create the collection.
-                    pendingCollectionNames.push(schemaName);
-                }
-            });
+        //         if (collectionList.findIndex((collection: mongo.Collection): boolean => {
+        //             return collection.collectionName === schemaName;
+        //         }) == -1) {
+        //             // The given schema name does not have a matching collection. Create the collection.
+        //             pendingCollectionNames.push(schemaName);
+        //         }
+        //     });
 
-            // Create a collection for all the pending collection names.
-            for (let i: number = 0; i < pendingCollectionNames.length; i++) {
-                await this.dbConn.db.createCollection(pendingCollectionNames[i]);
-            }
+        //     // Create a collection for all the pending collection names.
+        //     for (let i: number = 0; i < pendingCollectionNames.length; i++) {
+        //         await this.dbConn.db.createCollection(pendingCollectionNames[i]);
+        //     }
 
-        } catch (err) {
+        // } catch (err) {
 
-            console.log(`Failed to initialize the database. ${JSON.stringify(err)}`);
-            throw new Error(`Failed to initialize the database. ${JSON.stringify(err)}`);
-        }
+        //     console.log(`Failed to initialize the database. ${JSON.stringify(err)}`);
+        //     throw new Error(`Failed to initialize the database. ${JSON.stringify(err)}`);
+        // }
     }
 
     /**
