@@ -1,8 +1,13 @@
 import * as React from 'react';
-import { BusTrackerEvents } from '../BusTrackerEvents';
+import { BusTrackerEvents, LoginEvent } from '../BusTrackerEvents';
+import { appState } from '../state/BusTrackerState';
+import * as cookies from 'js-cookie';
+import * as md5 from 'md5';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
 import { Coords } from 'google-map-react';
 import {BusTrackerApi} from '../api/BusTrackerApi';
+import { User } from '../models/User';
+import { TypedResult } from '../Result';
 
 interface StopTypeDB {
 	id: string;
@@ -43,18 +48,23 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 			return;
 		}
 
-		let loginRegisterResult;
+		let loginRegisterResult: TypedResult<User>;
 		if (loginOrRegister == 'login')
-			loginRegisterResult = await this.api.login(this.state.username, this.state.password);
+			loginRegisterResult = await this.api.login(this.state.username, md5(this.state.password));
 		else
-			loginRegisterResult = await this.api.register(this.state.username, this.state.password);
+			loginRegisterResult = await this.api.register(this.state.username, md5(this.state.password));
 
 		if (loginRegisterResult.success) {
-			this.hideLogin();
-			BusTrackerEvents.login.loginSucceeded.dispatch()
+			
+			// Store the user id in a cookie so they don't have to log in again.
+			cookies.set('usernameAndHash', {userId: loginRegisterResult.data.username, passwordHash: loginRegisterResult.data.passwordHash});
+			// Store the user object to the state and alert the rest of the UI that login has occurred.
+			appState.user = loginRegisterResult.data;
+			BusTrackerEvents.login.loginSucceeded.dispatch();
 			// this.props.sendToParent(stopResult.data);
-		} else
-			alert(loginRegisterResult.message)
+		} else {
+			alert(loginRegisterResult.message);
+		}		
 	}
 
 	public hideLogin = () => {

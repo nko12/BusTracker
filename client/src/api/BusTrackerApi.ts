@@ -8,7 +8,6 @@ import {Route} from '../models/Route';
 import {Coords} from 'google-map-react';
 
 import gql from 'graphql-tag';
-import * as md5 from 'md5';
 import {ExecutionResult} from 'graphql/execution/execute'
 import * as polyline from 'polyline';
 
@@ -39,14 +38,14 @@ export class BusTrackerApi {
     /**
      * Logs a user into the system. Returns a user object with the user's data.
      * @param username The username of the user.
-     * @param password The password for the user. This will be hashed before being sent to server.
+     * @param passwordHash The password hash for the user. This will be hashed before being sent to server.
      * @returns A TypedResult containing the user data for the new user.
      */
-    public async login(username: string, password: string): Promise<TypedResult<User>> {
+    public async login(username: string, passwordHash: string): Promise<TypedResult<User>> {
 
         const query = gql`
             query LoginQuery {
-                login(username: "${username}", passwordHash: "${md5(password)}") {
+                login(username: "${username}", passwordHash: "${passwordHash}") {
                     error, id, username, favoriteStopIds, favoriteRouteIds, isAdmin
                 }
             }
@@ -58,14 +57,14 @@ export class BusTrackerApi {
     /**
      * Registers a new user into the system. Returns a user object with the user's new default data.
      * @param username The username of the user to login.
-     * @param password The password of the user to login.
+     * @param passwordHash The password hash of the user to login.
      * @returns A TypedResult containing the user data for the new user.
      */
-    public async register(username: string, password: string): Promise<TypedResult<User>> {
+    public async register(username: string, passwordHash: string): Promise<TypedResult<User>> {
 
         const mutation = gql`
             mutation RegisterMutation {
-                register(username: "${username}", passwordHash: "${md5(password)}") {
+                register(username: "${username}", passwordHash: "${passwordHash}") {
                     error, id, username, favoriteStopIds, favoriteRouteIds, isAdmin
                 }
             }
