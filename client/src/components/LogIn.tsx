@@ -1,14 +1,20 @@
 import * as React from 'react';
+import { BusTrackerEvents } from '../BusTrackerEvents';
+import { appState } from '../BusTrackerState';
+import * as cookies from 'js-cookie';
+import * as md5 from 'md5';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
-import {Coords} from 'google-map-react';
+/* import { Coords } from 'google-map-react'; */
 import {BusTrackerApi} from '../api/BusTrackerApi';
+import { User } from '../models/User';
+import { TypedResult } from '../Result';
 
-interface StopTypeDB {
+/* interface StopTypeDB {
 	id: string;
 	name: string;
 	latitude: number;
 	longitude: number;
-}
+} */
 
 interface LogInState {
 	active: boolean;
@@ -17,8 +23,8 @@ interface LogInState {
 }
 
 interface LogInProps {
-	currentLocation: Coords;
-	sendToParent: (stops: StopTypeDB[]) => void;
+	/* currentLocation: Coords;
+	sendToParent: (stops: StopTypeDB[]) => void; */
 }
 
 export default class LogIn extends React.Component<LogInProps, LogInState> {
@@ -42,24 +48,23 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 			return;
 		}
 
-		let loginRegisterResult;
+		let loginRegisterResult: TypedResult<User>;
 		if (loginOrRegister == 'login')
-			loginRegisterResult = await this.api.login(this.state.username, this.state.password);
+			loginRegisterResult = await this.api.login(this.state.username, md5(this.state.password));
 		else
-			loginRegisterResult = await this.api.register(this.state.username, this.state.password);
+			loginRegisterResult = await this.api.register(this.state.username, md5(this.state.password));
 
 		if (loginRegisterResult.success) {
-			this.hideLogin();
 			
-			const stopResult = await this.api.getBusStopsNearLocation(this.props.currentLocation);
-			const routeResult = await this.api.getRoutesNearLocation(this.props.currentLocation);
-			
-			stopResult.message;
-			routeResult.message;
-
-			this.props.sendToParent(stopResult.data);
-		} else
-			alert(loginRegisterResult.message)
+			// Store the user id in a cookie so they don't have to log in again.
+			cookies.set('usernameAndHash', {username: loginRegisterResult.data.username, passwordHash: md5(this.state.password)});
+			// Store the user object to the state and alert the rest of the UI that login has occurred.
+			appState.user = loginRegisterResult.data;
+			BusTrackerEvents.login.loginSucceeded.dispatch();
+			// this.props.sendToParent(stopResult.data);
+		} else {
+			alert(loginRegisterResult.message);
+		}		
 	}
 
 	public hideLogin = () => {

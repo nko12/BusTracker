@@ -39,10 +39,10 @@ export interface BusMapState {
 }
 
 export interface BusMapProps {
-	busses: BusType[];
+	/* busses: BusType[];
 	stops: StopType[];
 
-	polyString: string;
+	polyString: string; */
 
 	zoom: number;
 }
@@ -56,13 +56,13 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 			mapLoaded: false,
 
-			busses: props.busses,
-			stops: props.stops,
+			busses: new Array<BusType>(),
+			stops: new Array<StopType>(),
 
 			busMarkers: null,
 			stopMarkers: null,
 
-			polyString: props.polyString,
+			polyString: '',
 			polyLine: null
 		};
 	}
@@ -100,14 +100,14 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		this.setState({
 			busMarkers: [] as google.maps.Marker[],
 			stopMarkers: [] as google.maps.Marker[],
-			polyLine: new google.maps.Polyline()
+			polyLine: null
 		});
 	}
 
 	componentWillReceiveProps(nextProps: BusMapProps) {
-		this.updateStops(nextProps.stops);
+		/* this.updateStops(nextProps.stops);
 		this.updateBusses(nextProps.busses);
-		this.updatePolyline(nextProps.polyString);
+		this.updatePolyline(nextProps.polyString); */
 	}
 
 	updateStops(newStops: StopType[]) {
