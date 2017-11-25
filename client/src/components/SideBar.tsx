@@ -1,12 +1,11 @@
 import * as React from 'react';
 import * as GoogleMapReact from 'google-map-react';
-import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
-import { FontIcon, SelectionControlGroup } from 'react-md';
-import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from './api';
-import { BusType, StopType } from './BusMap';
+import {CardText, TabsContainer, Tabs, Tab, TextField, Button} from 'react-md';
+import {FontIcon, SelectionControlGroup} from 'react-md';
+import {getStop, /* getStopsFromBus, */ subscribeToStop, subscribeToBus} from './api';
+import {BusType, StopType} from './BusMap';
 
 const bus = <FontIcon>star</FontIcon>;
-
 
 export interface SideBarState {
 	/* allStops: Map<number, StopType>;

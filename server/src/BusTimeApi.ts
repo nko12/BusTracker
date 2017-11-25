@@ -123,7 +123,7 @@ export class BusTimeApi {
         }
     }
 
-    public async GetBusStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop>> | TypedResult<null>> {
+    public async GetBusStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop> | null>> {
         const url: string = `${this.URL_BASE}stops-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
             const resultData: BusStopsForLocationResult = <BusStopsForLocationResult> JSON.parse(await request(url));
