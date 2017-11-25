@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { BusTrackerEvents } from '../BusTrackerEvents';
-import { appState } from '../state/BusTrackerState';
+import { appState } from '../BusTrackerState';
 import * as cookies from 'js-cookie';
 import * as md5 from 'md5';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';

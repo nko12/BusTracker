@@ -1,5 +1,5 @@
-import { User } from '../models/User';
-import { BusTrackerApi } from '../api/BusTrackerApi';
+import { User } from './models/User';
+import { BusTrackerApi } from './api/BusTrackerApi';
 
 /**
  * The type of a selected object.

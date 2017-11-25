@@ -1,7 +1,8 @@
 import * as React from 'react';
 /* import * as GoogleMapReact from 'google-map-react'; */
-import {CardText, TabsContainer, Tabs, Tab, TextField} from 'react-md';
-import {FontIcon, SelectionControlGroup} from 'react-md';
+import { BusTrackerEvents } from '../BusTrackerEvents';
+import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
+import { FontIcon, SelectionControlGroup } from 'react-md';
 // import {getStop, /* getStopsFromBus, */ subscribeToStop, subscribeToBus} from './api';
 /* import {BusType, StopType} from './BusMap'; */
 
@@ -284,6 +285,12 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 						</Tab>
 					</Tabs>
 				</TabsContainer>
+				<Button
+					raised
+					onClick={(evt) => BusTrackerEvents.login.logoutRequested.dispatch()}
+				>
+					Logout
+				</Button>
 			</div>
 		);
 	}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { appState } from './state/BusTrackerState';
+import { appState } from './BusTrackerState';
 import { BusTrackerEvents } from './BusTrackerEvents';
 import * as cookies from 'js-cookie';
 /* import * as GoogleMapReact from 'google-map-react'; */
@@ -64,6 +64,7 @@ export default class App extends React.Component<{}, AppState> {
 		this.onLogin = this.onLogin.bind(this);
 		this.onDismissToast = this.onDismissToast.bind(this);
 		this.showToast = this.showToast.bind(this);
+		this.onLogout = this.onLogout.bind(this);
 
 		// TODO: uncomment this after debugging
 		// navigator.geolocation.getCurrentPosition((position: any) => {
@@ -75,6 +76,7 @@ export default class App extends React.Component<{}, AppState> {
 
 		// Listen to certain events.
 		BusTrackerEvents.login.loginSucceeded.add(this.onLogin);
+		BusTrackerEvents.login.logoutRequested.add(this.onLogout);
 
 		// Is the user already logged in?
 		const userIdAndHash = cookies.getJSON('usernameAndHash');
@@ -93,7 +95,7 @@ export default class App extends React.Component<{}, AppState> {
 		}
 	}
 
-	public onLogin(): void {
+	private onLogin(): void {
 
 		// Hide the blur background and login window.
 		this.setState({ isUserLoggedIn: true });
@@ -105,12 +107,25 @@ export default class App extends React.Component<{}, AppState> {
 		this.showToast('Welcome ' + appState.user.username);
 	}
 
-	public onDismissToast(): void {
+	private onLogout(): void {
+
+		// Logout has been requested.
+		this.setState({ isUserLoggedIn: false});
+		cookies.remove('usernameAndHash');
+
+		// Show a message telling the user they've been logged out.
+		this.showToast('Goodbye ' + appState.user.username);
+
+		// Reset the app state accordingly.
+		appState.user = null;
+	}
+
+	private onDismissToast(): void {
 		const [, ...toasts] = this.state.toasts;
 		this.setState({ toasts });
 	}
 
-	public showToast(message: string): void {
+	private showToast(message: string): void {
 		
 		const toasts = this.state.toasts.slice();
 		toasts.push({ text: message });
@@ -166,6 +181,7 @@ export default class App extends React.Component<{}, AppState> {
 					autohide={true}
 					toasts={this.state.toasts}
 					onDismiss={this.onDismissToast}
+					autohideTimeout={1500}
 				/>
 			</div>
 		);
