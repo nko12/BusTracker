@@ -92,7 +92,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										return {label: stop.name, value: stop.id, checked: true, onChange: () => {
 											// wait to play animation before moving
 											setTimeout(() => {
-												// remove stop from favorite list
+												// remove from favorite list
 												let stops = this.state.favoriteStops.slice(); // slice() performs shallow copy
 												stops.splice(stops.indexOf(stop), 1);
 												this.setState({favoriteStops: stops});
@@ -117,13 +117,12 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedStops.map((stop: Stop) => {
 										return {label: stop.name, value: stop.id, checked: false, onChange: () => {
-											{/*console.log(JSON.stringify(stop));*/}
-
+											// send to map
 											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: stop.id, selectedObjectType: SelectedObjectType.Stop})
 
 											// wait to play animation before moving
 											setTimeout(() => {
-												// remove stop from detected list
+												// remove from detected list
 												let stops = this.state.detectedStops.slice(); // slice() performs shallow copy
 												stops.splice(stops.indexOf(stop), 1);
 												this.setState({detectedStops: stops});
@@ -162,7 +161,20 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									checkedCheckboxIcon={favorite}
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.favoriteRoutes.map((route: Route) => {
-										return { label: route.name, value: route.id };
+										return {label: route.name, value: route.id, checked: true, onChange: () => {
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove from favorite list
+												let routes = this.state.favoriteRoutes.slice(); // slice() performs shallow copy
+												routes.splice(routes.indexOf(route), 1);
+												this.setState({favoriteRoutes: routes});
+
+												// add it to detected list
+												routes = this.state.detectedRoutes.slice();
+												routes.push(route);
+												this.setState({detectedRoutes: routes});
+											}, 250);
+										}};
 									})}
 								/>
 
@@ -176,7 +188,20 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									checkedCheckboxIcon={favorite}
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedRoutes.map((route: Route) => {
-										return { label: route.name, value: route.id };
+										return {label: route.name, value: route.id, checked: false, onChange: () => {
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove from detected list
+												let routes = this.state.detectedRoutes.slice(); // slice() performs shallow copy
+												routes.splice(routes.indexOf(route), 1);
+												this.setState({detectedRoutes: routes});
+
+												// add it to favorite list
+												routes = this.state.favoriteRoutes.slice();
+												routes.push(route);
+												this.setState({favoriteRoutes: routes});
+											}, 250);
+										}};
 									})}
 								/>
 
