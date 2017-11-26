@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as GoogleMapReact from 'google-map-react';
 import { CardText, TabsContainer, Tabs, Tab, TextField, Button } from 'react-md';
-import { FontIcon, SelectionControlGroup } from 'react-md';
+import { Divider, FontIcon, SelectionControlGroup } from 'react-md';
 import { getStop, /*getStopsFromBus,*/ subscribeToStop, subscribeToBus } from './api';
 import { BusType, StopType } from './BusMap';
 
@@ -233,8 +233,7 @@ export class AdminView extends React.Component<AdminViewProps, AdminViewState> {
 						<Button primary={true} raised={true}>+ Add New Route</Button>
 						<CardText/>
 						<Button primary={true} raised={true}>- Delete Route</Button>
-						<CardText className="center">Strange</CardText>
-						<Button raised={true}>View as User</Button>
+						
 						</Tab>
 
 						<Tab label="Buses">
@@ -303,6 +302,9 @@ export class AdminView extends React.Component<AdminViewProps, AdminViewState> {
 						</Tab>
 					</Tabs>
 				</TabsContainer>
+				<Divider/>
+				<CardText>Switch to user view</CardText>
+				<Button raised={true}>View as User</Button>
 			</div>
 		);
 	}
