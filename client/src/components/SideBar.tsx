@@ -139,7 +139,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									controls={this.state.detectedStops.map((stop: Stop) => {
 										return {label: stop.name, value: stop.id, checked: false, onChange: () => {
 											// send to map. TODO: make this happen on radio button instead
-											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: stop.id, selectedObjectType: SelectedObjectType.Stop})
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ID: stop.id, type: SelectedObjectType.Stop})
 
 											// wait to play animation before moving
 											setTimeout(() => {
@@ -209,7 +209,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									controls={this.state.detectedRoutes.map((route: Route) => {
 										return {label: route.name, value: route.id, checked: false, onChange: () => {
 											// send to map. TODO: make this happen on radio button instead
-											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: route.id, selectedObjectType: SelectedObjectType.Route, polyString: route.polyline})
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ID: route.id, type: SelectedObjectType.Route, polyString: route.polyline})
 
 											// wait to play animation before moving
 											setTimeout(() => {

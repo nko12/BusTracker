@@ -105,17 +105,22 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	}
 
 	displayChangeRequested = (args: MapDisplayChangeArguments) => {
-		switch (args.selectedObjectType) {
+		switch (args.type) {
 			case SelectedObjectType.Bus: // BUS
-				subscribeToBus({interval: INTERVAL, busID: args.selectedObjectID.split('_')[1]}, (err: any, busLoc: GoogleMapReact.Coords) => {
-					this.updateBusses([{location: busLoc, ID: args.selectedObjectID}]);
+				subscribeToBus({interval: INTERVAL, busID: args.ID.split('_')[1]}, (err: any, busLoc: GoogleMapReact.Coords) => {
+					this.updateBusses([{location: busLoc, ID: args.ID}]);
 				});
 				break;
 			case SelectedObjectType.Stop: // STOP
-				getStop(args.selectedObjectID.split('_')[1], (err: any, stopLoc: GoogleMapReact.Coords) => {
-					this.updateStops([{location: stopLoc, ID: args.selectedObjectID}]);
-				});
-				subscribeToStop({interval: INTERVAL, stopID: args.selectedObjectID}, (err: any, busObjs: BusType[]) => {
+				// just do it if a location was given
+				if (args.location)
+					this.updateStops([{location: args.location, ID: args.ID}]);
+				else // otherwise we need to find it
+					getStop(args.ID.split('_')[1], (err: any, stopLoc: GoogleMapReact.Coords) => {
+						this.updateStops([{location: stopLoc, ID: args.ID}]);
+					});
+
+				subscribeToStop({interval: INTERVAL, stopID: args.ID}, (err: any, busObjs: BusType[]) => {
 					let busses: BusType[] = [];
 					for (let i = 0; i < busObjs.length; i++)
 						busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
@@ -188,8 +193,6 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		// finish centroid calculation
 		centroid.lat /= total;
 		centroid.lng /= total;
-
-		console.log('setting center to ' + JSON.stringify(centroid));
 
 		// finalize changes
 		this.setState({stops: newStops, stopMarkers: newMarkers, center: centroid});
