@@ -198,8 +198,8 @@ class GraphQLHandler {
           error: String
           id: String
           name: String
-          latitude: String
-          longitude: String
+          latitude: Float
+          longitude: Float
         }
 
         type Query {

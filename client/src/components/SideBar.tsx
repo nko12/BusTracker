@@ -139,7 +139,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									controls={this.state.detectedStops.map((stop: Stop) => {
 										return {label: stop.name, value: stop.id, checked: false, onChange: () => {
 											// send to map. TODO: make this happen on radio button instead
-											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ID: stop.id, type: SelectedObjectType.Stop})
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ID: stop.id, type: SelectedObjectType.Stop, location: {lat: stop.latitude, lng: stop.longitude}})
 
 											// wait to play animation before moving
 											setTimeout(() => {
