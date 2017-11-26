@@ -11,7 +11,7 @@ export enum SelectedObjectType {
 }
 
 export interface MapDisplayChangeArguments {
-	selectedObjectId: string;
+	selectedObjectID: string;
 	selectedObjectType: SelectedObjectType;
 }
 

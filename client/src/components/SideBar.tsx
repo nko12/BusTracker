@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup} from 'react-md';
-import {BusTrackerEvents} from '../BusTrackerEvents';
+import {BusTrackerEvents, SelectedObjectType} from '../BusTrackerEvents';
 import {appState} from '../BusTrackerState';
 import {Stop} from '../models/Stop';
 import {Route} from '../models/Route';
@@ -117,7 +117,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedStops.map((stop: Stop) => {
 										return {label: stop.name, value: stop.id, checked: false, onChange: () => {
-											console.log(JSON.stringify(stop));
+											{/*console.log(JSON.stringify(stop));*/}
+
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: stop.id, selectedObjectType: SelectedObjectType.Stop})
 
 											// wait to play animation before moving
 											setTimeout(() => {
