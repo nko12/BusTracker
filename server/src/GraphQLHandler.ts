@@ -44,9 +44,9 @@ class GraphQLRoute extends models.Route implements IError {
 }
 
 /**
- * Represents the object sent to the client with GraphQL to represent a BusStop
+ * Represents the object sent to the client with GraphQL to represent a Stop
  */
-class GraphQLBusStop extends models.BusStop implements IError {
+class GraphQLStop extends models.Stop implements IError {
   error?: string;
 }
 
@@ -55,9 +55,9 @@ class GraphQLRouteArray implements IError {
   routes?: Array<models.Route>;
 }
 
-class GraphQLBusStopArray implements IError {
+class GraphQLStopArray implements IError {
   error?: string;
-  stops?: Array<models.BusStop>;
+  stops?: Array<models.Stop>;
 }
 
 /**
@@ -110,7 +110,7 @@ class AddRouteMutationData extends models.Route {
 /**
  * Represents the object sent from the client for adding a fake stop
  */
-interface AddBusStopMutationData extends models.BusStop {
+interface AddStopMutationData extends models.Stop {
   userId: string;
 }
 
@@ -181,7 +181,7 @@ class GraphQLHandler {
           id: String
           name: String
           polyline: String
-          busStopIDs: [String]
+          stopIDs: [String]
         }
 
         type RouteArray implements IError {
@@ -189,12 +189,12 @@ class GraphQLHandler {
           routes: [Route]
         }
 
-        type BusStopArray implements IError {
+        type StopArray implements IError {
           error: String
-          stops: [BusStop]
+          stops: [Stop]
         }
 
-        type BusStop implements IError {
+        type Stop implements IError {
           error: String
           id: String
           name: String
@@ -205,22 +205,22 @@ class GraphQLHandler {
         type Query {
           login(username: String, passwordHash: String): User
           getRoute(id: String): Route
-          getStop(id: String): BusStop
+          getStop(id: String): Stop
           getRoutes(ids: [String]): RouteArray
-          getStops(ids: [String]): BusStopArray
+          getStops(ids: [String]): StopArray
           getRoutesNearLocation(latitude: Float, longitude: Float): RouteArray
-          getBusStopsNearLocation(latitude: Float, longitude: Float): BusStopArray
+          getStopsNearLocation(latitude: Float, longitude: Float): StopArray
         }
 
         type Mutation {
           register(username: String, passwordHash: String): User
           toggleAdminRights(grantingId: String, targetId: String, adminStatus: Boolean): BasicResponse
-          editFavoriteBusStopIDs(userId: String, objectIds: [String]): BasicResponse
+          editFavoriteStopIDs(userId: String, objectIds: [String]): BasicResponse
           editFavoriteRouteIDs(userId: String, objectIds: [String]): BasicResponse
-          addNewRoute(userId: String, id: String, name: String, polyline: String, busStopIDs: [String]): IDResponse
-          addNewBusStop(userId: String, id: String, name: String, latitude: String, longitude: String): IDResponse
+          addNewRoute(userId: String, id: String, name: String, polyline: String, stopIDs: [String]): IDResponse
+          addNewStop(userId: String, id: String, name: String, latitude: String, longitude: String): IDResponse
           removeRoute(userId: String, objectId: String): BasicResponse
-          removeBusStop(userId: String, objectId: String): BasicResponse
+          removeStop(userId: String, objectId: String): BasicResponse
           deleteUser(id: String): BasicResponse
         }
       `);
@@ -268,17 +268,17 @@ class GraphQLHandler {
    * Handler that deals with the getStop query.
    * @param data The id for the stop to lookup.
    */
-  public async getStop(data: IDQueryData): Promise<GraphQLBusStop> {
+  public async getStop(data: IDQueryData): Promise<GraphQLStop> {
 
-    let stop: GraphQLBusStop = new GraphQLBusStop();
+    let stop: GraphQLStop = new GraphQLStop();
 
-    const result = await this.server.storage.getBusStop(data.id);
+    const result = await this.server.storage.getStop(data.id);
     if (!result.success) {
       stop.error = result.message;
       return stop;
     }
 
-    stop = <GraphQLBusStop>result.data;
+    stop = <GraphQLStop>result.data;
     return stop;
   }
 
@@ -304,16 +304,16 @@ class GraphQLHandler {
    * Handler that gets the bus stops associated with a list of ids.
    * @param data The ids of the stops to look up.
    */
-  public async getStops(data: GetObjectsByIdQueryData): Promise<GraphQLBusStopArray> {
+  public async getStops(data: GetObjectsByIdQueryData): Promise<GraphQLStopArray> {
 
-    let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
-    const result = await this.server.storage.getBusStops(data.ids);
+    let stops: GraphQLStopArray = new GraphQLStopArray();
+    const result = await this.server.storage.getStops(data.ids);
     if (!result.success) {
       stops.error = result.message;
       return stops;
     }
 
-    stops.stops = <models.BusStop[]> result.data;
+    stops.stops = <models.Stop[]> result.data;
 
     return stops;
   }
@@ -340,16 +340,16 @@ class GraphQLHandler {
    * Handler that gets the list of bus stops that are near a particular location.
    * @param data The parameters for the handler as an object.
    */
-  public async getBusStopsNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLBusStopArray> {
-    let stops: GraphQLBusStopArray = new GraphQLBusStopArray();
+  public async getStopsNearLocation(data: GetObjectsNearPositionMutationData): Promise<GraphQLStopArray> {
+    let stops: GraphQLStopArray = new GraphQLStopArray();
 
-    const result = await this.busApi.GetBusStopsNearPosition(data.latitude, data.longitude);
+    const result = await this.busApi.GetStopsNearPosition(data.latitude, data.longitude);
     if (!result.success) {
       stops.error = result.message;
       return stops;
     }
 
-    stops.stops = <Array<models.BusStop>>result.data;
+    stops.stops = <Array<models.Stop>>result.data;
     return stops;
   }
 
@@ -390,14 +390,14 @@ class GraphQLHandler {
   }
 
   /**
-   * Handler that deals with the editFavoriteBusStopIDs mutation.
+   * Handler that deals with the editFavoriteStopIDs mutation.
    * @param data The bus stop ids and user data passed from the client.
    */
-  public async editFavoriteBusStopIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
+  public async editFavoriteStopIDs(data: IDArrayMutationData): Promise<GraphQLBasicResponse> {
 
     let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
-    const result = await this.server.storage.editFavoriteBusStopIDs(data.userId, data.objectIds);
+    const result = await this.server.storage.editFavoriteStopIDs(data.userId, data.objectIds);
     if (!result.success) {
       response.error = result.message;
     }
@@ -437,14 +437,14 @@ class GraphQLHandler {
   }
 
   /**
-   * Handler that deals with the addNewBusStop mutation.
+   * Handler that deals with the addNewStop mutation.
    * @param data The stop to create and user id
    */
-  public async addNewBusStop(data: AddBusStopMutationData): Promise<GraphQLIDResponse> {
+  public async addNewStop(data: AddStopMutationData): Promise<GraphQLIDResponse> {
 
     let response: GraphQLIDResponse = new GraphQLIDResponse();
 
-    const result = await this.server.storage.addNewBusStop(data.userId, data);
+    const result = await this.server.storage.addNewStop(data.userId, data);
     if (!result.success) {
       response.error = result.message;
       return response;
@@ -469,14 +469,14 @@ class GraphQLHandler {
   }
 
   /**
-   * Handler that deals with the removeBusStop mutation.
+   * Handler that deals with the removeStop mutation.
    * @param data The user id and route id to remove
    */
-  public async removeBusStop(data: RemoveIDMutationData): Promise<GraphQLBasicResponse> {
+  public async removeStop(data: RemoveIDMutationData): Promise<GraphQLBasicResponse> {
 
     let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
-    const result = await this.server.storage.removeBusStop(data.userId, data.objectId);
+    const result = await this.server.storage.removeStop(data.userId, data.objectId);
     if (!result.success) {
       response.error = result.message;
     }

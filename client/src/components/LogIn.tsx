@@ -1,20 +1,12 @@
 import * as React from 'react';
-import { BusTrackerEvents } from '../BusTrackerEvents';
-import { appState } from '../BusTrackerState';
 import * as cookies from 'js-cookie';
 import * as md5 from 'md5';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
-/* import { Coords } from 'google-map-react'; */
+import {BusTrackerEvents} from '../BusTrackerEvents';
+import {appState} from '../BusTrackerState';
 import {BusTrackerApi} from '../api/BusTrackerApi';
-import { User } from '../models/User';
-import { TypedResult } from '../Result';
-
-/* interface StopTypeDB {
-	id: string;
-	name: string;
-	latitude: number;
-	longitude: number;
-} */
+import {User} from '../models/User';
+import {TypedResult} from '../Result';
 
 interface LogInState {
 	active: boolean;
@@ -22,12 +14,9 @@ interface LogInState {
 	password: string;
 }
 
-interface LogInProps {
-	/* currentLocation: Coords;
-	sendToParent: (stops: StopTypeDB[]) => void; */
-}
+interface LogInProps {}
 
-export default class LogIn extends React.Component<LogInProps, LogInState> {
+export class LogIn extends React.Component<LogInProps, LogInState> {
 	private readonly api: BusTrackerApi;
 
 	public constructor(props: LogInProps) {
@@ -55,16 +44,14 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 			loginRegisterResult = await this.api.register(this.state.username, md5(this.state.password));
 
 		if (loginRegisterResult.success) {
-			
 			// Store the user id in a cookie so they don't have to log in again.
 			cookies.set('usernameAndHash', {username: loginRegisterResult.data.username, passwordHash: md5(this.state.password)});
 			// Store the user object to the state and alert the rest of the UI that login has occurred.
 			appState.user = loginRegisterResult.data;
 			BusTrackerEvents.login.loginSucceeded.dispatch();
 			// this.props.sendToParent(stopResult.data);
-		} else {
+		} else
 			alert(loginRegisterResult.message);
-		}		
 	}
 
 	public hideLogin = () => {
@@ -75,7 +62,6 @@ export default class LogIn extends React.Component<LogInProps, LogInState> {
 		this.setState({active: false});
 	}
 
-	// TODO: @Nkosi, @Alex: Need to link login button to actually login
 	render() {
 		// janky way to get this component to stop rendering
 		if (!this.state.active)

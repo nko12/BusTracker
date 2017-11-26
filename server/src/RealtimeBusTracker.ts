@@ -25,34 +25,34 @@ var clickLimit = 5;
 // getStopsFromBus(7790);
 
 function decycle(object : any) {
-  var objects: any[] = [], paths: any[] = [];
-  function resolve(value: any, path: any) {
-    var length: any, results: any;
-    if (typeof value == 'object' && value) {
-      length = objects.length;
-      while (length--) {
-        if (objects[length] == value) return {'$ref': paths[length]};
-      }
-      objects.push(value);
-      paths.push(path);
-      if (Object.prototype.toString.call(value) == '[object Array]') {
-        results = [];
-        length = value.length;
-        while (length--) {
-          results[length] = resolve(value[length], path + '[' + length + ']');
-        }
-      } else {
-        results = {};
-        for (length in value) {
-          results[length] = resolve(value[length], path + '[' + JSON.stringify(length) + ']');
-        }
-      }
-      return results;
-    } else {
-      return value;
-    }
-  }
-  return resolve(object, '$');
+	var objects: any[] = [], paths: any[] = [];
+	function resolve(value: any, path: any) {
+		var length: any, results: any;
+		if (typeof value == 'object' && value) {
+			length = objects.length;
+			while (length--) {
+				if (objects[length] == value) return {'$ref': paths[length]};
+			}
+			objects.push(value);
+			paths.push(path);
+			if (Object.prototype.toString.call(value) == '[object Array]') {
+				results = [];
+				length = value.length;
+				while (length--) {
+					results[length] = resolve(value[length], path + '[' + length + ']');
+				}
+			} else {
+				results = {};
+				for (length in value) {
+					results[length] = resolve(value[length], path + '[' + JSON.stringify(length) + ']');
+				}
+			}
+			return results;
+		} else {
+			return value;
+		}
+	}
+	return resolve(object, '$');
 }
 
 var stopInfoArray = [[0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];

@@ -1,5 +1,5 @@
 import * as request from 'request-promise-native';
-import { Route, BusStop } from './Models';
+import { Route, Stop } from './Models';
 import { Result, TypedResult } from './Result';
 import { BusTrackerDB } from './Database'
 
@@ -37,7 +37,7 @@ interface RoutesForLocationResult extends BusTimeResponse {
     }
 }
 
-interface BusStopsForLocationResult extends BusTimeResponse {
+interface StopsForLocationResult extends BusTimeResponse {
     data: {
         stops: Array<BusTimeStopObject>;
     }
@@ -98,7 +98,7 @@ export class BusTimeApi {
                 }
                 
                 // Create the route object.
-                const route: Route = {id: busTimeRoute.id, name: busTimeRoute.longName, polyline: '', busStopIDs: []};
+                const route: Route = {id: busTimeRoute.id, name: busTimeRoute.longName, polyline: '', stopIDs: []};
                 
                 // The route was not found in the database. First, attempt to get the extra data for it. Even if this fails, we need to
                 // store the route anyway. Failing to find the polyline and stop ids will result in it just not showing up on the map when selected.
@@ -110,7 +110,7 @@ export class BusTimeApi {
                 
                 if (extraDataResult.data != null) {
                     route.polyline = extraDataResult.data.polyline.points;
-                    route.busStopIDs = extraDataResult.data.stops;
+                    route.stopIDs = extraDataResult.data.stops;
                 }
                 
                 routes.push(route);
@@ -123,20 +123,20 @@ export class BusTimeApi {
         }
     }
 
-    public async GetBusStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<BusStop> | null>> {
+    public async GetStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<Stop> | null>> {
         const url: string = `${this.URL_BASE}stops-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
-            const resultData: BusStopsForLocationResult = <BusStopsForLocationResult> JSON.parse(await request(url));
+            const resultData: StopsForLocationResult = <StopsForLocationResult> JSON.parse(await request(url));
             if (resultData.code != 200) {
                 return new TypedResult(false, null, 'Failed to get data from BusTime: ' + resultData.text);
             }
 
-            const stops: Array<BusStop> = new Array<BusStop>();
+            const stops: Array<Stop> = new Array<Stop>();
             for (let i = 0; i < resultData.data.stops.length; i++) {
                 const busTimeStop: BusTimeStopObject = resultData.data.stops[i];
-                const stop: BusStop = {id: busTimeStop.id, name: busTimeStop.name, latitude: busTimeStop.lat, longitude: busTimeStop.lon};
+                const stop: Stop = {id: busTimeStop.id, name: busTimeStop.name, latitude: busTimeStop.lat, longitude: busTimeStop.lon};
                 stops.push(stop);
-                await this.storage.addNewRealBusStop(stop);
+                await this.storage.addNewRealStop(stop);
             }
 
             return new TypedResult(true, stops);
@@ -170,7 +170,7 @@ export class BusTimeApi {
                 for (let stop of resultData.data.stops) {
                     
                     // Add this stop data to the database. If it already exists, the add is ignored.
-                    await this.storage.addNewRealBusStop({id: stop.id, name: stop.name, latitude: stop.lat, longitude: stop.lon});
+                    await this.storage.addNewRealStop({id: stop.id, name: stop.name, latitude: stop.lat, longitude: stop.lon});
                     stopIds.push(stop.id);
                 }
 

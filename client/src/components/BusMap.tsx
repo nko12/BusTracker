@@ -39,11 +39,6 @@ export interface BusMapState {
 }
 
 export interface BusMapProps {
-	/* busses: BusType[];
-	stops: StopType[];
-
-	polyString: string; */
-
 	zoom: number;
 }
 
@@ -104,11 +99,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		});
 	}
 
-	componentWillReceiveProps(nextProps: BusMapProps) {
-		/* this.updateStops(nextProps.stops);
-		this.updateBusses(nextProps.busses);
-		this.updatePolyline(nextProps.polyString); */
-	}
+	componentWillReceiveProps(nextProps: BusMapProps) {}
 
 	updateStops(newStops: StopType[]) {
 		// ignore stops at the origin

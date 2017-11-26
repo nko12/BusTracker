@@ -3,7 +3,7 @@ import * as faker from 'faker';
 /**
  * Represents a Bus Stop.
  */
-export class BusStop {
+export class Stop {
 
     /**
      * Represents the unique ID of the bus stop.

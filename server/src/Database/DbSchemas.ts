@@ -30,26 +30,26 @@ export class Schemas {
         id: { type: String, index: true },
         name: String,
         polyline: String,
-        busStopIDs: []
+        stopIDs: []
     }, {
             // Make sure the name of the collection is "Route" and not "routes".
             collection: 'Route'
     });
 
-    // The BusStop schema.
-    public static busStopSchema: mongoose.Schema = new mongoose.Schema({
+    // The Stop schema.
+    public static stopSchema: mongoose.Schema = new mongoose.Schema({
         id: {type: String, index: true},
         name: String,
         latitude: Number,
         longitude: Number
     }, {
-        collection: 'BusStop'
+        collection: 'Stop'
     });
 
     public static schemaNames: string[] = [
         'User',
         'Route',
-        'BusStop'
+        'Stop'
     ];
 }
 
@@ -62,6 +62,6 @@ export const UserType = mongoose.model('User', Schemas.userSchema);
  */
 export const RouteType = mongoose.model('Route', Schemas.routeSchema);
 /**
- * Represents a 'BusStop' Mongoose Model.
+ * Represents a 'Stop' Mongoose Model.
  */
-export const BusStopType = mongoose.model('BusStop', Schemas.busStopSchema);
+export const StopType = mongoose.model('Stop', Schemas.stopSchema);
