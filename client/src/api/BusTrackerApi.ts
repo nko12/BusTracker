@@ -1,15 +1,14 @@
-import {ApolloClient, ApolloError} from 'apollo-client';
-import {HttpLink} from 'apollo-link-http';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {TypedResult, Result} from '../Result';
-import {User} from '../models/User';
-import {BusStop} from '../models/BusStop';
-import {Route} from '../models/Route';
-import {Coords} from 'google-map-react';
+import { ApolloClient, ApolloError } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { TypedResult, Result } from '../Result';
+import { User } from '../models/User';
+import { BusStop } from '../models/BusStop';
+import { Route } from '../models/Route';
+import { Coords } from 'google-map-react';
 
 import gql from 'graphql-tag';
-import * as md5 from 'md5';
-import {ExecutionResult} from 'graphql/execution/execute'
+import { ExecutionResult } from 'graphql/execution/execute'
 import * as polyline from 'polyline';
 
 export interface IDType {
@@ -39,14 +38,14 @@ export class BusTrackerApi {
     /**
      * Logs a user into the system. Returns a user object with the user's data.
      * @param username The username of the user.
-     * @param password The password for the user. This will be hashed before being sent to server.
+     * @param passwordHash The password hash for the user. This will be hashed before being sent to server.
      * @returns A TypedResult containing the user data for the new user.
      */
-    public async login(username: string, password: string): Promise<TypedResult<User>> {
+    public async login(username: string, passwordHash: string): Promise<TypedResult<User>> {
 
         const query = gql`
             query LoginQuery {
-                login(username: "${username}", passwordHash: "${md5(password)}") {
+                login(username: "${username}", passwordHash: "${passwordHash}") {
                     error, id, username, favoriteStopIds, favoriteRouteIds, isAdmin
                 }
             }
@@ -58,14 +57,14 @@ export class BusTrackerApi {
     /**
      * Registers a new user into the system. Returns a user object with the user's new default data.
      * @param username The username of the user to login.
-     * @param password The password of the user to login.
+     * @param passwordHash The password hash of the user to login.
      * @returns A TypedResult containing the user data for the new user.
      */
-    public async register(username: string, password: string): Promise<TypedResult<User>> {
+    public async register(username: string, passwordHash: string): Promise<TypedResult<User>> {
 
         const mutation = gql`
             mutation RegisterMutation {
-                register(username: "${username}", passwordHash: "${md5(password)}") {
+                register(username: "${username}", passwordHash: "${passwordHash}") {
                     error, id, username, favoriteStopIds, favoriteRouteIds, isAdmin
                 }
             }
@@ -232,7 +231,7 @@ export class BusTrackerApi {
 
         const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutesNearLocation', false, true);
 
-        return new TypedResult(result.success, <Array<Route>>result.data['routes']);
+        return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
     }
 
     public async getBusStopsNearLocation(location: Coords): Promise<TypedResult<Array<BusStop>>> {
@@ -249,7 +248,41 @@ export class BusTrackerApi {
         `;
         const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getBusStopsNearLocation', false, true);
 
-        return new TypedResult(result.success, <Array<BusStop>>result.data['stops']);
+        return new TypedResult(result.success, <Array<BusStop>>result.data['stops'], result.message);
+    }
+
+    public async getBusStops(stopIds: Array<string>): Promise<TypedResult<Array<BusStop>>> {
+
+        const query = gql`
+            query GetBusStops {
+                getStops(ids: [${stopIds}]) {
+                    error, stops {
+                        id, name, latitude, longitude
+                    }
+                }
+            }
+        `;
+
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getStops', false, true);
+
+        return new TypedResult(result.success, <Array<BusStop>>result.data['stops'], result.message);
+    }
+
+    public async getRoutes(routeIds: Array<string>): Promise<TypedResult<Array<Route>>> {
+
+        const query = gql`
+        query {
+            getRoutes(ids: [${routeIds}]) {
+              error, routes {
+                id, name, busStopIDs, polyline
+              }
+            }
+          }
+        `;
+
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutes', false, true);
+
+        return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
     }
 
     /**

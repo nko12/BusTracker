@@ -49,35 +49,35 @@ export class BusTrackerDB {
             }
         }
 
-        try {
+        // try {
 
-            // Get the names of the existing collections.        
-            const cursor: mongo.CommandCursor = this.dbConn.db.listCollections({});
-            const collectionList = await cursor.toArray();
+        //     // Get the names of the existing collections.        
+        //     const cursor: mongo.CommandCursor = this.dbConn.db.listCollections({});
+        //     const collectionList = await cursor.toArray();
 
-            // For each schema name, there should be dbConnesponding collection for it. Loop through each schema name, and
-            // if a collection does not exist for it, create the collection.
-            const pendingCollectionNames: string[] = [];
-            schema.Schemas.schemaNames.forEach((schemaName: string) => {
+        //     // For each schema name, there should be dbConnesponding collection for it. Loop through each schema name, and
+        //     // if a collection does not exist for it, create the collection.
+        //     const pendingCollectionNames: string[] = [];
+        //     schema.Schemas.schemaNames.forEach((schemaName: string) => {
 
-                if (collectionList.findIndex((collection: mongo.Collection): boolean => {
-                    return collection.collectionName === schemaName;
-                }) == -1) {
-                    // The given schema name does not have a matching collection. Create the collection.
-                    pendingCollectionNames.push(schemaName);
-                }
-            });
+        //         if (collectionList.findIndex((collection: mongo.Collection): boolean => {
+        //             return collection.collectionName === schemaName;
+        //         }) == -1) {
+        //             // The given schema name does not have a matching collection. Create the collection.
+        //             pendingCollectionNames.push(schemaName);
+        //         }
+        //     });
 
-            // Create a collection for all the pending collection names.
-            for (let i: number = 0; i < pendingCollectionNames.length; i++) {
-                await this.dbConn.db.createCollection(pendingCollectionNames[i]);
-            }
+        //     // Create a collection for all the pending collection names.
+        //     for (let i: number = 0; i < pendingCollectionNames.length; i++) {
+        //         await this.dbConn.db.createCollection(pendingCollectionNames[i]);
+        //     }
 
-        } catch (err) {
+        // } catch (err) {
 
-            console.log(`Failed to initialize the database. ${JSON.stringify(err)}`);
-            throw new Error(`Failed to initialize the database. ${JSON.stringify(err)}`);
-        }
+        //     console.log(`Failed to initialize the database. ${JSON.stringify(err)}`);
+        //     throw new Error(`Failed to initialize the database. ${JSON.stringify(err)}`);
+        // }
     }
 
     /**
@@ -305,10 +305,44 @@ export class BusTrackerDB {
     }
 
     /**
- * Gets the specified route object by id.
- * @param routeId The id of the route to get.
- * @returns The requested route object.
- */
+     * Adds a new real bus stop to the database. The id should already be set.
+     * @param stopData The stop data to add to the database. If it already exists, it is overwritten.
+     */
+    public async addNewRealBusStop(stopData: models.BusStop): Promise<Result> {
+
+        // Check if the bus stop already exists. If it does, ignore this request.
+        let busStop: mongoose.Document = await schema.BusStopType.findOne({ id: stopData.id }).cursor().next();
+        if (busStop != null) {
+            return new Result(true);
+        }
+
+        busStop = new schema.BusStopType(stopData);
+        await busStop.save();
+        return new Result(true);
+    }
+
+    /**
+     * Adds a new real route to the database. The id should already be set.
+     * @param routeData The route data to add to the database. if it already exists, it is overwritten.
+     */
+    public async addNewRealRoute(routeData: models.Route): Promise<Result> {
+
+        // Check if the route already exists. If it does, ignore this request.
+        let route: mongoose.Document = await schema.RouteType.findOne({ id: routeData.id }).cursor().next();
+        if (route != null) {
+            return new Result(true);
+        }
+
+        route = new schema.RouteType(routeData);
+        await route.save();
+        return new Result(true);
+    }
+
+    /**
+     * Gets the specified route object by id.
+     * @param routeId The id of the route to get.
+     * @returns The requested route object.
+     */
     public async getRoute(routeId: string): Promise<TypedResult<models.Route | null>> {
 
         // Get the route object.
@@ -319,6 +353,48 @@ export class BusTrackerDB {
             return new TypedResult(false, null, `Route with id ${routeId} not found.`);
 
         return new TypedResult(true, route);
+    }
+
+    /**
+     * Gets the specified routes by id.
+     * @param routeIds The ids of the route objects to get.
+     * @returns A result containing the list of routes.
+     */
+    public async getRoutes(routeIds: Array<string>): Promise<TypedResult<Array<models.Route> | null>> {
+
+        // Search for all routes matching the specified ids.
+        try {
+            const cursor = schema.RouteType.find({id: {"$in": routeIds}}).lean().cursor();
+            const routes: Array<models.Route> = new Array<models.Route>();
+            await cursor.eachAsync((route: models.Route) => {
+                routes.push(route);
+            });
+    
+            return new TypedResult(true, routes);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get the requested routes: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
+     * Gets the specified bus stops by id.
+     * @param stopIds The ids of the bus stop objects to get.
+     * @returns A result containing the list of bus stops.
+     */
+    public async getBusStops(stopIds: Array<string>): Promise<TypedResult<Array<models.BusStop> | null>> {
+
+        // Search for all bus stops matching the specified ids.
+        try {
+            const cursor = schema.BusStopType.find({id: {"$in": stopIds}}).lean().cursor();
+            const stops: Array<models.BusStop> = new Array<models.BusStop>();
+            await cursor.eachAsync((stop: models.BusStop) => {
+                stops.push(stop);
+            });
+
+            return new TypedResult(true, stops);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get the requested bus stops: ' + JSON.stringify(err));
+        }
     }
 
     /**
@@ -366,7 +442,7 @@ export class BusTrackerDB {
         await route.remove();
 
         return new Result(true);
-    } 
+    }
 
     /**
      * Allows an admin to remove an existing fake bus stop from the database.
@@ -397,7 +473,7 @@ export class BusTrackerDB {
 
         return new Result(true);
     }
-    
+
     /**
      * Attempts to connect to the database.
      * @returns The connection to the database if successful, otherwise an error.
@@ -406,7 +482,7 @@ export class BusTrackerDB {
         /*  const conn: mongoose.Connection =
              mongoose.createConnection(`mongodb://${serverConfig.dbHost}:${serverConfig.dbPort}/${serverConfig.dbName}`, { useMongoClient: true }); */
         mongoose.connect(serverConfig.dbConnString, { useMongoClient: true });
-        
+
         return new Promise<mongoose.Connection | undefined>((resolve, reject) => {
             mongoose.connection.on('error', (err) => {
                 reject(err);

@@ -3,9 +3,15 @@
   "version": "0.5.0",
   "description": "A bus tracking system that can be used to track the realtime movements of busses in New York city.",
   "scripts": {
+<<<<<<< HEAD
+    "start": "cross-env NODE_ENV=dev node ./compiled/main.js",
+    "start-prod": "cross-env NODE_ENV=prod node ./compiled/main.js",
+    "test": "cross-env NODE_ENV=test mocha -r ts-node/register src/**/*.test.ts"
+=======
     "start": "tsc && export NODE_ENV=dev && node ./compiled/main.js",
-    "start-prod": "SET NODE_ENV=prod && node ./compiled/main.js",
-    "test": "SET NODE_ENV=test && mocha -r ts-node/register src/**/*.test.ts"
+    "start-prod": "export NODE_ENV=prod && node ./compiled/main.js",
+    "test": "export NODE_ENV=test && mocha -r ts-node/register src/**/*.test.ts"
+>>>>>>> master
   },
   "repository": {
     "type": "git",
@@ -19,6 +25,7 @@
   "homepage": "https://github.com/nko12/BusTracker#readme",
   "dependencies": {
     "cors": "^2.8.4",
+    "cross-env": "^5.1.1",
     "deep-equal": "^1.0.1",
     "express": "^4.16.2",
     "express-graphql": "^0.6.11",
