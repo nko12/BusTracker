@@ -1,11 +1,11 @@
 import * as React from 'react';
+import * as cookies from 'js-cookie';
+import {Snackbar} from 'react-md';
 import {appState} from './BusTrackerState';
 import {BusTrackerEvents} from './BusTrackerEvents';
-import * as cookies from 'js-cookie';
 import {BusMap} from './components/BusMap';
 import {SideBar} from './components/SideBar';
-import LogIn from './components/LogIn';
-import {Snackbar} from 'react-md';
+import {LogIn} from './components/LogIn';
 import './styles/App.css';
 
 interface Toast {

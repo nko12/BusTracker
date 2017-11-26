@@ -11,18 +11,18 @@ export enum SelectedObjectType {
 }
 
 export interface MapDisplayChangeArguments {
-	selectedObjectId: string,
-	selectedObjectType: SelectedObjectType
+	selectedObjectId: string;
+	selectedObjectType: SelectedObjectType;
 }
 
 interface IBusTrackerEvents {
 	login: {
-		loginSucceeded: signals.Signal
+		loginSucceeded: signals.Signal,
 		logoutRequested: signals.Signal
-	}
+	};
 	map: {
 		mapDisplayChangeRequested: signals.Signal
-	}
+	};
 }
 
 export interface LoginEvent {

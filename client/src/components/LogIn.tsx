@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {BusTrackerEvents} from '../BusTrackerEvents';
-import {appState} from '../BusTrackerState';
 import * as cookies from 'js-cookie';
 import * as md5 from 'md5';
 import {Card, CardTitle, CardText, TextField, Button} from 'react-md';
+import {BusTrackerEvents} from '../BusTrackerEvents';
+import {appState} from '../BusTrackerState';
 import {BusTrackerApi} from '../api/BusTrackerApi';
 import {User} from '../models/User';
 import {TypedResult} from '../Result';
@@ -16,7 +16,7 @@ interface LogInState {
 
 interface LogInProps {}
 
-export default class LogIn extends React.Component<LogInProps, LogInState> {
+export class LogIn extends React.Component<LogInProps, LogInState> {
 	private readonly api: BusTrackerApi;
 
 	public constructor(props: LogInProps) {

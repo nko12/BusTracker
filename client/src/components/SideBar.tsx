@@ -1,9 +1,9 @@
 import * as React from 'react';
+import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup} from 'react-md';
 import {BusTrackerEvents} from '../BusTrackerEvents';
 import {appState} from '../BusTrackerState';
 import {Stop} from '../models/Stop';
 import {Route} from '../models/Route';
-import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup} from 'react-md';
 
 const favorite = <FontIcon>star</FontIcon>;
 const unfavorite = <FontIcon>star_border</FontIcon>;

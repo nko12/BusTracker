@@ -2,13 +2,13 @@ import * as polyline from 'polyline';
 import gql from 'graphql-tag';
 import {ExecutionResult} from 'graphql/execution/execute'
 import {ApolloClient, ApolloError} from 'apollo-client';
-import {HttpLink} from 'apollo-link-http';
 import {InMemoryCache} from 'apollo-cache-inmemory';
+import {HttpLink} from 'apollo-link-http';
+import {Coords} from 'google-map-react';
 import {TypedResult, Result} from '../Result';
 import {User} from '../models/User';
 import {Stop} from '../models/Stop';
 import {Route} from '../models/Route';
-import {Coords} from 'google-map-react';
 
 export interface IDType {
 	id: string,
