@@ -12,6 +12,9 @@ export interface SideBarBusItemProps {
 export class SideBarBusItem extends React.Component<SideBarBusItemProps, {}> {
 
     render(): void {
-
+        <span>{this.props.itemText}</span>
+        <Checkbox 
+            checked
+        />
     }
 }
