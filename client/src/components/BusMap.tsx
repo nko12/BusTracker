@@ -106,12 +106,12 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 
 	displayChangeRequested = (args: MapDisplayChangeArguments) => {
 		switch (args.selectedObjectType) {
-			case SelectedObjectType.Bus:
+			case SelectedObjectType.Bus: // BUS
 				subscribeToBus({interval: INTERVAL, busID: args.selectedObjectID.split('_')[1]}, (err: any, busLoc: GoogleMapReact.Coords) => {
 					this.updateBusses([{location: busLoc, ID: args.selectedObjectID}]);
 				});
 				break;
-			case SelectedObjectType.Stop:
+			case SelectedObjectType.Stop: // STOP
 				getStop(args.selectedObjectID.split('_')[1], (err: any, stopLoc: GoogleMapReact.Coords) => {
 					this.updateStops([{location: stopLoc, ID: args.selectedObjectID}]);
 				});
@@ -123,7 +123,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 					this.updateBusses(busses);
 				});
 				break;
-			case SelectedObjectType.Route:
+			case SelectedObjectType.Route: // ROUTE
 				if (args.polyString)
 					this.updatePolyline(args.polyString);
 				else

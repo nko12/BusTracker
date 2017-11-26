@@ -2,18 +2,24 @@ import * as React from 'react';
 import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup} from 'react-md';
 import {BusTrackerEvents, SelectedObjectType} from '../BusTrackerEvents';
 import {appState} from '../BusTrackerState';
-import {Stop} from '../models/Stop';
-import {Route} from '../models/Route';
+// import {Bus} from './../models/Bus';
+import {Stop} from './../models/Stop';
+import {Route} from './../models/Route';
 
 const favorite = <FontIcon>star</FontIcon>;
 const unfavorite = <FontIcon>star_border</FontIcon>;
 
 export interface SideBarState {
-	favoriteStops: Stop[];
-	favoriteRoutes: Route[];
+	// detectedBusses: Bus[];
+	// favoriteBusses: Bus[];
+
 	detectedStops: Stop[];
+	favoriteStops: Stop[];
+
 	detectedRoutes: Route[];
-	selectedTabId: string;
+	favoriteRoutes: Route[];
+
+	selectedTabID: string;
 }
 
 export interface SideBarProps {}
@@ -22,11 +28,16 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			favoriteStops: [] as Stop[],
-			favoriteRoutes: [] as Route[],
+			// detectedBusses: [] as Bus[],
+			// favoriteBusses: [] as Bus[],
+
 			detectedStops: [] as Stop[],
+			favoriteStops: [] as Stop[],
+
 			detectedRoutes: [] as Route[],
-			selectedTabId: 'tabStops'
+			favoriteRoutes: [] as Route[],
+
+			selectedTabID: 'tabStops'
 		};
 
 		this.onLogin = this.onLogin.bind(this);
@@ -37,11 +48,19 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	}
 
 	private async onLogin(): Promise<void> {
-		// Get the list of bus stops that are nearby.
+		// get the list ALL busses
+		// const busResult = await appState.api.getAllBusses();
+		// if (!busResult.success) {}
+
+		// get list of busses that the user has favorited
+		// const favoriteBusResult = await appState.api.getBusses(appState.user.favoriteBusIds);
+		// if (!favoriteBusResult.success) {}
+
+		// Get the list of stops that are nearby.
 		const stopResult = await appState.api.getStopsNearLocation({lat: 40.7588528, lng: -73.9852625});
 		if (!stopResult.success) {}
 
-		// Get the list of bus stops that the user has favorited, and request them from the server.
+		// Get the list of stops that the user has favorited, and request them from the server.
 		const favoriteStopResult = await appState.api.getStops(appState.user.favoriteStopIds);
 		if (!favoriteStopResult.success) {}
 
@@ -55,10 +74,14 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 		// TODO: Remove duplicates between what is nearby and what the user has favorited.
 		this.setState({
-			favoriteStops: favoriteStopResult.data,
+			// detectedBusses: busResult.data,
+			// favoriteBusses: favoriteBusResult.data,
+
 			detectedStops: stopResult.data,
-			favoriteRoutes: favoriteRouteResult.data,
-			detectedRoutes: routeResult.data
+			favoriteStops: favoriteStopResult.data,
+
+			detectedRoutes: routeResult.data,
+			favoriteRoutes: favoriteRouteResult.data
 		});
 	}
 
@@ -71,8 +94,6 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 					>
 						<Tabs tabId='phone-stuffs'>
 							<Tab label='Stops' id={'tabStops'}>
-								<h3>Bus Stops</h3>
-
 								{/* Simple Search Bar */}
 								<TextField
 									placeholder='Search Stops'
@@ -117,7 +138,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedStops.map((stop: Stop) => {
 										return {label: stop.name, value: stop.id, checked: false, onChange: () => {
-											// send to map
+											// send to map. TODO: make this happen on radio button instead
 											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: stop.id, selectedObjectType: SelectedObjectType.Stop})
 
 											// wait to play animation before moving
@@ -143,8 +164,6 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							</Tab>
 
 							<Tab label='Routes' id={'tabRoutes'}>
-								<h3>Bus Routes</h3>
-
 								{/* Simple Search Bar */}
 								<TextField
 									placeholder='Search Routes'
@@ -189,7 +208,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedRoutes.map((route: Route) => {
 										return {label: route.name, value: route.id, checked: false, onChange: () => {
-											// send to map
+											// send to map. TODO: make this happen on radio button instead
 											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: route.id, selectedObjectType: SelectedObjectType.Route, polyString: route.polyline})
 
 											// wait to play animation before moving
@@ -214,16 +233,14 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								<Button primary={true} raised={true}>- Delete Route</Button>
 							</Tab>
 
-							<Tab label='Buses' id='tabBuses'>
-								<h3>Busses</h3>
-
-								{/* Simple Search Bar */}
+							{/* <Tab label='Buses' id='tabBuses'>
+								
 								<TextField
 									placeholder='Search Buses'
 									type='search'
 								/>
 
-								{/* Current Favorites List */}
+								{/* Current Favorites List }
 								<SelectionControlGroup
 									className='listlayout'
 									id='favorites-checkbox-3'
@@ -232,23 +249,25 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									label='Favorite Buses'
 									checkedCheckboxIcon={favorite}
 									uncheckedCheckboxIcon={unfavorite}
-									controls={[
-										{
-											label: 'Orlando Bus',
-											value: 'AAA',
-										},
-										{
-											label: 'Tampa Bus',
-											value: 'BBB',
-										},
-										{
-											label: 'Miami Bus',
-											value: 'CCC',
-										}
-									]}
+									controls={this.state.detectedBusses.map((bus: Bus) => {
+										return {label: bus.name, value: bus.id, checked: false, onChange: () => {
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove from favorite list
+												let busses = this.state.favoriteBusses.slice(); // slice() performs shallow copy
+												busses.splice(busses.indexOf(bus), 1);
+												this.setState({favoriteBusses: busses});
+
+												// add it to detected list
+												busses = this.state.detectedBusses.slice();
+												busses.push(bus);
+												this.setState({detectedBusses: busses});
+											}, 250);
+										}};
+									})}
 								/>
 
-								{/* Nearby Buses List */}
+								{/* Nearby Buses List }
 								<SelectionControlGroup
 									className='listlayout'
 									id='nearby-checkbox-3'
@@ -257,27 +276,33 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									label='Nearby Buses'
 									checkedCheckboxIcon={favorite}
 									uncheckedCheckboxIcon={unfavorite}
-									controls={[
-										{
-											label: 'Austin Bus',
-											value: '111',
-										},
-										{
-											label: 'Seattle Bus',
-											value: '222',
-										},
-										{
-											label: 'San Francisco Bus',
-											value: '333',
-										}
-									]}
+									controls={this.state.detectedBusses.map((bus: Bus) => {
+										return {label: bus.name, value: bus.id, checked: false, onChange: () => {
+											// send to map. TODO: make this happen on radio button instead
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: bus.id, selectedObjectType: SelectedObjectType.Bus})
+
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove from detected list
+												let busses = this.state.detectedBusses.slice(); // slice() performs shallow copy
+												busses.splice(busses.indexOf(bus), 1);
+												this.setState({detectedBusses: busses});
+
+												// add it to favorite list
+												busses = this.state.favoriteBusses.slice();
+												busses.push(bus);
+												this.setState({favoriteBusses: busses});
+											}, 250);
+										}};
+									})}
 								/>
 
-								{/*Add or Delete Buses*/}
+								{/*Add or Delete Buses}
 								<CardText className="add-delete-button">Add or Delete Buses</CardText>
 								<Button primary={true} raised={true}>+ Add New Bus</Button>
 								<Button primary={true} raised={true}>- Delete Bus</Button>
-							</Tab>
+							</Tab> */}
+
 						</Tabs>
 					</TabsContainer>
 					<Button
