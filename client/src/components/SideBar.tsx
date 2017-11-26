@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControl, SelectionControlGroup, Checkbox, List, ListItem, ListItemControl } from 'react-md';
-import { BusTrackerEvents } from '../BusTrackerEvents';
+import { BusTrackerEvents, SelectedObjectType } from '../BusTrackerEvents';
 import { appState } from '../BusTrackerState';
 import { Stop } from '../models/Stop';
 import { Route } from '../models/Route';
@@ -9,12 +9,16 @@ const favorite = <FontIcon>star</FontIcon>;
 const unfavorite = <FontIcon>star_border</FontIcon>;
 
 export interface SideBarState {
-	favoriteStops: Stop[];
-	favoriteRoutes: Route[];
+	// detectedBusses: Bus[];
+	// favoriteBusses: Bus[];
+
 	detectedStops: Stop[];
+	favoriteStops: Stop[];
+
 	detectedRoutes: Route[];
 	selectedTabId: string;
 	editFavoriteMode: boolean;
+	favoriteRoutes: Route[];
 }
 
 export interface SideBarProps { }
@@ -23,10 +27,15 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			favoriteStops: [] as Stop[],
-			favoriteRoutes: [] as Route[],
+			// detectedBusses: [] as Bus[],
+			// favoriteBusses: [] as Bus[],
+
 			detectedStops: [] as Stop[],
+			favoriteStops: [] as Stop[],
+
 			detectedRoutes: [] as Route[],
+			favoriteRoutes: [] as Route[],
+
 			selectedTabId: 'tabStops',
 			editFavoriteMode: false
 		};
@@ -38,16 +47,24 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	}
 
 	private async onLogin(): Promise<void> {
-		// Get the list of bus stops that are nearby.
-		const stopResult = await appState.api.getStopsNearLocation({ lat: 40.7588528, lng: -73.9852625 });
+		// get the list ALL busses
+		// const busResult = await appState.api.getAllBusses();
+		// if (!busResult.success) {}
+
+		// get list of busses that the user has favorited
+		// const favoriteBusResult = await appState.api.getBusses(appState.user.favoriteBusIds);
+		// if (!favoriteBusResult.success) {}
+
+		// Get the list of stops that are nearby.
+		const stopResult = await appState.api.getStopsNearLocation(appState.location);
 		if (!stopResult.success) { }
 
-		// Get the list of bus stops that the user has favorited, and request them from the server.
+		// Get the list of stops that the user has favorited, and request them from the server.
 		const favoriteStopResult = await appState.api.getStops(appState.user.favoriteStopIds);
 		if (!favoriteStopResult.success) { }
 
 		// Get the list of routes that are nearby.
-		const routeResult = await appState.api.getRoutesNearLocation({ lat: 40.7588528, lng: -73.9852625 });
+		const routeResult = await appState.api.getRoutesNearLocation(appState.location);
 		if (!routeResult.success) { }
 
 		// Get the list of routes that the user has favorited, and request them from the server.
@@ -56,10 +73,14 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 		// TODO: Remove duplicates between what is nearby and what the user has favorited.
 		this.setState({
-			favoriteStops: favoriteStopResult.data,
+			// detectedBusses: busResult.data,
+			// favoriteBusses: favoriteBusResult.data,
+
 			detectedStops: stopResult.data,
-			favoriteRoutes: favoriteRouteResult.data,
-			detectedRoutes: routeResult.data
+			favoriteStops: favoriteStopResult.data,
+
+			detectedRoutes: routeResult.data,
+			favoriteRoutes: favoriteRouteResult.data
 		});
 	}
 
@@ -228,6 +249,11 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										return (
 											<ListItem
 												primaryText={stop.name}
+												onClick={() => {
+													BusTrackerEvents.map.mapDisplayChangeRequested.dispatch(
+														{ ID: stop.id, type: SelectedObjectType.Stop, location: { lat: stop.latitude, lng: stop.longitude } }
+													);
+												}}
 											/>
 										)
 									}
@@ -341,6 +367,11 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										return (
 											<ListItem
 												primaryText={route.name}
+												onClick={() => {
+													BusTrackerEvents.map.mapDisplayChangeRequested.dispatch(
+														{ ID: route.id, type: SelectedObjectType.Route, polyString: route.polyline }
+													);
+												}}
 											/>
 										)
 									}
@@ -353,70 +384,75 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							<Button primary={true} raised={true}>- Delete Route</Button>
 						</Tab>
 
-						<Tab label='Buses' id='tabBuses'>
-							<h3>Busses</h3>
+						{/* <Tab label='Buses' id='tabBuses'>
+								
+								<TextField
+									placeholder='Search Buses'
+									type='search'
+								/>
 
-							{/* Simple Search Bar */}
-							<TextField
-								placeholder='Search Buses'
-								type='search'
-							/>
+								{/* Current Favorites List }
+								<SelectionControlGroup
+									className='listlayout'
+									id='favorites-checkbox-3'
+									name='favorites-3'
+									type='checkbox'
+									label='Favorite Buses'
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
+									controls={this.state.detectedBusses.map((bus: Bus) => {
+										return {label: bus.name, value: bus.id, checked: false, onChange: () => {
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove from favorite list
+												let busses = this.state.favoriteBusses.slice(); // slice() performs shallow copy
+												busses.splice(busses.indexOf(bus), 1);
+												this.setState({favoriteBusses: busses});
 
-							{/* Current Favorites List */}
-							<SelectionControlGroup
-								className='listlayout'
-								id='favorites-checkbox-3'
-								name='favorites-3'
-								type='checkbox'
-								label='Favorite Buses'
-								checkedCheckboxIcon={favorite}
-								uncheckedCheckboxIcon={unfavorite}
-								controls={[
-									{
-										label: 'Orlando Bus',
-										value: 'AAA',
-									},
-									{
-										label: 'Tampa Bus',
-										value: 'BBB',
-									},
-									{
-										label: 'Miami Bus',
-										value: 'CCC',
-									}
-								]}
-							/>
+												// add it to detected list
+												busses = this.state.detectedBusses.slice();
+												busses.push(bus);
+												this.setState({detectedBusses: busses});
+											}, 250);
+										}};
+									})}
+								/>
 
-							{/* Nearby Buses List */}
-							<SelectionControlGroup
-								className='listlayout'
-								id='nearby-checkbox-3'
-								name='nearby-3'
-								type='checkbox'
-								label='Nearby Buses'
-								checkedCheckboxIcon={favorite}
-								uncheckedCheckboxIcon={unfavorite}
-								controls={[
-									{
-										label: 'Austin Bus',
-										value: '111',
-									},
-									{
-										label: 'Seattle Bus',
-										value: '222',
-									},
-									{
-										label: 'San Francisco Bus',
-										value: '333',
-									}
-								]}
-							/>
+								{/* Nearby Buses List }
+								<SelectionControlGroup
+									className='listlayout'
+									id='nearby-checkbox-3'
+									name='nearby-3'
+									type='checkbox'
+									label='Nearby Buses'
+									checkedCheckboxIcon={favorite}
+									uncheckedCheckboxIcon={unfavorite}
+									controls={this.state.detectedBusses.map((bus: Bus) => {
+										return {label: bus.name, value: bus.id, checked: false, onChange: () => {
+											// send to map. TODO: make this happen on radio button instead
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: bus.id, selectedObjectType: SelectedObjectType.Bus})
 
-							{/*Add or Delete Buses*/}
-							<CardText className="add-delete-button">Add or Delete Buses</CardText>
-							<Button primary={true} raised={true}>+ Add New Bus</Button>
-							<Button primary={true} raised={true}>- Delete Bus</Button>
-						</Tab>
+											// wait to play animation before moving
+											setTimeout(() => {
+												// remove from detected list
+												let busses = this.state.detectedBusses.slice(); // slice() performs shallow copy
+												busses.splice(busses.indexOf(bus), 1);
+												this.setState({detectedBusses: busses});
+
+												// add it to favorite list
+												busses = this.state.favoriteBusses.slice();
+												busses.push(bus);
+												this.setState({favoriteBusses: busses});
+											}, 250);
+										}};
+									})}
+								/>
+
+								{/*Add or Delete Buses}
+								<CardText className="add-delete-button">Add or Delete Buses</CardText>
+								<Button primary={true} raised={true}>+ Add New Bus</Button>
+								<Button primary={true} raised={true}>- Delete Bus</Button>
+							</Tab> */}
 					</Tabs>
 				</TabsContainer>
 				<Button

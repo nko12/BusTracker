@@ -1,4 +1,5 @@
 import * as signals from 'signals';
+import {Coords} from 'google-map-react';
 
 /**
  * The type of a selected object.
@@ -11,8 +12,10 @@ export enum SelectedObjectType {
 }
 
 export interface MapDisplayChangeArguments {
-	selectedObjectId: string;
-	selectedObjectType: SelectedObjectType;
+	ID: string;
+	type: SelectedObjectType;
+	polyString?: string;
+	location?: Coords;
 }
 
 interface IBusTrackerEvents {
