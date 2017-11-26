@@ -34,9 +34,9 @@ export class User {
     /**
      * The list of IDs representing the stops that the user has favorited.
      */
-    public favoriteStopIds: Array<string> = [];
+    public favoriteStopIds: string[] = [];
     /**
      * The list of IDs representing the routes that the user has favorited.
      */
-    public favoriteRouteIds: Array<string> = [];
+    public favoriteRouteIds: string[] = [];
 }

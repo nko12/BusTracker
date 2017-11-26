@@ -77,7 +77,7 @@ export class BusTrackerApi {
 	public async toggleAdminRights(userId: string, targetUsername: string, adminStatus: boolean): Promise<Result> {
 		const mutation = gql`
 			mutation AdminStatusMutation {
-				toggleAdminRights(grantingId: ${userId}, targetId: ${targetUsername}, adminStatus: ${adminStatus}) {
+				toggleAdminRights(grantingId: "${userId}", targetId: "${targetUsername}", adminStatus: ${adminStatus}) {
 					error
 				}
 			}
@@ -94,7 +94,7 @@ export class BusTrackerApi {
 	public async editFavoriteStopIDs(userId: string, ids: Array<string>): Promise<Result> {
 		const mutation = gql`
 			mutation EditStops {
-				editFavoriteStopIDs(userId: ${userId}, objectIds: ${ids.toString()}) {
+				editFavoriteStopIDs(userId: "${userId}", objectIds: [${ids.length === 0 ? '' : '"' + ids.join('","') + '"'}]) {
 					error
 				}
 			}
@@ -111,7 +111,7 @@ export class BusTrackerApi {
 	public async editFavoriteRouteIDs(userId: string, ids: Array<string>): Promise<Result> {
 		const mutation = gql`
 			mutation EditRoutes {
-				editFavoriteRouteIDs(userId: ${userId}, objectIds: ${ids}) {
+				editFavoriteRouteIDs(userId: "${userId}", objectIds: [${ids.length === 0 ? '' : '"' + ids.join('","') + '"'}]) {
 					error
 				}
 			}
@@ -132,7 +132,7 @@ export class BusTrackerApi {
 
 		const mutation = gql`
 			mutation AddRoute {
-				addNewRoute(userId: ${userId}, name: ${name}, polyline: ${encodeResult}, stopIDs: []) {
+				addNewRoute(userId: "${userId}", name: "${name}", polyline: "${encodeResult}", stopIDs: []) {
 					error
 				}
 			}
@@ -151,7 +151,7 @@ export class BusTrackerApi {
 	public async addNewStop(userId: string, stopName: string, latitude: number, longitude: number): Promise<TypedResult<IDType>> {
 		const mutation = gql`
 			mutation AddStop {
-				addNewStop(userId: ${userId}, name: ${name}, latitude: ${latitude}, longitude: ${longitude}) {
+				addNewStop(userId: "${userId}", name: "${name}", latitude: ${latitude}, longitude: ${longitude}) {
 					error
 				}
 			}
@@ -168,7 +168,7 @@ export class BusTrackerApi {
 	public async removeRoute(userId: string, routeId: string): Promise<Result> {
 		const mutation = gql`
 			mutation RemoveRoute {
-				removeRoute(userId: ${userId}, objectId: ${routeId}) {
+				removeRoute(userId: ${userId}, objectId: "${routeId}") {
 					error
 				}
 			}
@@ -185,7 +185,7 @@ export class BusTrackerApi {
 	public async removeStop(userId: string, stopId: string): Promise<Result> {
 		const mutation = gql`
 		mutation RemoveStop {
-			removeStop(userId: ${userId}, objectId: ${stopId}) {
+			removeStop(userId: "${userId}", objectId: "${stopId}") {
 				error
 			}
 		}
@@ -233,7 +233,7 @@ export class BusTrackerApi {
 	public async getStops(stopIds: Array<string>): Promise<TypedResult<Array<Stop>>> {
 		const query = gql`
 			query GetStops {
-				getStops(ids: [${stopIds}]) {
+				getStops(ids: [${stopIds.length === 0 ? '' : '"' + stopIds.join('","') + '"'}]) {
 					error, stops {
 						id, name, latitude, longitude
 					}
@@ -249,7 +249,7 @@ export class BusTrackerApi {
 	public async getRoutes(routeIds: Array<string>): Promise<TypedResult<Array<Route>>> {
 		const query = gql`
 		query {
-			getRoutes(ids: [${routeIds}]) {
+			getRoutes(ids: [${routeIds.length === 0 ? '' : '"' + routeIds.join('","') + '"'}]) {
 			  error, routes {
 				id, name, stopIDs, polyline
 			  }
@@ -283,7 +283,7 @@ export class BusTrackerApi {
 			if (result.data[methodName]['error'])
 				return new TypedResult(false, null, 'Server failed request: ' + result.data[methodName]['error']);
 			else
-				return new TypedResult(true, hasData ? result.data[methodName] : null);
+				return new TypedResult(true, hasData ? Object.assign({}, result.data[methodName]) : null);
 
 		} catch (err) {
 			return new TypedResult(false, null, 'Query failed to execute: ' + (<ApolloError>err).message);

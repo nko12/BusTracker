@@ -10,7 +10,7 @@ export interface BusTrackerAppState {
 }
 
 // Represents the initial state of the app on startup.
-export const appState: BusTrackerAppState = {
+export let appState: BusTrackerAppState = {
 	user: null,
 	api: new BusTrackerApi()
 }

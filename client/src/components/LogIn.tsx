@@ -47,7 +47,7 @@ export class LogIn extends React.Component<LogInProps, LogInState> {
 			// Store the user id in a cookie so they don't have to log in again.
 			cookies.set('usernameAndHash', {username: loginRegisterResult.data.username, passwordHash: md5(this.state.password)});
 			// Store the user object to the state and alert the rest of the UI that login has occurred.
-			appState.user = loginRegisterResult.data;
+			appState.user = Object.assign({}, loginRegisterResult.data);
 			BusTrackerEvents.login.loginSucceeded.dispatch();
 			// this.props.sendToParent(stopResult.data);
 		} else

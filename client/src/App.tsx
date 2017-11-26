@@ -52,7 +52,7 @@ export default class App extends React.Component<{}, AppState> {
 			const result = await appState.api.login(userIdAndHash['username'], userIdAndHash['passwordHash']);
 			if (result.success) {
 				// Store the user data into the state.
-				appState.user = result.data;
+				appState.user = Object.assign({}, result.data);
 				// Set up the ui with the user's data.
 				BusTrackerEvents.login.loginSucceeded.dispatch();
 			} else {
