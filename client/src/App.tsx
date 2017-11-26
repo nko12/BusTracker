@@ -54,7 +54,7 @@ export default class App extends React.Component<{}, AppState> {
 				// Store the user data into the state.
 				appState.user = result.data;
 				// Set up the ui with the user's data.
-				this.onLogin();
+				BusTrackerEvents.login.loginSucceeded.dispatch();
 			} else {
 				// Unable to login the user. The login UI will show up.
 				this.showToast('Unable to log you back in, please login again.');

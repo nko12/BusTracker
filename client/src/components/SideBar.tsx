@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup} from 'react-md';
+import {CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControlGroup, Checkbox, List, ListItemControl} from 'react-md';
 import {BusTrackerEvents} from '../BusTrackerEvents';
 import {appState} from '../BusTrackerState';
 import {Stop} from '../models/Stop';
@@ -30,9 +30,6 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 		};
 
 		this.onLogin = this.onLogin.bind(this);
-	}
-
-	public componentDidMount(): void {
 		BusTrackerEvents.login.loginSucceeded.add(this.onLogin);
 	}
 
@@ -78,6 +75,26 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									placeholder='Search Stops'
 									type='search'
 								/>
+
+								<List>
+									{this.state.detectedStops.map((stop: Stop) => {
+										<ListItemControl
+											primaryAction={
+												<span>{stop.name}</span>
+											}
+											secondaryAction={
+												<Checkbox
+													id={stop.id}
+													name={stop.id + '_STOP'}
+													checkedIcon={favorite}
+													uncheckedIcon={unfavorite}
+												/>
+											}
+										>
+										</ListItemControl>
+									})}
+									<ListItemControl primaryAction={<span>TEST STOP</span>} secondaryAction={<Checkbox id={'asdfawe'} name={'danjfiasdnifds'} label={'Favorite?'} checkedIcon={favorite} uncheckedIcon={unfavorite} />}></ListItemControl>
+								</List>
 
 								{/* Current Favorites List */}
 								<SelectionControlGroup

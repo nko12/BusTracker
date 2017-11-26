@@ -3,9 +3,9 @@
   "version": "0.5.0",
   "description": "A bus tracking system that can be used to track the realtime movements of busses in New York city.",
   "scripts": {
-    "start": "tsc && export NODE_ENV=dev && node ./compiled/main.js",
-    "start-prod": "export NODE_ENV=prod && node ./compiled/main.js",
-    "test": "export NODE_ENV=test && mocha -r ts-node/register src/**/*.test.ts"
+    "start": "tsc && cross-env NODE_ENV=dev node ./compiled/main.js",
+    "start-prod": "cross-env NODE_ENV=prod node ./compiled/main.js",
+    "test": "cross-env NODE_ENV=test mocha -r ts-node/register src/**/*.test.ts"
   },
   "repository": {
     "type": "git",

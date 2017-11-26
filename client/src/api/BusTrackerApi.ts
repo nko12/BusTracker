@@ -1,14 +1,14 @@
 import * as polyline from 'polyline';
 import gql from 'graphql-tag';
-import {ExecutionResult} from 'graphql/execution/execute'
-import {ApolloClient, ApolloError} from 'apollo-client';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {HttpLink} from 'apollo-link-http';
-import {Coords} from 'google-map-react';
-import {TypedResult, Result} from '../Result';
-import {User} from '../models/User';
-import {Stop} from '../models/Stop';
-import {Route} from '../models/Route';
+import { ExecutionResult } from 'graphql/execution/execute'
+import { ApolloClient, ApolloError } from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { HttpLink } from 'apollo-link-http';
+import { Coords } from 'google-map-react';
+import { TypedResult, Result } from '../Result';
+import { User } from '../models/User';
+import { Stop } from '../models/Stop';
+import { Route } from '../models/Route';
 
 export interface IDType {
 	id: string,
@@ -25,7 +25,7 @@ export class BusTrackerApi {
 	 * Creates a new instance of the BusTrackerApi class.
 	 */
 	public constructor() {
-		const httpLink: HttpLink = new HttpLink({uri: 'http://localhost:5000/graphql'});
+		const httpLink: HttpLink = new HttpLink({ uri: 'http://localhost:5000/graphql' });
 
 		this.client = new ApolloClient<InMemoryCache>({
 			link: httpLink,
@@ -208,7 +208,8 @@ export class BusTrackerApi {
 		  }
 		`;
 		const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutesNearLocation', false, true);
-
+		if (!result.success)
+			return new TypedResult(false, null, result.message);
 		return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
 	}
 
@@ -224,7 +225,8 @@ export class BusTrackerApi {
 			}
 		`;
 		const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getStopsNearLocation', false, true);
-
+		if (!result.success)
+			return new TypedResult(false, null, result.message);
 		return new TypedResult(result.success, <Array<Stop>>result.data['stops'], result.message);
 	}
 
@@ -239,7 +241,8 @@ export class BusTrackerApi {
 			}
 		`;
 		const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getStops', false, true);
-
+		if (!result.success)
+			return new TypedResult(false, null, result.message);
 		return new TypedResult(result.success, <Array<Stop>>result.data['stops'], result.message);
 	}
 
@@ -254,7 +257,8 @@ export class BusTrackerApi {
 		  }
 		`;
 		const result: TypedResult<any> = await this.makeGraphQLRequest<any>(query, 'getRoutes', false, true);
-
+		if (!result.success)
+			return new TypedResult(false, null, result.message);
 		return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
 	}
 
@@ -280,7 +284,7 @@ export class BusTrackerApi {
 				return new TypedResult(false, null, 'Server failed request: ' + result.data[methodName]['error']);
 			else
 				return new TypedResult(true, hasData ? result.data[methodName] : null);
-			
+
 		} catch (err) {
 			return new TypedResult(false, null, 'Query failed to execute: ' + (<ApolloError>err).message);
 		}
