@@ -134,8 +134,11 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										}};
 									})}
 								/>
-
-								<CardText />
+								
+								{/*Add or Delete Stops*/}
+								<CardText className="add-delete-button">Add or Delete Stops</CardText>
+								<Button primary={true} raised={true}>+ Add New Stop</Button>
+								<Button primary={true} raised={true}>- Delete Stop</Button>
 							</Tab>
 
 							<Tab label='Routes' id={'tabRoutes'}>
@@ -174,6 +177,11 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										return { label: route.name, value: route.id };
 									})}
 								/>
+
+								{/*Add or Delete Routes*/}
+								<CardText className="add-delete-button">Add or Delete Routes</CardText>
+								<Button primary={true} raised={true}>+ Add New Route</Button>
+								<Button primary={true} raised={true}>- Delete Route</Button>
 							</Tab>
 
 							<Tab label='Buses' id='tabBuses'>
@@ -235,6 +243,10 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									]}
 								/>
 
+								{/*Add or Delete Buses*/}
+								<CardText className="add-delete-button">Add or Delete Buses</CardText>
+								<Button primary={true} raised={true}>+ Add New Bus</Button>
+								<Button primary={true} raised={true}>- Delete Bus</Button>
 							</Tab>
 						</Tabs>
 					</TabsContainer>
