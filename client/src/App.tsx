@@ -32,12 +32,6 @@ export default class App extends React.Component<{}, AppState> {
 		this.onDismissToast = this.onDismissToast.bind(this);
 		this.showToast = this.showToast.bind(this);
 		this.onLogout = this.onLogout.bind(this);
-
-		// TODO: uncomment this after debugging
-		// it will change the current location to the user's geolocation, but by default it's NYC
-		// navigator.geolocation.getCurrentPosition((position: any) => {
-		// 	this.setState({currentLocation: {lat: position.coords.latitude, lng: position.coords.longitude}});
-		// });
 	}
 
 	public async componentDidMount(): Promise<void> {
@@ -71,6 +65,15 @@ export default class App extends React.Component<{}, AppState> {
 
 		// Show a message welcoming the user.
 		this.showToast('Welcome ' + appState.user.username);
+
+		// get the current location
+		// TODO: uncomment this after finished debugging
+		// this changes the current location to the user's geolocation
+		// we want this off for now because there are no BusTime busses in Florida
+		// navigator.geolocation.getCurrentPosition((position: any) => {
+		// 	appState.location = {lat: position.coords.latitude, lng: position.coords.longitude};
+		// 	console.log('current position is: ' + JSON.stringify(appState.location));
+		// });
 	}
 
 	private onLogout(): void {

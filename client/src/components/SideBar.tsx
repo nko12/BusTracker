@@ -57,7 +57,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 		// if (!favoriteBusResult.success) {}
 
 		// Get the list of stops that are nearby.
-		const stopResult = await appState.api.getStopsNearLocation({lat: 40.7588528, lng: -73.9852625});
+		const stopResult = await appState.api.getStopsNearLocation(appState.location);
 		if (!stopResult.success) {}
 
 		// Get the list of stops that the user has favorited, and request them from the server.
@@ -65,7 +65,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 		if (!favoriteStopResult.success) {}
 
 		// Get the list of routes that are nearby.
-		const routeResult = await appState.api.getRoutesNearLocation({lat: 40.7588528, lng: -73.9852625});
+		const routeResult = await appState.api.getRoutesNearLocation(appState.location);
 		if (!routeResult.success) {}
 
 		// Get the list of routes that the user has favorited, and request them from the server.
