@@ -189,6 +189,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									uncheckedCheckboxIcon={unfavorite}
 									controls={this.state.detectedRoutes.map((route: Route) => {
 										return {label: route.name, value: route.id, checked: false, onChange: () => {
+											// send to map
+											BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({selectedObjectID: route.id, selectedObjectType: SelectedObjectType.Route, polyString: route.polyline})
+
 											// wait to play animation before moving
 											setTimeout(() => {
 												// remove from detected list

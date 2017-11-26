@@ -13,6 +13,7 @@ export enum SelectedObjectType {
 export interface MapDisplayChangeArguments {
 	selectedObjectID: string;
 	selectedObjectType: SelectedObjectType;
+	polyString?: string;
 }
 
 interface IBusTrackerEvents {

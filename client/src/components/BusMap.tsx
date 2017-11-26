@@ -124,7 +124,10 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				});
 				break;
 			case SelectedObjectType.Route:
-				console.log('recieved Route request for ' + args.selectedObjectID);
+				if (args.polyString)
+					this.updatePolyline(args.polyString);
+				else
+					console.log('error: args.polyString is ' + JSON.stringify(args.polyString) + ' in displayChangeRequested()');
 				break;
 			case SelectedObjectType.None:
 				break;
@@ -206,7 +209,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		var newPolyLine = new google.maps.Polyline({
 			path: this.convert(newPolyString),
 			geodesic: true,
-			strokeColor: '#ff0000',
+			strokeColor: '#00D4ff',
 			strokeOpacity: 1.0,
 			strokeWeight: 2
 		});
@@ -216,7 +219,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		else
 			console.log('this.state.map is undefined?');
 
-		oldPolyLine.setMap(null);
+		if (oldPolyLine)
+			oldPolyLine.setMap(null);
 
 		this.setState({polyString: newPolyString, polyLine: newPolyLine});
 	}
