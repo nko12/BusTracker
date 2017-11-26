@@ -1,4 +1,11 @@
 import * as React from 'react';
+
+import * as GoogleMapReact from 'google-map-react';
+import { BusMap, BusType, StopType } from './components/BusMap';
+//import { SideBar } from './components/SideBar';
+import { AdminView } from './components/AdminView';
+import LogIn from './components/LogIn';
+
 import { appState } from './BusTrackerState';
 import { BusTrackerEvents } from './BusTrackerEvents';
 import * as cookies from 'js-cookie';
@@ -7,6 +14,7 @@ import { BusMap } from './components/BusMap';
 import { SideBar } from './components/SideBar';
 import LogIn from './components/LogIn';
 import { Snackbar } from 'react-md';
+
 import './styles/App.css';
 
 /* const ORIGIN = { lat: 0.0, lng: 0.0 };
@@ -159,6 +167,20 @@ export default class App extends React.Component<{}, AppState> {
 	render() {
 		return (
 			<div>
+
+				 <LogIn 
+					currentLocation={this.state.currentLocation}
+					sendToParent={this.recieveFromLogin}
+				/> 
+				<div className='blurr'>
+					<div className='SideBar'>
+						<AdminView
+							busses={this.state.activeBusses}
+							allStops={this.state.allStops}
+							activeStops={this.state.activeStops}
+							polyString={this.state.polyString}
+							sendToParent={this.recieveFromSideBar}
+
 				{this.state.isUserLoggedIn ? null : <LogIn />}
 				<div id={'appBlur'} className='blurr'>
 					<div className='SideBar'>
@@ -168,6 +190,7 @@ export default class App extends React.Component<{}, AppState> {
 						activeStops={this.state.activeStops}
 						polyString={this.state.polyString}
 						sendToParent={this.recieveFromSideBar} */
+
 						/>
 					</div>
 					<div className='BusMap'>

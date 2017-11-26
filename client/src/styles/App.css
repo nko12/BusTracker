@@ -109,3 +109,22 @@
   text-align: left;
   margin: auto;
   display: block; }
+
+
+  .add-delete-button {
+    position: auto;
+    text-align: left;
+    padding: 25px;
+    width: 70%;
+
+  }
+
+  .center {
+    background-color: red;
+    top: -50px;
+    left: 410px;
+   
+    
+    
+  }
+
