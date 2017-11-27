@@ -9,15 +9,16 @@ interface ToastMessage {
 
 export interface AdminViewProps {
     showToastCallback(message: string): void;
+    
 }
 
 export interface AdminToolsProps {
     showDialog: boolean;
     onDialogClosed(): void;
+    selectedTabIndex: number
 }
 
-interface AdminToolsState {
-    selectedTabId: string;
+interface AdminToolsState {  
     isShowingDialog: boolean;
     toasts: Array<ToastMessage>
 }
@@ -27,7 +28,6 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
     public constructor(props: AdminToolsProps) {
         super(props);
         this.state = {
-            selectedTabId: '',
             isShowingDialog: false,
             toasts: new Array<ToastMessage>()
         }
@@ -57,14 +57,14 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
                     portal={true}
                     fullPage={true}
                 >
-                    <TabsContainer panelClassName={'md-grid'} className={'tabs__page-layout'} colored fixed themed label
+                    <TabsContainer panelClassName={'md-grid'} className={'tabs__page-layout'} colored fixed themed label activeTabIndex={1}
                         toolbar={<Toolbar title={'Administrator Tools'} actions={[<Button flat onClick={() => this.props.onDialogClosed()}>Exit</Button>]} />}
                     >
-                        <Tabs tabId='tabs-object'>
-                            <Tab label={'Create Stop'}>
+                        <Tabs tabId='tabs-object' >
+                            <Tab label={'Create Stop'} id={'create-stop-tab'}>
                                 <CreateStop showToastCallback={this.showToastMessage}/>
                             </Tab>
-                            <Tab label={'Create Route'}>
+                            <Tab label={'Create Route'} id={'create-route-tab'}>
                                 <CreateRoute showToastCallback={this.showToastMessage}/>
                             </Tab>
                         </Tabs>

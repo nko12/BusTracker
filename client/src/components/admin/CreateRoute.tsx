@@ -43,8 +43,7 @@ export class CreateRoute extends React.Component<AdminViewProps, CreateRouteStat
                             placeholder={'Route Name...'}
                             value={this.state.name}
                             onChange={(value: string) => { this.setState({ name: value }) }}
-                        />
-                        
+                        />                     
                         <br></br>
                         <br></br>
                     </Cell>
