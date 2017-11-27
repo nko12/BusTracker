@@ -242,7 +242,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			geodesic: true,
 			strokeColor: '#00D4ff',
 			strokeOpacity: 1.0,
-			strokeWeight: 2
+			strokeWeight: 4
 		});
 		
 		if (this.state.map != undefined)
