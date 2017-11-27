@@ -186,11 +186,11 @@ export class BusTrackerDB {
     /**
      * Allows a user to grant or revoke admin rights of a target user.
      * @param grantingId The id of the user who is attempting to grant admin rights.
-     * @param targetId The id of the user who is to receive admin rights.
+     * @param targetUsername The username of the user who is to receive admin rights.
      * @param adminStatus True to grant admin rights, false to revoke them.
      * @returns A promise containing the result of the operation.
      */
-    public async toggleAdminRights(grantingId: string, targetId: string, adminStatus: boolean): Promise<Result> {
+    public async toggleAdminRights(grantingId: string, targetUsername: string, adminStatus: boolean): Promise<Result> {
 
         // Find the user attempting to grant admin rights.
         const grantingUserData: models.User = await schema.UserType.findOne({ id: grantingId }).lean().cursor().next();
@@ -202,9 +202,9 @@ export class BusTrackerDB {
             return new Result(false, `Granting user with id ${grantingId} does not have administrative rights.`);
 
         // Find the target user.
-        const targetUser: mongoose.Document = await schema.UserType.findOne({ id: targetId }).cursor().next();
+        const targetUser: mongoose.Document = await schema.UserType.findOne({ username: targetUsername }).cursor().next();
         if (targetUser == null)
-            return new Result(false, `Target user with id ${targetId} not found.`);
+            return new Result(false, `Target user with username ${targetUsername} not found.`);
 
         // Change the target user admin rights. Nothing happens if the toggle value matches their current rights.
         targetUser.set({ isAdmin: adminStatus });

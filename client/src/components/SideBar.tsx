@@ -205,20 +205,23 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	}
 
 	render() {
-		let stopTabAdminTools = null, routeTabAdminTools = null;
+		let stopTabAdminTools = null, routeTabAdminTools = null, buttonAdminTools = null;
 
 		if (appState.user != null && appState.user.isAdmin) {
 			stopTabAdminTools = (
 				<div style={{float: 'none', margin: '0 auto', marginTop: '15px'}}>
-					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 0 })}>+ Add New Stop</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 1 })}>+ Add New Stop</Button>
 					<Button raised={true}>- Delete Stop</Button>
 				</div>
 			);
 			routeTabAdminTools = (
 				<div style={{float: 'none', margin: '0 auto', marginTop: '15px'}}>
-					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 1 })}>+ Add New Route</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 3 })}>+ Add New Route</Button>
 					<Button raised={true}>- Delete Route</Button>
 				</div>
+			);
+			buttonAdminTools = (
+				<Button raised onClick={() => {this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 0})}}>Admin Tools</Button>
 			);
 		}
 		return (
@@ -233,6 +236,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 					<Tabs tabId='phone-stuffs'>
 						<Tab label='Stops' id={'tabStops'}>
 							<h3>Bus Stops</h3>
+							<br></br>
+							<br></br>
 
 							<Checkbox
 								id={'checkboxEditFavoriteStopMode'}
@@ -323,7 +328,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 						<Tab label='Routes' id={'tabRoutes'}>
 							<h3>Bus Routes</h3>
-
+							<br></br>
+							<br></br>
 							<Checkbox
 								id={'checkboxEditFavoriteRouteMode'}
 								name={'checkboxEditFavoriteRouteMode'}
@@ -412,6 +418,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 						</Tab>
 					</Tabs>
 				</TabsContainer>
+				{buttonAdminTools}
 				<Button
 					raised
 					onClick={(evt) => BusTrackerEvents.login.logoutRequested.dispatch()}

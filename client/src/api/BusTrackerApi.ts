@@ -77,7 +77,7 @@ export class BusTrackerApi {
 	public async toggleAdminRights(userId: string, targetUsername: string, adminStatus: boolean): Promise<Result> {
 		const mutation = gql`
 			mutation AdminStatusMutation {
-				toggleAdminRights(grantingId: "${userId}", targetId: "${targetUsername}", adminStatus: ${adminStatus}) {
+				toggleAdminRights(grantingId: "${userId}", targetUsername: "${targetUsername}", adminStatus: ${adminStatus}) {
 					error
 				}
 			}

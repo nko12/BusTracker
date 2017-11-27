@@ -88,7 +88,7 @@ interface IDArrayMutationData {
  */
 interface AdminRightsMutationData {
   grantingId: string;
-  targetId: string;
+  targetUsername: string;
   adminStatus: boolean;
 }
 
@@ -214,7 +214,7 @@ class GraphQLHandler {
 
         type Mutation {
           register(username: String, passwordHash: String): User
-          toggleAdminRights(grantingId: String, targetId: String, adminStatus: Boolean): BasicResponse
+          toggleAdminRights(grantingId: String, targetUsername: String, adminStatus: Boolean): BasicResponse
           editFavoriteStopIDs(userId: String, objectIds: [String]): BasicResponse
           editFavoriteRouteIDs(userId: String, objectIds: [String]): BasicResponse
           addNewRoute(userId: String, id: String, name: String, polyline: String, stopIDs: [String]): IDResponse
@@ -382,7 +382,7 @@ class GraphQLHandler {
 
     let response: GraphQLBasicResponse = new GraphQLBasicResponse();
 
-    const result = await this.server.storage.toggleAdminRights(data.grantingId, data.targetId, data.adminStatus);
+    const result = await this.server.storage.toggleAdminRights(data.grantingId, data.targetUsername, data.adminStatus);
     if (!result.success) {
       response.error = result.message;
     }
