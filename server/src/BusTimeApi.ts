@@ -85,7 +85,7 @@ export class BusTimeApi {
                 return new TypedResult(false, null, 'Failed to get data from BusTime: ' + resultData.text);
             }
 
-            const routes: Array<Route> = new Array<Route>();
+            let routes: Array<Route> = new Array<Route>();
             for (let i = 0; i < resultData.data.routes.length; i++) {
                 const busTimeRoute: BusTimeRouteObject = resultData.data.routes[i];
                 
@@ -117,6 +117,12 @@ export class BusTimeApi {
                 await this.storage.addNewRealRoute(route);
             }
 
+            // Throw in the fake routes into the mix as well so users can always see them.
+            const fakeRouteResults = await this.storage.getAllFakeRoutes();
+            if (fakeRouteResults.success) {
+                routes = routes.concat(<Array<Route>> fakeRouteResults.data);
+            }        
+
             return new TypedResult(true, routes);
         } catch (err) {
             return new TypedResult(false, null);
@@ -131,13 +137,19 @@ export class BusTimeApi {
                 return new TypedResult(false, null, 'Failed to get data from BusTime: ' + resultData.text);
             }
 
-            const stops: Array<Stop> = new Array<Stop>();
+            let stops: Array<Stop> = new Array<Stop>();
             for (let i = 0; i < resultData.data.stops.length; i++) {
                 const busTimeStop: BusTimeStopObject = resultData.data.stops[i];
                 const stop: Stop = {id: busTimeStop.id, name: busTimeStop.name, latitude: busTimeStop.lat, longitude: busTimeStop.lon};
                 stops.push(stop);
                 await this.storage.addNewRealStop(stop);
             }
+
+            // Throw in the fake stops into the mix as well so users can always see them.
+            const fakeStopResults = await this.storage.getAllFakeStops();
+            if (fakeStopResults.success) {
+                stops = stops.concat(<Array<Stop>> fakeStopResults.data);
+            }    
 
             return new TypedResult(true, stops);
         } catch (err) {

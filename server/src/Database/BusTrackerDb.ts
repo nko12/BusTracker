@@ -186,11 +186,11 @@ export class BusTrackerDB {
     /**
      * Allows a user to grant or revoke admin rights of a target user.
      * @param grantingId The id of the user who is attempting to grant admin rights.
-     * @param targetId The id of the user who is to receive admin rights.
+     * @param targetUsername The username of the user who is to receive admin rights.
      * @param adminStatus True to grant admin rights, false to revoke them.
      * @returns A promise containing the result of the operation.
      */
-    public async toggleAdminRights(grantingId: string, targetId: string, adminStatus: boolean): Promise<Result> {
+    public async toggleAdminRights(grantingId: string, targetUsername: string, adminStatus: boolean): Promise<Result> {
 
         // Find the user attempting to grant admin rights.
         const grantingUserData: models.User = await schema.UserType.findOne({ id: grantingId }).lean().cursor().next();
@@ -202,9 +202,9 @@ export class BusTrackerDB {
             return new Result(false, `Granting user with id ${grantingId} does not have administrative rights.`);
 
         // Find the target user.
-        const targetUser: mongoose.Document = await schema.UserType.findOne({ id: targetId }).cursor().next();
+        const targetUser: mongoose.Document = await schema.UserType.findOne({ username: targetUsername }).cursor().next();
         if (targetUser == null)
-            return new Result(false, `Target user with id ${targetId} not found.`);
+            return new Result(false, `Target user with username ${targetUsername} not found.`);
 
         // Change the target user admin rights. Nothing happens if the toggle value matches their current rights.
         targetUser.set({ isAdmin: adminStatus });
@@ -364,15 +364,53 @@ export class BusTrackerDB {
 
         // Search for all routes matching the specified ids.
         try {
-            const cursor = schema.RouteType.find({id: {"$in": routeIds}}).lean().cursor();
+            const cursor = schema.RouteType.find({ id: { "$in": routeIds } }).lean().cursor();
             const routes: Array<models.Route> = new Array<models.Route>();
             await cursor.eachAsync((route: models.Route) => {
                 routes.push(route);
             });
-    
+
             return new TypedResult(true, routes);
         } catch (err) {
             return new TypedResult(false, null, 'Failed to get the requested routes: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
+     * Gets the list of all fake routes that administrators have created.
+     * @returns A result containing the list of fake routes.
+     */
+    public async getAllFakeRoutes(): Promise<TypedResult<Array<models.Route> | null>> {
+
+        try {
+            const cursor = schema.RouteType.find({ id: new RegExp('^FAKE_')}).lean().cursor();
+            const routes: Array<models.Route> = new Array<models.Route>();
+            await cursor.eachAsync((route: models.Route) => {
+                routes.push(route);
+            });
+
+            return new TypedResult(true, routes);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get all fake routes: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
+     * Gets the list of all fake bus stops that administrators have created.
+     * @returns A result containing the list of fake bus stops.
+     */
+    public async getAllFakeStops(): Promise<TypedResult<Array<models.Stop> | null>> {
+
+        try {
+            const cursor = schema.StopType.find({ id: new RegExp('^FAKE_')}).lean().cursor();
+            const stops: Array<models.Stop> = new Array<models.Stop>();
+            await cursor.eachAsync((stop: models.Stop) => {
+                stops.push(stop);
+            });
+
+            return new TypedResult(true, stops);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get all fake bus stops: ' + JSON.stringify(err));
         }
     }
 
@@ -385,7 +423,7 @@ export class BusTrackerDB {
 
         // Search for all bus stops matching the specified ids.
         try {
-            const cursor = schema.StopType.find({id: {"$in": stopIds}}).lean().cursor();
+            const cursor = schema.StopType.find({ id: { "$in": stopIds } }).lean().cursor();
             const stops: Array<models.Stop> = new Array<models.Stop>();
             await cursor.eachAsync((stop: models.Stop) => {
                 stops.push(stop);

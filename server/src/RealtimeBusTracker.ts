@@ -5,8 +5,6 @@ var request = require('request');
 const IO = require('socket.io')();
 const PORT = 8000;
 
-// realTimeInit();
-
 export function realTimeInit() {
 	IO.listen(PORT);
 	console.log('listening on port', PORT);
@@ -22,35 +20,31 @@ var hm = new Map<string, MapValueType>();
 var numClicks = 0;
 var clickLimit = 5;
 
-// getStopsFromBus(7790);
-
 function decycle(object : any) {
 	var objects: any[] = [], paths: any[] = [];
 	function resolve(value: any, path: any) {
 		var length: any, results: any;
+
 		if (typeof value == 'object' && value) {
 			length = objects.length;
-			while (length--) {
+			while (length--)
 				if (objects[length] == value) return {'$ref': paths[length]};
-			}
+			
 			objects.push(value);
 			paths.push(path);
 			if (Object.prototype.toString.call(value) == '[object Array]') {
 				results = [];
 				length = value.length;
-				while (length--) {
+				while (length--)
 					results[length] = resolve(value[length], path + '[' + length + ']');
-				}
 			} else {
 				results = {};
-				for (length in value) {
+				for (length in value)
 					results[length] = resolve(value[length], path + '[' + JSON.stringify(length) + ']');
-				}
 			}
 			return results;
-		} else {
+		} else
 			return value;
-		}
 	}
 	return resolve(object, '$');
 }
@@ -157,6 +151,11 @@ IO.on('connection', (client: any) => {
 		console.log('disconnecting ' + thisClientID);
 		hm.delete(thisClientID);
 	});
+
+	client.on('cancelSubscriptions', () => {
+		hm.set(thisClientID, {bus: false, stop: false});
+		console.log('IT HAS BEEN SET!!!!');
+	})
 });
 
 function getStop(stopID: any, client: any) {

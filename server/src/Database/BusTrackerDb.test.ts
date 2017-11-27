@@ -302,7 +302,7 @@ describe('BusTrackerDB', () => {
             await user2.save();
 
             // Have user1 attempt to give user2 admin rights.
-            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.username, true);
 
             // The operation should succeed.
             chai.expect(result.success).to.be.true;
@@ -324,7 +324,7 @@ describe('BusTrackerDB', () => {
             await user2.save();
 
             // Have user1 attempt to give user2 admin rights.
-            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+            const result: Result = await appDB.toggleAdminRights(userData1.id, userData2.username, true);
 
             // The operation should fail.
             chai.expect(result.success).to.be.false;
@@ -347,17 +347,17 @@ describe('BusTrackerDB', () => {
             await user2.save();
 
             // Have user1 attempt to give user2 admin rights.
-            await appDB.toggleAdminRights(userData1.id, userData2.id, true);
+            await appDB.toggleAdminRights(userData1.id, userData2.username, true);
 
             // The second user should have admin rights.
-            let locatedUser: models.User = await UserType.findOne({ id: userData2.id }).lean().cursor().next();
+            let locatedUser: models.User = await UserType.findOne({ username: userData2.username }).lean().cursor().next();
             chai.expect(locatedUser.isAdmin).to.be.true;
 
             // Now, have user1 attempt to remove user2's admin rights.
-            await appDB.toggleAdminRights(userData1.id, userData2.id, false);
+            await appDB.toggleAdminRights(userData1.id, userData2.username, false);
 
             // The second user should no longer have admin rights.
-            locatedUser = await UserType.findOne({ id: userData2.id }).lean().cursor().next();
+            locatedUser = await UserType.findOne({ username: userData2.username }).lean().cursor().next();
             chai.expect(locatedUser.isAdmin).to.be.false;
         });
     });

@@ -25,7 +25,10 @@ interface IBusTrackerEvents {
 	};
 	map: {
 		mapDisplayChangeRequested: signals.Signal
-	};
+    };
+    toast: {
+        showToastRequested: signals.Signal;
+    }
 }
 
 export interface LoginEvent {
@@ -49,5 +52,11 @@ export const BusTrackerEvents: IBusTrackerEvents = {
 		 * Fired when the user requests the BusMap to display something.
 		 */
 		mapDisplayChangeRequested: new signals.Signal()
-	}
+    },
+    toast: {
+        /**
+         * Fired when a control wants to show a toast message.
+         */
+        showToastRequested: new signals.Signal()
+    }
 }

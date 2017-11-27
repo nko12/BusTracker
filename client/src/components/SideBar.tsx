@@ -1,13 +1,14 @@
 import * as React from 'react';
 import {
-	CardText, TabsContainer, Tabs, Tab, Button, FontIcon,
-	SelectionControl, Checkbox, List, ListItem, ListItemControl, Divider, Card
+	TabsContainer, Tabs, Tab, Button, FontIcon,
+	SelectionControl, Checkbox, List, ListItem, ListItemControl, Divider
 } from 'react-md';
 import Scrollbar from 'react-custom-scrollbars';
 import { BusTrackerEvents, SelectedObjectType } from '../BusTrackerEvents';
 import { appState } from '../BusTrackerState';
 import { Stop } from '../models/Stop';
 import { Route } from '../models/Route';
+import { AdminTools } from './admin/AdminTools';
 
 const favorite = <FontIcon>star</FontIcon>;
 const unfavorite = <FontIcon>star_border</FontIcon>;
@@ -23,6 +24,9 @@ export interface SideBarState {
 	selectedTabId: string;
 	editFavoriteMode: boolean;
 	favoriteRoutes: Route[];
+
+	isShowingAdminToolsDialog: boolean;
+	selectedAdminToolsTabIndex: number;
 }
 
 export interface SideBarProps { }
@@ -41,7 +45,10 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 			favoriteRoutes: [] as Route[],
 
 			selectedTabId: 'tabStops',
-			editFavoriteMode: false
+			editFavoriteMode: false,
+
+			isShowingAdminToolsDialog: false,
+			selectedAdminToolsTabIndex: 0
 		};
 
 		this.onLogin = this.onLogin.bind(this);
@@ -198,18 +205,39 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	}
 
 	render() {
+		let stopTabAdminTools = null, routeTabAdminTools = null, buttonAdminTools = null;
+
+		if (appState.user != null && appState.user.isAdmin) {
+			stopTabAdminTools = (
+				<div style={{float: 'none', margin: '0 auto', marginTop: '15px'}}>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 1 })}>+ Add New Stop</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 3 })}>- Delete Stop</Button>
+				</div>
+			);
+			routeTabAdminTools = (
+				<div style={{float: 'none', margin: '0 auto', marginTop: '15px'}}>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 2 })}>+ Add New Route</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 3 })}>- Delete Route</Button>
+				</div>
+			);
+			buttonAdminTools = (
+				<Button raised onClick={() => {this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 0})}}>Admin Tools</Button>
+			);
+		}
 		return (
 			<div style={{ overflow: 'auto' }}>
 				<TabsContainer
 					className='tabs__page-layout'
 					panelClassName='md-grid'
 					onTabChange={() => {
-						BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ID: 'nil', type: SelectedObjectType.None});
+						BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ ID: 'nil', type: SelectedObjectType.None });
 					}}
 				>
 					<Tabs tabId='phone-stuffs'>
 						<Tab label='Stops' id={'tabStops'}>
 							<h3>Bus Stops</h3>
+							<br></br>
+							<br></br>
 
 							<Checkbox
 								id={'checkboxEditFavoriteStopMode'}
@@ -295,18 +323,13 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									})}
 								</List>
 							</Scrollbar>
-
-							{/*Add or Delete Stops*/}
-							<Card>
-								<CardText className="add-delete-button">Add or Delete Stops</CardText>
-								<Button primary={true} raised={true}>+ Add New Stop</Button>
-								<Button primary={true} raised={true}>- Delete Stop</Button>
-							</Card>
+							{stopTabAdminTools}
 						</Tab>
 
 						<Tab label='Routes' id={'tabRoutes'}>
 							<h3>Bus Routes</h3>
-
+							<br></br>
+							<br></br>
 							<Checkbox
 								id={'checkboxEditFavoriteRouteMode'}
 								name={'checkboxEditFavoriteRouteMode'}
@@ -391,23 +414,18 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 									})}
 								</List>
 							</Scrollbar>
-
-							{/*Add or Delete Routes*/}
-							<Card>
-								<CardText className="add-delete-button">Add or Delete Routes</CardText>
-								<Button primary={true} raised={true}>+ Add New Route</Button>
-								<Button primary={true} raised={true}>- Delete Route</Button>
-							</Card>
-
+							{routeTabAdminTools}
 						</Tab>
 					</Tabs>
 				</TabsContainer>
+				{buttonAdminTools}
 				<Button
 					raised
 					onClick={(evt) => BusTrackerEvents.login.logoutRequested.dispatch()}
 				>
 					Logout
 				</Button>
+				<AdminTools selectedTabIndex={this.state.selectedAdminToolsTabIndex} showDialog={this.state.isShowingAdminToolsDialog} onDialogClosed={() => this.setState({ isShowingAdminToolsDialog: false })} />
 			</div>
 		);
 	}
