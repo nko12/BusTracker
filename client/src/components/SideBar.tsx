@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, SelectionControl, SelectionControlGroup, Checkbox, List, ListItem, ListItemControl } from 'react-md';
+import { CardText, TabsContainer, Tabs, Tab, TextField, Button, FontIcon, 
+	SelectionControl, Checkbox, List, ListItem, ListItemControl, Divider } from 'react-md';
+import Scrollbar from 'react-custom-scrollbars';
 import { BusTrackerEvents, SelectedObjectType } from '../BusTrackerEvents';
 import { appState } from '../BusTrackerState';
 import { Stop } from '../models/Stop';
@@ -225,6 +227,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								label={this.state.editFavoriteMode ? 'Exit Favorite Mode' : 'Enter Favorite Mode'}
 							/>
 
+							<Scrollbar style={{height: '600px'}}>
 							<List>
 								{this.state.favoriteStops.map((stop: Stop) => {
 									if (this.state.editFavoriteMode) {
@@ -260,6 +263,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								})}
 							</List>
 
+							{/* Divide the favorites from everything else. */}
+							<Divider></Divider>
+
 							<List>
 								{this.state.detectedStops.map((stop: Stop) => {
 									if (this.state.editFavoriteMode) {
@@ -284,11 +290,17 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										return (
 											<ListItem
 												primaryText={stop.name}
+												onClick={() => {
+													BusTrackerEvents.map.mapDisplayChangeRequested.dispatch(
+														{ ID: stop.id, type: SelectedObjectType.Stop, location: { lat: stop.latitude, lng: stop.longitude } }
+													);
+												}}
 											/>
 										)
 									}
 								})}
 							</List>
+							</Scrollbar>
 
 							{/*Add or Delete Stops*/}
 							<CardText className="add-delete-button">Add or Delete Stops</CardText>
@@ -337,6 +349,11 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 										return (
 											<ListItem
 												primaryText={route.name}
+												onClick={() => {
+													BusTrackerEvents.map.mapDisplayChangeRequested.dispatch(
+														{ ID: route.id, type: SelectedObjectType.Route, polyString: route.polyline }
+													);
+												}}
 											/>
 										)
 									}

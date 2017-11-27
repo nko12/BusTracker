@@ -63,6 +63,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			polyString: '',
 			polyLine: null
 		};
+
+		BusTrackerEvents.map.mapDisplayChangeRequested.add(this.displayChangeRequested);
 	}
 
 	convert(encoded: string) {
@@ -101,7 +103,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			polyLine: null
 		});
 
-		BusTrackerEvents.map.mapDisplayChangeRequested.add(this.displayChangeRequested);
+		
 	}
 
 	displayChangeRequested = (args: MapDisplayChangeArguments) => {
