@@ -72,7 +72,7 @@ export class CreateRoute extends React.Component<AdminViewProps, CreateRouteStat
 
         // Take the contents of the route definition textbox and split it along each new long to get each string latitude/longitude pair.
         // For each of these pairs, split them on the comma to get an array [latitude, longitude]
-        const latLngs: Array<Array<number>> = this.state.positionText.split('/\r?\n/').map((strPosition: string) => {
+        const latLngs: Array<Array<number>> = this.state.positionText.replace(/\n/g, ' ').split(' ').map((strPosition: string) => {
             
             return strPosition.split(',').map((latlng: string) => {
                 return parseFloat(latlng);

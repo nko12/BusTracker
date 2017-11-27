@@ -1,4 +1,3 @@
-import * as polyline from 'polyline';
 import gql from 'graphql-tag';
 import { ExecutionResult } from 'graphql/execution/execute'
 import { ApolloClient, ApolloError } from 'apollo-client';
@@ -121,9 +120,13 @@ export class BusTrackerApi {
 	 * @param routePositions A two dimensional array representing the latitude/longitude pairs of points that make up the route.
 	 * @returns A Result dictating the result of the operation.
 	 */
-    public async addNewRoute(userId: string, routeName: string, routePositions: Array<Array<number>>): Promise<TypedResult<string>> {
-        // Encode the list of latitude/longitude objects into a polyline string.
-        const encodeResult: string = polyline.encode(routePositions, 5);
+    public async addNewRoute(userId: string, routeName: string, routePositions: number[][]): Promise<TypedResult<string>> {
+		
+		// Encode the list of latitude/longitude objects into a polyline string.
+		const googleMapPositions = routePositions.map((latlng: number[]) => {
+			return new google.maps.LatLng(latlng[0], latlng[1]);
+		});
+		const encodeResult: string = google.maps.geometry.encoding.encodePath(googleMapPositions);
 
         const mutation = gql`
 			mutation AddRoute {

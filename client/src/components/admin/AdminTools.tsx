@@ -35,7 +35,7 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
         }
     }
 
-    public componentWillReceiveProps(nextProps: AdminToolsProps) {
+    public async componentWillReceiveProps(nextProps: AdminToolsProps) {
 
         if (nextProps.showDialog != this.state.isShowingDialog) {
             this.setState({ isShowingDialog: nextProps.showDialog });
