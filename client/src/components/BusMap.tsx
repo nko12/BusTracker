@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as GoogleMapReact from 'google-map-react';
 import GoogleMap from 'google-map-react';
 import {BusTrackerEvents, MapDisplayChangeArguments, SelectedObjectType} from '../BusTrackerEvents';
-import {getStop, subscribeToStop, subscribeToBus} from '../api/RealTimeApi';
+import {getStop, subscribeToStop, subscribeToBus, cancelSubscriptions} from '../api/RealTimeApi';
 
 const IMG = 'https://i.imgur.com/7f5HCOn.png';
 // const KRH = 'https://i.imgur.com/SUxfnuv.png';
@@ -30,12 +30,13 @@ export interface BusMapState {
 	maps?: GoogleMapReact.Maps;
 
 	mapLoaded: boolean;
+	subscribed: boolean;
 
 	busses: BusType[];
 	stops: StopType[];
 
-	busMarkers: google.maps.Marker[];
-	stopMarkers: google.maps.Marker[];
+	busMarkers: google.maps.Marker[] | null;
+	stopMarkers: google.maps.Marker[] | null;
 
 	polyString: string;
 	polyLine: google.maps.Polyline | null;
@@ -53,6 +54,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			center: NYC,
 
 			mapLoaded: false,
+			subscribed: false,
 
 			busses: new Array<BusType>(),
 			stops: new Array<StopType>(),
@@ -102,15 +104,16 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			stopMarkers: [] as google.maps.Marker[],
 			polyLine: null
 		});
-
-		
 	}
 
 	displayChangeRequested = (args: MapDisplayChangeArguments) => {
 		switch (args.type) {
 			case SelectedObjectType.Bus: // BUS
+				this.setState({subscribed: true});
+
 				subscribeToBus({interval: INTERVAL, busID: args.ID.split('_')[1]}, (err: any, busLoc: GoogleMapReact.Coords) => {
-					this.updateBusses([{location: busLoc, ID: args.ID}]);
+					if (this.state.subscribed)
+						this.updateBusses([{location: busLoc, ID: args.ID}]);
 				});
 				break;
 			case SelectedObjectType.Stop: // STOP
@@ -118,8 +121,11 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				if (args.location)
 					this.updateStops([{location: args.location, ID: args.ID}]);
 				else // otherwise we need to find it
+					this.setState({subscribed: true});
+
 					getStop(args.ID.split('_')[1], (err: any, stopLoc: GoogleMapReact.Coords) => {
-						this.updateStops([{location: stopLoc, ID: args.ID}]);
+						if (this.state.subscribed)
+							this.updateStops([{location: stopLoc, ID: args.ID}]);
 					});
 
 				subscribeToStop({interval: INTERVAL, stopID: args.ID}, (err: any, busObjs: BusType[]) => {
@@ -137,6 +143,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 					console.log('error: args.polyString is ' + JSON.stringify(args.polyString) + ' in displayChangeRequested()');
 				break;
 			case SelectedObjectType.None:
+				cancelSubscriptions();
 				// dispose of old busses
 				let markers = this.state.busMarkers;
 				for (let i = 0; i < markers.length; i++)
@@ -152,7 +159,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				if (polyLine)
 					polyLine.setMap(null);
 
-				this.setState({busses: [], stops: [], busMarkers: [], stopMarkers: [], polyString: '', polyLine: null});
+				this.setState({busses: [], stops: [], busMarkers: [], stopMarkers: [], polyString: '', polyLine: null, subscribed: false});
 				break;
 			default:
 				break;

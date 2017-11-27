@@ -219,7 +219,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 								label={this.state.editFavoriteMode ? 'Exit Favorite Mode' : 'Enter Favorite Mode'}
 							/>
 
-							<Scrollbar style={{ height: '550px' }}>
+							<Scrollbar style={{height: '550px'}}>
 								<h3>Favorites</h3>
 								<List>
 									{this.state.favoriteStops.map((stop: Stop) => {
