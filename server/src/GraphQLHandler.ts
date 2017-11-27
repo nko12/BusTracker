@@ -218,7 +218,7 @@ class GraphQLHandler {
           editFavoriteStopIDs(userId: String, objectIds: [String]): BasicResponse
           editFavoriteRouteIDs(userId: String, objectIds: [String]): BasicResponse
           addNewRoute(userId: String, id: String, name: String, polyline: String, stopIDs: [String]): IDResponse
-          addNewStop(userId: String, id: String, name: String, latitude: String, longitude: String): IDResponse
+          addNewStop(userId: String, id: String, name: String, latitude: Float, longitude: Float): IDResponse
           removeRoute(userId: String, objectId: String): BasicResponse
           removeStop(userId: String, objectId: String): BasicResponse
           deleteUser(id: String): BasicResponse

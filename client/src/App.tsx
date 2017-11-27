@@ -38,6 +38,7 @@ export default class App extends React.Component<{}, AppState> {
 		// Listen to certain events.
 		BusTrackerEvents.login.loginSucceeded.add(this.onLogin);
 		BusTrackerEvents.login.logoutRequested.add(this.onLogout);
+		BusTrackerEvents.toast.showToastRequested.add(this.showToast);
 
 		// Is the user already logged in?
 		const userIdAndHash = cookies.getJSON('usernameAndHash');
@@ -122,7 +123,6 @@ export default class App extends React.Component<{}, AppState> {
 					toasts={this.state.toasts}
 					onDismiss={this.onDismissToast}
 					autohideTimeout={1500}
-					// TODO: align text center
 				/>
 			</div>
 		);

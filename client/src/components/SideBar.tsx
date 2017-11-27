@@ -8,6 +8,7 @@ import { BusTrackerEvents, SelectedObjectType } from '../BusTrackerEvents';
 import { appState } from '../BusTrackerState';
 import { Stop } from '../models/Stop';
 import { Route } from '../models/Route';
+import { AdminTools } from './admin/AdminTools';
 
 const favorite = <FontIcon>star</FontIcon>;
 const unfavorite = <FontIcon>star_border</FontIcon>;
@@ -23,6 +24,8 @@ export interface SideBarState {
 	selectedTabId: string;
 	editFavoriteMode: boolean;
 	favoriteRoutes: Route[];
+
+	isShowingAdminToolsDialog: boolean;
 }
 
 export interface SideBarProps { }
@@ -41,7 +44,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 			favoriteRoutes: [] as Route[],
 
 			selectedTabId: 'tabStops',
-			editFavoriteMode: false
+			editFavoriteMode: false,
+
+			isShowingAdminToolsDialog: false
 		};
 
 		this.onLogin = this.onLogin.bind(this);
@@ -299,8 +304,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							{/*Add or Delete Stops*/}
 							<Card>
 								<CardText className="add-delete-button">Add or Delete Stops</CardText>
-								<Button primary={true} raised={true}>+ Add New Stop</Button>
-								<Button primary={true} raised={true}>- Delete Stop</Button>
+								<Button raised={true} onClick={() => this.setState({isShowingAdminToolsDialog: true})}>+ Add New Stop</Button>
+								<Button raised={true}>- Delete Stop</Button>
 							</Card>
 						</Tab>
 
@@ -395,8 +400,8 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 							{/*Add or Delete Routes*/}
 							<Card>
 								<CardText className="add-delete-button">Add or Delete Routes</CardText>
-								<Button primary={true} raised={true}>+ Add New Route</Button>
-								<Button primary={true} raised={true}>- Delete Route</Button>
+								<Button raised={true}>+ Add New Route</Button>
+								<Button raised={true}>- Delete Route</Button>
 							</Card>
 
 						</Tab>
@@ -408,6 +413,7 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 				>
 					Logout
 				</Button>
+				<AdminTools showDialog={this.state.isShowingAdminToolsDialog} onDialogClosed={() => this.setState({isShowingAdminToolsDialog: false})} />
 			</div>
 		);
 	}
