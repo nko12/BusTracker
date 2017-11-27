@@ -86,6 +86,7 @@ export class BusTrackerServer {
 
             // A component failed to initialization successfully.
             console.log(`Server initialization failed. ${err}`);
+            throw err;
         }
     }
 

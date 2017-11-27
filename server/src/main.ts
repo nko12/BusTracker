@@ -9,4 +9,5 @@ server.init().then(() => {
 
     console.log('An error occurred during server initialization. Server is unable to start.');
     console.log(`Error Object: ${err}`);
+    process.exit();
 });

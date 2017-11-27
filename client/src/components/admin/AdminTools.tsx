@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button, DialogContainer, Snackbar, Tab, Tabs, TabsContainer, Toolbar } from 'react-md';
-import { CreateStop, CreateRoute, ToggleUserAdmin } from './';
+import { CreateStop, CreateRoute, ToggleUserAdmin, DeleteObjects } from './';
 
 interface ToastMessage {
     text: string
@@ -23,6 +23,8 @@ interface AdminToolsState {
 }
 
 export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState> {
+
+    private deleteObjectsChild: DeleteObjects;
 
     public constructor(props: AdminToolsProps) {
         super(props);
@@ -61,7 +63,7 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
                 >
                     <TabsContainer panelClassName={'md-grid'} className={'tabs__page-layout'} colored fixed themed label activeTabIndex={this.state.selectedTabIndex}
                         toolbar={<Toolbar title={'Administrator Tools'} actions={[<Button flat onClick={() => this.props.onDialogClosed()}>Exit</Button>]} />}
-                        onTabChange={this.onTabChanged}
+                        onTabChange={async (index: number, tabId: string) => await this.onTabChanged(index, tabId)}
                     >
                         <Tabs tabId='tabs-object'>
                             <Tab label={'About Tools'} id={'admin-tools-info'}>
@@ -73,13 +75,10 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
                                         <li>Create Bus Stops - Allows you to create fake bus stops. The system uses actual bus data, so these stops
                                             will not display bus data with them.
                                         </li>
-                                        <li>Delete Bus Stops - Allows you to delete fake bus stops that you have created. You cannot delete the real
-                                            bus stops provided by the BusTime API.
-                                        </li>
                                         <li>Create Routes - Allows you to define fake routes. The route will show up to users like real ones.
                                         </li>
-                                        <li>Delete Routes - Allows you to delete fake routes. Like the "Delete Stop" tab, you cannot delete the real
-                                            bus routes provided by the BusTime API.
+                                        <li>Delete Objects - Allows you to delete fake routes and bsu stops. You cannot delete the real bus routes provided 
+                                            by the BusTime API.
                                         </li>
                                         <li>Admin Privileges - Allows you to grant or revoke the admin privileges of another user, given their username.
                                         </li>
@@ -91,14 +90,11 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
                             <Tab label={'Create Stop'} id={'create-stop-tab'}>
                                 <CreateStop showToastCallback={this.showToastMessage}/>
                             </Tab>
-                            <Tab label={'Delete Stop'} id={'delete-stop-tab'}>
-                                
-                            </Tab>
                             <Tab label={'Create Route'} id={'create-route-tab'}>
                                 <CreateRoute showToastCallback={this.showToastMessage}/>
                             </Tab>
-                            <Tab label={'Delete Route'} id={'delete-stop-tab'}>
-
+                            <Tab label={'Delete Object'} id={'delete-object-tab'}>
+                                <DeleteObjects ref={instance => { this.deleteObjectsChild = instance; }} showToastCallback={this.showToastMessage}/>
                             </Tab>
                             <Tab label={'Admin Privileges'} id={'toggle-admin-privliges'}>
                                 <ToggleUserAdmin showToastCallback={this.showToastMessage}/>
@@ -123,7 +119,10 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
         this.setState({ toasts });
     }
 
-    private onTabChanged = (newActiveTabIndex: number) => {
+    private onTabChanged = async (newActiveTabIndex: number, tabId: string): Promise<void> => {
         this.setState({selectedTabIndex: newActiveTabIndex});
+        if (tabId == 'delete-object-tab' && this.deleteObjectsChild != null) {
+            await this.deleteObjectsChild.reloadFakeObjects();
+        }
     }
 }

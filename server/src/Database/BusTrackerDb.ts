@@ -364,15 +364,53 @@ export class BusTrackerDB {
 
         // Search for all routes matching the specified ids.
         try {
-            const cursor = schema.RouteType.find({id: {"$in": routeIds}}).lean().cursor();
+            const cursor = schema.RouteType.find({ id: { "$in": routeIds } }).lean().cursor();
             const routes: Array<models.Route> = new Array<models.Route>();
             await cursor.eachAsync((route: models.Route) => {
                 routes.push(route);
             });
-    
+
             return new TypedResult(true, routes);
         } catch (err) {
             return new TypedResult(false, null, 'Failed to get the requested routes: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
+     * Gets the list of all fake routes that administrators have created.
+     * @returns A result containing the list of fake routes.
+     */
+    public async getAllFakeRoutes(): Promise<TypedResult<Array<models.Route> | null>> {
+
+        try {
+            const cursor = schema.RouteType.find({ id: new RegExp('^FAKE_')}).lean().cursor();
+            const routes: Array<models.Route> = new Array<models.Route>();
+            await cursor.eachAsync((route: models.Route) => {
+                routes.push(route);
+            });
+
+            return new TypedResult(true, routes);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get all fake routes: ' + JSON.stringify(err));
+        }
+    }
+
+    /**
+     * Gets the list of all fake bus stops that administrators have created.
+     * @returns A result containing the list of fake bus stops.
+     */
+    public async getAllFakeStops(): Promise<TypedResult<Array<models.Stop> | null>> {
+
+        try {
+            const cursor = schema.StopType.find({ id: new RegExp('^FAKE_')}).lean().cursor();
+            const stops: Array<models.Stop> = new Array<models.Stop>();
+            await cursor.eachAsync((stop: models.Stop) => {
+                stops.push(stop);
+            });
+
+            return new TypedResult(true, stops);
+        } catch (err) {
+            return new TypedResult(false, null, 'Failed to get all fake bus stops: ' + JSON.stringify(err));
         }
     }
 
@@ -385,7 +423,7 @@ export class BusTrackerDB {
 
         // Search for all bus stops matching the specified ids.
         try {
-            const cursor = schema.StopType.find({id: {"$in": stopIds}}).lean().cursor();
+            const cursor = schema.StopType.find({ id: { "$in": stopIds } }).lean().cursor();
             const stops: Array<models.Stop> = new Array<models.Stop>();
             await cursor.eachAsync((stop: models.Stop) => {
                 stops.push(stop);

@@ -208,6 +208,8 @@ class GraphQLHandler {
           getStop(id: String): Stop
           getRoutes(ids: [String]): RouteArray
           getStops(ids: [String]): StopArray
+          getFakeRoutes: RouteArray
+          getFakeStops: StopArray
           getRoutesNearLocation(latitude: Float, longitude: Float): RouteArray
           getStopsNearLocation(latitude: Float, longitude: Float): StopArray
         }
@@ -295,7 +297,7 @@ class GraphQLHandler {
       return routes;
     }
 
-    routes.routes = <models.Route[]> result.data;
+    routes.routes = <models.Route[]>result.data;
 
     return routes;
   }
@@ -313,8 +315,39 @@ class GraphQLHandler {
       return stops;
     }
 
-    stops.stops = <models.Stop[]> result.data;
+    stops.stops = <models.Stop[]>result.data;
+    return stops;
+  }
 
+  /**
+   * Handler that gets all the fake routes that have been created by admin.
+   * @returns An object containing all the fake route objects.
+   */
+  public async getFakeRoutes(): Promise<GraphQLRouteArray> {
+    let routes: GraphQLRouteArray = new GraphQLRouteArray();
+    const result = await this.server.storage.getAllFakeRoutes();
+    if (!result.success) {
+      routes.error = result.message;
+      return routes;
+    }
+
+    routes.routes = <models.Route[]>result.data;
+    return routes;
+  }
+
+  /**
+   * Handler that gets all the fake bus stops that have been created by admin.
+   * @returns An object containing all the fake bus stop objects.
+   */
+  public async getFakeStops(): Promise<GraphQLStopArray> {
+    let stops: GraphQLStopArray = new GraphQLStopArray();
+    const result = await this.server.storage.getAllFakeStops();
+    if (!result.success) {
+      stops.error = result.message;
+      return stops;
+    }
+
+    stops.stops = <models.Stop[]>result.data;
     return stops;
   }
 
