@@ -81,7 +81,7 @@ export class DeleteObjects extends React.Component<AdminViewProps, DeleteObjectS
         const result = await appState.api.removeStop(appState.user.id, stop.id);
         if (result.success) {
             this.props.showToastCallback('Bus stop successfully removed.');
-            const stops = this.state.stops;
+            const stops = this.state.stops.slice();
             stops.splice(stops.indexOf(stop), 1);
             this.setState({ stops: stops });
         } else {
@@ -94,7 +94,7 @@ export class DeleteObjects extends React.Component<AdminViewProps, DeleteObjectS
         const result = await appState.api.removeRoute(appState.user.id, route.id);
         if (result.success) {
             this.props.showToastCallback('Bus stop successfully removed.');
-            const routes = this.state.routes;
+            const routes = this.state.routes.slice();
             routes.splice(routes.indexOf(route), 1);
             this.setState({ routes: routes });
         } else {

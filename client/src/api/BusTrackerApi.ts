@@ -173,7 +173,7 @@ export class BusTrackerApi {
     public async removeRoute(userId: string, routeId: string): Promise<Result> {
         const mutation = gql`
 			mutation RemoveRoute {
-				removeRoute(userId: ${userId}, objectId: "${routeId}") {
+				removeRoute(userId: "${userId}", objectId: "${routeId}") {
 					error
 				}
 			}

@@ -211,13 +211,13 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 			stopTabAdminTools = (
 				<div style={{float: 'none', margin: '0 auto', marginTop: '15px'}}>
 					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 1 })}>+ Add New Stop</Button>
-					<Button raised={true}>- Delete Stop</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 3 })}>- Delete Stop</Button>
 				</div>
 			);
 			routeTabAdminTools = (
 				<div style={{float: 'none', margin: '0 auto', marginTop: '15px'}}>
-					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 3 })}>+ Add New Route</Button>
-					<Button raised={true}>- Delete Route</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 2 })}>+ Add New Route</Button>
+					<Button raised={true} onClick={() => this.setState({ isShowingAdminToolsDialog: true, selectedAdminToolsTabIndex: 3 })}>- Delete Route</Button>
 				</div>
 			);
 			buttonAdminTools = (
