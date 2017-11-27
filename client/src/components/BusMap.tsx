@@ -10,7 +10,7 @@ const IMG = 'https://i.imgur.com/7f5HCOn.png';
 const ORIGIN = {lat: 0.0, lng: 0.0};
 const NYC = {lat: 40.7588528, lng: -73.9852625};
 
-const INTERVAL = 1000;
+const INTERVAL = 10000;
 
 export interface BusType {
 	location: GoogleMapReact.Coords;
@@ -30,7 +30,6 @@ export interface BusMapState {
 	maps?: GoogleMapReact.Maps;
 
 	mapLoaded: boolean;
-	subscribed: boolean;
 
 	busses: BusType[];
 	stops: StopType[];
@@ -54,7 +53,6 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			center: NYC,
 
 			mapLoaded: false,
-			subscribed: false,
 
 			busses: new Array<BusType>(),
 			stops: new Array<StopType>(),
@@ -109,33 +107,35 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 	displayChangeRequested = (args: MapDisplayChangeArguments) => {
 		switch (args.type) {
 			case SelectedObjectType.Bus: // BUS
-				this.setState({subscribed: true});
+				// cancel realTime subscription if fake
+				if (args.ID.split('_')[0] == 'FAKE')
+					cancelSubscriptions();
 
 				subscribeToBus({interval: INTERVAL, busID: args.ID.split('_')[1]}, (err: any, busLoc: GoogleMapReact.Coords) => {
-					if (this.state.subscribed)
-						this.updateBusses([{location: busLoc, ID: args.ID}]);
+					this.updateBusses([{location: busLoc, ID: args.ID}]);
 				});
 				break;
+
 			case SelectedObjectType.Stop: // STOP
 				// just do it if a location was given
 				if (args.location)
 					this.updateStops([{location: args.location, ID: args.ID}]);
 				else // otherwise we need to find it
-					this.setState({subscribed: true});
-
-					getStop(args.ID.split('_')[1], (err: any, stopLoc: GoogleMapReact.Coords) => {
-						if (this.state.subscribed)
-							this.updateStops([{location: stopLoc, ID: args.ID}]);
+					getStop(args.ID.split('_').pop(), (err: any, stopLoc: GoogleMapReact.Coords) => {
+						this.updateStops([{location: stopLoc, ID: args.ID}]);
 					});
 
-				subscribeToStop({interval: INTERVAL, stopID: args.ID}, (err: any, busObjs: BusType[]) => {
-					let busses: BusType[] = [];
-					for (let i = 0; i < busObjs.length; i++)
-						busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
+				// don't get busses for fake stops
+				if (args.ID.split('_')[0] != 'FAKE')
+					subscribeToStop({interval: INTERVAL, stopID: args.ID}, (err: any, busObjs: BusType[]) => {
+						let busses: BusType[] = [];
+						for (let i = 0; i < busObjs.length; i++)
+							busses.push({location: busObjs[i].location, ID: busObjs[i].ID.split('_')[1]});
 
-					this.updateBusses(busses);
-				});
+						this.updateBusses(busses);
+					});
 				break;
+
 			case SelectedObjectType.Route: // ROUTE
 				if (args.polyString)
 					this.updatePolyline(args.polyString);
@@ -143,7 +143,9 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 					console.log('error: args.polyString is ' + JSON.stringify(args.polyString) + ' in displayChangeRequested()');
 				break;
 			case SelectedObjectType.None:
+				// stop getting updates
 				cancelSubscriptions();
+
 				// dispose of old busses
 				let markers = this.state.busMarkers;
 				for (let i = 0; i < markers.length; i++)
@@ -159,8 +161,9 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				if (polyLine)
 					polyLine.setMap(null);
 
-				this.setState({busses: [], stops: [], busMarkers: [], stopMarkers: [], polyString: '', polyLine: null, subscribed: false});
+				this.setState({busses: [], stops: [], busMarkers: [], stopMarkers: [], polyString: '', polyLine: null});
 				break;
+
 			default:
 				break;
 		}

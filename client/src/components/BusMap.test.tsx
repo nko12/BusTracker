@@ -1,11 +1,15 @@
 import * as React from 'react';
-// import * as GoogleMapReact from 'google-map-react';
 import {mount, ReactWrapper} from 'enzyme';
 import GoogleMap from 'google-map-react';
 import {BusMap, BusMapProps, BusMapState, StopType} from './BusMap';
 
-const NYC = {lat: 40.7588528, lng: -73.9852625};
-const POLYSTRING= 'ybpwFvxsbMuC_CUKWMaBe@gCo@A?_@Eg@O}DkAo@e@oCuB{BeBYSSOgCmBaAo@iAw@QKoBuAsBaBq@g@oI}GKIc@oAuBsAe@]}ASmCc@}B_@YEyC_@qACC?eADa@JgBRm@CWSs@e@AA{@g@MKm@c@aAm@KMq@e@y@i@uBqAsBwAuBsAYSaBgAcC_BgAs@}@m@yByAITsBrGIZ}B{AyByA{ByAm@a@mAw@{ByA{@k@}@m@{ByA{ByAeCaBwBwAMGyByA{ByAeBiASO}ByA{ByAmBqAMIcC_BqBuASM{ByA}B{AmBoAOK{ByAqBsAKG}B{AoBqAKG}B{A}B{AoBoAMI{B{A{B{AoBoAMIeCcByBwAMI{ByA}B{AeBiAUQ}ByA}B{Ak@_@oAy@}B{AiBmAQM}B{As@c@gAu@}B{Au@e@gAu@{ByAiCcBoA{@w@g@}B{A_C{A[UaBgA_C{AeAs@w@g@gCcBsA{@u@g@}B{A_C{AmBqAOK}B{A_C}AgCaBcAq@cAq@{ByAoBoAMK}B{A}B{AeAs@u@e@}B}AkAu@q@c@}B{AuA}@o@c@gCaBkBqAQK}B{AkFiDMK}B{AgAu@u@e@gBkAUM}B}AkBmAYSgCaB{@m@_Am@}B{A}@m@_Am@}B{Au@e@kAw@yE}CuCoB{@i@oA{@gCaB}B{Aq@e@iAu@gAs@y@c@q@]kAw@aAo@{@k@{B{AgAs@e@[MOOQuBuA}@m@gAs@}ByAo@c@kAw@{ByAu@e@gAu@{ByAaC_By@i@qH_FOIOh@Y|@{AxEsA}@s@c@{B{A{AcA_@WWOGEcBgAo@pBqDnL_@tAeAs@u@e@{ByA{ByAcAq@y@k@}ByAeBgAKEYC{@m@iAs@mBqAQ?c@rAsDhLM^M`@zBzALc@~EoO'
+// TODO: this test uses the old way of transferring data between components
+// i.e. via props and callbacks to parent components
+// the new way uses signals and a unified state component
+// TODO: re-write these tests using the new way
+
+// const NYC = {lat: 40.7588528, lng: -73.9852625};
+// const POLYSTRING= 'ybpwFvxsbMuC_CUKWMaBe@gCo@A?_@Eg@O}DkAo@e@oCuB{BeBYSSOgCmBaAo@iAw@QKoBuAsBaBq@g@oI}GKIc@oAuBsAe@]}ASmCc@}B_@YEyC_@qACC?eADa@JgBRm@CWSs@e@AA{@g@MKm@c@aAm@KMq@e@y@i@uBqAsBwAuBsAYSaBgAcC_BgAs@}@m@yByAITsBrGIZ}B{AyByA{ByAm@a@mAw@{ByA{@k@}@m@{ByA{ByAeCaBwBwAMGyByA{ByAeBiASO}ByA{ByAmBqAMIcC_BqBuASM{ByA}B{AmBoAOK{ByAqBsAKG}B{AoBqAKG}B{A}B{AoBoAMI{B{A{B{AoBoAMIeCcByBwAMI{ByA}B{AeBiAUQ}ByA}B{Ak@_@oAy@}B{AiBmAQM}B{As@c@gAu@}B{Au@e@gAu@{ByAiCcBoA{@w@g@}B{A_C{A[UaBgA_C{AeAs@w@g@gCcBsA{@u@g@}B{A_C{AmBqAOK}B{A_C}AgCaBcAq@cAq@{ByAoBoAMK}B{A}B{AeAs@u@e@}B}AkAu@q@c@}B{AuA}@o@c@gCaBkBqAQK}B{AkFiDMK}B{AgAu@u@e@gBkAUM}B}AkBmAYSgCaB{@m@_Am@}B{A}@m@_Am@}B{Au@e@kAw@yE}CuCoB{@i@oA{@gCaB}B{Aq@e@iAu@gAs@y@c@q@]kAw@aAo@{@k@{B{AgAs@e@[MOOQuBuA}@m@gAs@}ByAo@c@kAw@{ByAu@e@gAu@{ByAaC_By@i@qH_FOIOh@Y|@{AxEsA}@s@c@{B{A{AcA_@WWOGEcBgAo@pBqDnL_@tAeAs@u@e@{ByA{ByAcAq@y@k@}ByAeBgAKEYC{@m@iAs@mBqAQ?c@rAsDhLM^M`@zBzALc@~EoO'
 
 function centroid(stops: StopType[]) {
 	let centroid = {lat: 0.0, lng: 0.0};
@@ -29,10 +33,7 @@ describe('BusMap on init', () => {
 	beforeEach(() => {
 		// Create some BusMap properties
 		props = {
-			busses: [{ID: '512', location: NYC}],
-			stops: [{ID: '400343', location: NYC, name: 'test'}],
-			zoom: 5,
-			polyString: POLYSTRING
+			zoom: 5
 		};
 		// Create a BusMap object to test on
 		busMapWrapper = mount(<BusMap {...props} />);
@@ -61,9 +62,6 @@ describe('BusMap on init', () => {
 
 		expect(state.mapLoaded).toBeTruthy();
 
-		expect(state.busses).toEqual(props.busses);
-		expect(state.stops).toEqual(props.stops);
-
 		// expect(state.busMarkers).toBeInstanceOf(google.maps.Marker[]);
 		// expect(state.stopMarkers).toBeInstanceOf(google.maps.Marker[]);
 	});
@@ -85,10 +83,7 @@ describe('BusMap on change', () => {
 	beforeAll(() => {
 		// Create some BusMap properties
 		props = {
-			busses: [{ID: '512', location: NYC}],
-			stops: [{ID: '400343', location: NYC, name: 'test'}],
-			zoom: 5,
-			polyString: POLYSTRING
+			zoom: 5
 		};
 		// Create a BusMap object to test on
 		busMapWrapper = mount(<BusMap {...props} />);
@@ -99,20 +94,7 @@ describe('BusMap on change', () => {
 	beforeEach(() => {
 		// redefine props
 		props = {
-			busses: [
-				{ID: '256', location: {lat: 40.7588528, lng: -73.9852625}},
-				{ID: '257', location: {lat: 40.7588528, lng: -74.9852625}},
-				{ID: '258', location: {lat: 41.7588528, lng: -73.9852625}},
-				{ID: '259', location: {lat: 41.7588528, lng: -74.9852625}}
-			],
-			stops: [
-				{ID: '400343', location: {lat: 41.7588528, lng: -74.9852625}, name: 'test'},
-				{ID: '400344', location: {lat: 41.7588528, lng: -75.9852625}, name: 'test'},
-				{ID: '400345', location: {lat: 42.7588528, lng: -74.9852625}, name: 'test'},
-				{ID: '400346', location: {lat: 42.7588528, lng: -75.9852625}, name: 'test'}
-			],
-			zoom: 5,
-			polyString: POLYSTRING
+			zoom: 5
 		};
 	});
 
@@ -134,9 +116,6 @@ describe('BusMap on change', () => {
 		// expect(state.maps).toBeInstanceOf(GoogleMapReact.Maps);
 
 		expect(newState.mapLoaded).toBeTruthy();
-
-		expect(newState.busses).toEqual(props.busses);
-		expect(newState.stops).toEqual(props.stops);
 
 
 		// expect(state.busMarkers).toBeInstanceOf(google.maps.Marker[]);
