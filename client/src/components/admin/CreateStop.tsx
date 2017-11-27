@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TextField, Button, Divider } from 'react-md';
+import { TextField, Button } from 'react-md';
 import { appState } from '../../BusTrackerState';
 import { AdminViewProps } from './AdminTools';
 // import { BusTrackerEvents } from '../../BusTrackerEvents';
@@ -29,7 +29,6 @@ export class CreateStop extends React.Component<AdminViewProps, CreateStopState>
         if (this.state.lastStopId != '') {
             idArea = (
                 <div>
-                    <Divider />
                     <span>New Bus Stop ID: {this.state.lastStopId}</span>
                 </div>
             )
@@ -62,8 +61,8 @@ export class CreateStop extends React.Component<AdminViewProps, CreateStopState>
         const result = await appState.api.addNewStop(appState.user.id, this.state.name, parseFloat(this.state.latitude), parseFloat(this.state.longitude));
         if (result.success) {
             // BusTrackerEvents.toast.showToastRequested.dispatch('Successfully created new bus stop.')
-            this.setState({latitude: '', longitude: '', name: '', lastStopId: result.data.id});
-            this.props.showToastCallback('Successfully created new bus stop. ID: ' + result.data.id);
+            this.setState({latitude: '', longitude: '', name: '', lastStopId: result.data});
+            this.props.showToastCallback('Successfully created new bus stop. ID: ' + result.data);
         } else {
             // BusTrackerEvents.toast.showToastRequested.dispatch('Failed to create new bus stop: ' + result.message);
             this.props.showToastCallback('Failed to create new bus stop: ' + result.message);

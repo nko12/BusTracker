@@ -10,11 +10,6 @@ import { User } from '../models/User';
 import { Stop } from '../models/Stop';
 import { Route } from '../models/Route';
 
-export interface IDType {
-	id: string,
-	error: string
-}
-
 /**
  * Represents the connection that allows the client to communicate to the server.
  */
@@ -126,18 +121,23 @@ export class BusTrackerApi {
 	 * @param routePositions A two dimensional array representing the latitude/longitude pairs of points that make up the route.
 	 * @returns A Result dictating the result of the operation.
 	 */
-	public async addNewRoute(userId: string, routeName: string, routePositions: Array<Array<number>>): Promise<TypedResult<IDType>> {
+	public async addNewRoute(userId: string, routeName: string, routePositions: Array<Array<number>>): Promise<TypedResult<string>> {
 		// Encode the list of latitude/longitude objects into a polyline string.
 		const encodeResult: string = polyline.encode(routePositions, 5);
 
 		const mutation = gql`
 			mutation AddRoute {
 				addNewRoute(userId: "${userId}", name: "${name}", polyline: "${encodeResult}", stopIDs: []) {
-					error
+                    error,
+                    id
 				}
 			}
 		`;
-		return await this.makeGraphQLRequest<IDType>(mutation, 'addNewRoute', true, false);
+        
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(mutation, 'addNewRoute', true, true);
+		if (!result.success)
+			return new TypedResult(false, null, result.message);
+		return new TypedResult(result.success, <string>result.data['id'], result.message);
 	}
 
 	/**
@@ -148,15 +148,20 @@ export class BusTrackerApi {
 	 * @param longitude The longitude of the bus stop.
 	 * @returns The result of the operation, with the id of the new stop.
 	 */
-	public async addNewStop(userId: string, stopName: string, latitude: number, longitude: number): Promise<TypedResult<IDType>> {
+	public async addNewStop(userId: string, stopName: string, latitude: number, longitude: number): Promise<TypedResult<string>> {
 		const mutation = gql`
 			mutation AddStop {
 				addNewStop(userId: "${userId}", name: "${name}", latitude: ${latitude}, longitude: ${longitude}) {
-					error
+                    error,
+                    id
 				}
 			}
-		`;
-		return (await this.makeGraphQLRequest<IDType>(mutation, 'addNewStop', true, false));
+        `;
+
+        const result: TypedResult<any> = await this.makeGraphQLRequest<any>(mutation, 'addNewStop', true, true);
+		if (!result.success)
+			return new TypedResult(false, null, result.message);
+		return new TypedResult(result.success, <string>result.data['id'], result.message);
 	}
 
 	/**

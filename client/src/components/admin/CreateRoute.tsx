@@ -113,8 +113,8 @@ export class CreateRoute extends React.Component<AdminViewProps, CreateRouteStat
         // Attempt to create a new route.
         const result = await appState.api.addNewRoute(appState.user.id, this.state.name, this.state.positions);
         if (result.success) {
-            this.props.showToastCallback('Successfully created new route. ID: ' + result.data.id);
-            this.setState({ positions: new Array<Array<number>>(), currentLatitude: '', currentLongitude: '', name: '', lastRouteId: result.data.id })
+            this.props.showToastCallback('Successfully created new route. ID: ' + result.data);
+            this.setState({ positions: new Array<Array<number>>(), currentLatitude: '', currentLongitude: '', name: '', lastRouteId: result.data })
         } else {
             this.props.showToastCallback('Failed to create new route: ' + result.message);
         }
