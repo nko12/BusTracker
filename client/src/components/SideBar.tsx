@@ -203,6 +203,9 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 				<TabsContainer
 					className='tabs__page-layout'
 					panelClassName='md-grid'
+					onTabChange={() => {
+						BusTrackerEvents.map.mapDisplayChangeRequested.dispatch({ID: 'nil', type: SelectedObjectType.None});
+					}}
 				>
 					<Tabs tabId='phone-stuffs'>
 						<Tab label='Stops' id={'tabStops'}>

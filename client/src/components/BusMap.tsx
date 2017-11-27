@@ -137,6 +137,22 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 					console.log('error: args.polyString is ' + JSON.stringify(args.polyString) + ' in displayChangeRequested()');
 				break;
 			case SelectedObjectType.None:
+				// dispose of old busses
+				let markers = this.state.busMarkers;
+				for (let i = 0; i < markers.length; i++)
+					markers[i].setMap(null);
+
+				// dispose of old markers
+				markers = this.state.stopMarkers;
+				for (let i = 0; i < markers.length; i++)
+					markers[i].setMap(null);
+
+				// dispose of old polyLine
+				let polyLine = this.state.polyLine;
+				if (polyLine)
+					polyLine.setMap(null);
+
+				this.setState({busses: [], stops: [], busMarkers: [], stopMarkers: [], polyString: '', polyLine: null});
 				break;
 			default:
 				break;
