@@ -77,6 +77,12 @@ export class BusTimeApi {
      */
     private URL_BASE = 'http://bustime.mta.info/api/where/';
 
+    /**
+     * Gets the route objects that are near a specific position. This will also include fake routes admin have created.
+     * @param latitude The latitude to use.
+     * @param longitude The longitude to use.
+     * @returns The result of the operation which contains an array of route objects that are near the specified latitude/longitude.
+     */
     public async GetRoutesNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<Route>> | TypedResult<null>> {
         const url: string = `${this.URL_BASE}routes-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
@@ -129,6 +135,12 @@ export class BusTimeApi {
         }
     }
 
+    /**
+     * Gets the stop objects that are near a specific position. This will also include fake stops admin have created.
+     * @param latitude The latitude to use.
+     * @param longitude The longitude to use.
+     * @returns The result of the operation which contains an array of stop objects that are near the specified latitude/longitude.
+     */
     public async GetStopsNearPosition(latitude: number, longitude: number): Promise<TypedResult<Array<Stop> | null>> {
         const url: string = `${this.URL_BASE}stops-for-location.json?key=${this.KEY}&lat=${latitude}&lon=${longitude}`;
         try {
@@ -157,6 +169,11 @@ export class BusTimeApi {
         }
     }
 
+    /**
+     * Gets the extra data (polyline and bus stops) associated with a specific route.
+     * @param routeId The id of the route to get extra data for.
+     * @returns The result of the operation which contains the extra route data for the specified route.
+     */
     private async GetExtraRouteData(routeId: string): Promise<TypedResult<ExtraRouteData> | TypedResult<null>> {
         const url: string = `${this.URL_BASE}stops-for-route/${encodeURIComponent(routeId)}.json?key=${this.KEY}&includePolylines=true`;
         try {

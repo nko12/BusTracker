@@ -3,10 +3,17 @@ import { Button, TextField, Grid, Cell } from 'react-md';
 import { AdminViewProps } from './AdminTools';
 import { appState } from '../../BusTrackerState';
 
+/**
+ * Interface for the state variables that the ToggleUserAdmin component needs to use.
+ */
 interface ToggleUserAdminState {
 	targetUsername: string
 }
 
+/**
+ * Represents the contents of the Toggle Admin tab in the AdminTools window. This allows
+ * an administrator to grant or revoke admin priviliges on another user.
+ */
 export class ToggleUserAdmin extends React.Component<AdminViewProps, ToggleUserAdminState> {
 
 	public constructor(props: AdminViewProps) {
@@ -42,8 +49,13 @@ export class ToggleUserAdmin extends React.Component<AdminViewProps, ToggleUserA
 		);
 	}
 
+	/**
+	 * Toggles the admin status of the user whose username was provided in the textbox.
+	 * @param adminStatus: True to grant admin status, false to revoke it.
+	 */
 	private toggleAdminStatusRequested = async (adminStatus: boolean) => {
 
+		// Attempt to grant or revoke the admin status of the target user.
 		const result = await appState.api.toggleAdminRights(appState.user.id, this.state.targetUsername, adminStatus);
 		if (result.success) {
 			if (adminStatus) {
