@@ -6,24 +6,43 @@ interface ToastMessage {
 	text: string
 }
 
+/**
+ * Interface for the components that run under the AdminTools component to use.
+ */
 export interface AdminViewProps {
+    /**
+     * The callback admin view components can use to tell the admin view to show a toast message.
+     */
 	showToastCallback(message: string): void;
 }
 
+/**
+ * Interface for the properties that the AdminTools component exposes.
+ */
 export interface AdminToolsProps {
-	showDialog: boolean;
-	onDialogClosed(): void;
+    showDialog: boolean;
+    onDialogClosed(): void;
 	selectedTabIndex: number
 }
 
+/**
+ * Interface for the state variables that the AdminTools component uses.
+ */
 interface AdminToolsState {  
 	isShowingDialog: boolean;
 	toasts: Array<ToastMessage>;
 	selectedTabIndex: number;
 }
 
+/**
+ * Represents the administrative tools view. This is a popup window with tabs that allow admins
+ * to control the system.
+ */
 export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState> {
 
+    /**
+     * Pointer to the DeleteObjects component.
+     */
 	private deleteObjectsChild: DeleteObjects;
 
 	public constructor(props: AdminToolsProps) {
@@ -121,7 +140,10 @@ export class AdminTools extends React.Component<AdminToolsProps, AdminToolsState
 
 	private onTabChanged = async (newActiveTabIndex: number, tabId: string): Promise<void> => {
 		this.setState({selectedTabIndex: newActiveTabIndex});
-		if (tabId == 'delete-object-tab' && this.deleteObjectsChild != null) {
+        
+        // If the delete object tab is selected, make the DeleteObjects component reload the lists
+        // of fake routes and fake stops.
+        if (tabId == 'delete-object-tab' && this.deleteObjectsChild != null) {
 			await this.deleteObjectsChild.reloadFakeObjects();
 		}
 	}

@@ -201,6 +201,11 @@ export class BusTrackerApi {
         return <Result>(await this.makeGraphQLRequest<any>(mutation, 'removeStop', true, false));
     }
 
+	/**
+	 * Gets the routes that are near a specific location.
+	 * @param location The coordinates to get the nearby routes of.
+	 * @returns The result of the operation which contains the list of stops that are near the coordinates.
+	 */
     public async getRoutesNearLocation(location: Coords): Promise<TypedResult<Array<Route>>> {
         const query = gql`
 		query {
@@ -221,6 +226,11 @@ export class BusTrackerApi {
         return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
     }
 
+	/**
+	 * Gets the stops that are nearby a specific location.
+	 * @param location The coordinates to get the nearby stops of.
+	 * @returns The result of the operation which contains the list of stops that are near the coordinates.
+	 */
     public async getStopsNearLocation(location: Coords): Promise<TypedResult<Array<Stop>>> {
         const query = gql`
 			query GetNearbyStops {
@@ -238,6 +248,11 @@ export class BusTrackerApi {
         return new TypedResult(result.success, <Array<Stop>>result.data['stops'], result.message);
     }
 
+	/**
+	 * Gets the stop objects associated with the given list of stop ids.
+	 * @param stopIds The ids of the stops to get.
+	 * @returns The result of the operation which contains the resulting list of stops.
+	 */
     public async getStops(stopIds: Array<string>): Promise<TypedResult<Array<Stop>>> {
         const query = gql`
 			query GetStops {
@@ -254,6 +269,11 @@ export class BusTrackerApi {
         return new TypedResult(result.success, <Array<Stop>>result.data['stops'], result.message);
     }
 
+	/**
+	 * Gets the route objects associated with the given list of route ids.
+	 * @param routeIds The ids of the routes to get.
+	 * @returns The result of the operation which contains the resulting list of routes.
+	 */
     public async getRoutes(routeIds: Array<string>): Promise<TypedResult<Array<Route>>> {
         const query = gql`
 		query GetFakeRoutes {
@@ -270,6 +290,10 @@ export class BusTrackerApi {
         return new TypedResult(result.success, <Array<Route>>result.data['routes'], result.message);
     }
 
+	/**
+	 * Gets all the fake stop objects that admin have created.
+	 * @returns The result of the operation which contains all the fake stops that have been created.
+	 */
     public async getFakeStops(): Promise<TypedResult<Array<Stop>>> {
         const query = gql`
             query GetFakeStops {
@@ -286,6 +310,10 @@ export class BusTrackerApi {
         return new TypedResult(result.success, <Array<Stop>>result.data['stops'], result.message);
     }
 
+	/**
+	 * Gets all the fake route objects that admin have created.
+	 * @returns The result of the operation which contains all the fake routes that have been created.
+	 */
     public async getFakeRoutes(): Promise<TypedResult<Array<Route>>> {
         const query = gql`
             query GetFakeRoutes {
@@ -314,12 +342,15 @@ export class BusTrackerApi {
         Promise<TypedResult<T>> {
 
         try {
+			// Perform either a query or mutation depending on the isMutation value.
             let result: ExecutionResult;
             if (isMutation)
                 result = await this.client.mutate({ mutation: interpolatedQuery });
             else
                 result = await this.client.query({ query: interpolatedQuery, fetchPolicy: 'network-only' });
 
+			// All queries and mutations have an error field. If it isn't null, something went wrong.
+			// If the operation succeeded, copy the data and return that.
             if (result.data[methodName]['error'])
                 return new TypedResult(false, null, 'Server failed request: ' + result.data[methodName]['error']);
             else

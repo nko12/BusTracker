@@ -4,6 +4,9 @@ import { appState } from '../../BusTrackerState';
 import { AdminViewProps } from './AdminTools';
 // import { BusTrackerEvents } from '../../BusTrackerEvents';
 
+/**
+ * Interface for the state variables that the CreateStop component needs to use.
+ */
 interface CreateStopState {
 	latitude: string,
 	longitude: string,
@@ -11,6 +14,10 @@ interface CreateStopState {
 	lastStopId: string
 }
 
+/**
+ * Represents the contents of the Create Bus Stop tab in the AdminTools window. This 
+ * component allows an administrator to create a new bus stop.
+ */
 export class CreateStop extends React.Component<AdminViewProps, CreateStopState> {
 
 	public constructor(props: AdminViewProps) {
@@ -56,15 +63,18 @@ export class CreateStop extends React.Component<AdminViewProps, CreateStopState>
 		);
 	}
 
+	/**
+	 * Creates a new fake bus stop using the bus stop name, latitude and longitude that the administrator provided
+	 * to the user interface.
+	 */
 	private addNewBus = async (): Promise<void> => {
 		
+		// Attempt to create the new stop.
 		const result = await appState.api.addNewStop(appState.user.id, this.state.name, parseFloat(this.state.latitude), parseFloat(this.state.longitude));
 		if (result.success) {
-			// BusTrackerEvents.toast.showToastRequested.dispatch('Successfully created new bus stop.')
 			this.setState({latitude: '', longitude: '', name: '', lastStopId: result.data});
 			this.props.showToastCallback('Successfully created new bus stop. ID: ' + result.data);
 		} else {
-			// BusTrackerEvents.toast.showToastRequested.dispatch('Failed to create new bus stop: ' + result.message);
 			this.props.showToastCallback('Failed to create new bus stop: ' + result.message);
 		}
 	}

@@ -6,8 +6,17 @@ import {Coords} from 'google-map-react';
  * Represents the shape of the BusTracker Application's state.
  */
 export interface BusTrackerAppState {
+	/**
+	 * The user object which contains various user data.
+	 */
 	user: User;
+	/**
+	 * The BusTrackerApi object to use to communicate with the BusTracker server.
+	 */
 	api: BusTrackerApi;
+	/**
+	 * The current location of the user.
+	 */
 	location: Coords;
 }
 
