@@ -5,11 +5,18 @@ import { AdminViewProps } from './AdminTools';
 import { Route } from '../../models/Route';
 import { Stop } from '../../models/Stop';
 
+/**
+ * Interface for the state variables that the DeleteObjects component needs to use.
+ */
 interface DeleteObjectState {
 	routes: Array<Route>;
 	stops: Array<Stop>;
 }
 
+/**
+ * Represents the contents of the Delete Objects tab in the AdminTools window. This allows
+ * admin to delete either fake bus stops or fake routes that they have created.
+ */
 export class DeleteObjects extends React.Component<AdminViewProps, DeleteObjectState> {
 
 	public constructor(props: AdminViewProps) {
@@ -20,6 +27,9 @@ export class DeleteObjects extends React.Component<AdminViewProps, DeleteObjectS
 		}
 	}
 
+	/**
+	 * Reloads the list of fake stops and fake routes.
+	 */
 	public reloadFakeObjects = async (): Promise<void> => {
 		let stopResult = await appState.api.getFakeStops();
 		if (!stopResult.success) {
@@ -76,8 +86,13 @@ export class DeleteObjects extends React.Component<AdminViewProps, DeleteObjectS
 		);
 	}
 
+	/**
+	 * Called when one of the fake stops have been clicked in the listview. Attempts to
+	 * delete the fake stop.
+	 */
 	private deleteStopRequested = async (stop: Stop): Promise<void> => {
 
+		// Attempt to delete the fake stop.
 		const result = await appState.api.removeStop(appState.user.id, stop.id);
 		if (result.success) {
 			this.props.showToastCallback('Bus stop successfully removed.');
@@ -89,8 +104,13 @@ export class DeleteObjects extends React.Component<AdminViewProps, DeleteObjectS
 		}
 	}
 
+	/**
+	 * Called when one of the fake routes have been clicked in the listview. Attempts to
+	 * delete the fake route.
+	 */
 	private deleteRouteRequested = async (route: Route): Promise<void> => {
 
+		// Attempt to delete the fake route.
 		const result = await appState.api.removeRoute(appState.user.id, route.id);
 		if (result.success) {
 			this.props.showToastCallback('Bus stop successfully removed.');

@@ -3,12 +3,19 @@ import { TextField, Divider, Button, Grid, Cell } from 'react-md';
 import { AdminViewProps } from './AdminTools';
 import { appState } from '../../BusTrackerState';
 
+/**
+ * Interface for the state variables that the CreateRoute component needs to use.
+ */
 interface CreateRouteState {
 	positionText: string,
 	name: string,
 	lastRouteId: string
 }
 
+/**
+ * Represents the contents of the Create Route tab in the AdminTools window. This component
+ * allows an administrator to create a new route.
+ */
 export class CreateRoute extends React.Component<AdminViewProps, CreateRouteState> {
 
 	public constructor(props: AdminViewProps) {
@@ -68,6 +75,10 @@ export class CreateRoute extends React.Component<AdminViewProps, CreateRouteStat
 		);
 	}
 
+    /**
+     * Creates a new fake route using the route name that was provided and the list of latitude,longitude pairs
+     * that were provided.
+     */
 	private onSubmitRoute = async (): Promise<void> => {
 
         // Take the contents of the route definition textbox and split it along each new long to get each string latitude/longitude pair.

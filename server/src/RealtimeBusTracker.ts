@@ -20,6 +20,9 @@ var hm = new Map<string, MapValueType>();
 var numClicks = 0;
 var clickLimit = 5;
 
+/*
+Returns a decycled object that is used to find a specific client id for tracking
+*/
 function decycle(object : any) {
 	var objects: any[] = [], paths: any[] = [];
 	function resolve(value: any, path: any) {
@@ -51,6 +54,9 @@ function decycle(object : any) {
 
 var stopInfoArray = [[0, {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}}]];
 
+/*
+Returns an array of stop objects containing their id and location
+*/
 function getStopInfo(client: any) {
 	request('http://bustime.mta.info/api/where/stops-for-location.json?lat=40.748433&lon=-73.985656&latSpan=100&lonSpan=100&key=8e4264f7-a1c1-49f3-930a-f2f1430f5e90', function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
@@ -62,7 +68,6 @@ function getStopInfo(client: any) {
 					var stopInfoObject = {ID: 0, /*name: 'RoadA/RoadB',*/ location:{lat: 0, lng: 0}};
 					stopInnerArray[0] = loc.data.stops[i].code;
 					stopInfoObject.ID = loc.data.stops[i].code;
-					//stopInfoObject.name = loc.data.stops[i].name;
 					stopInfoObject.location.lat = loc.data.stops[i].lat;
 					stopInfoObject.location.lng = loc.data.stops[i].lon;
 					stopInnerArray[1] = stopInfoObject;
@@ -79,16 +84,21 @@ function getStopInfo(client: any) {
 	});
 }
 
+
+/*
+This function executes when a client connects to the server
+*/
 IO.on('connection', (client: any) => {
 	var boolObj = {bus: false, stop: false};
 	var thisClientID = JSON.stringify(decycle(client.nsp.server.eio.clients)).split('\"')[1];
-	hm.set(thisClientID, boolObj);
+	hm.set(thisClientID, boolObj);	//Adds the connected client to a hashMap for tracking
 	
 	hm.forEach((value: any, key: any, map: any) => {
 		console.log('[' + key + '] = ' + JSON.stringify(value));
 	});
 	
 	var stopTimer: any = undefined;
+	//Executes when the client asks the server to track a stop in real-time
 	client.on('subscribeToStop', (param: any) => {
 		boolObj = {bus: false, stop: true};
 		hm.set(thisClientID, boolObj);
@@ -98,7 +108,7 @@ IO.on('connection', (client: any) => {
 			clearInterval(stopTimer);
 		
 		// pseudo-do-while loop
-		if (numClicks < clickLimit)
+		if (numClicks < clickLimit)	//Prevents the client from asking the server for info too frequently
 			getBussesFromStop(param.stopID, client, thisClientID);
 		stopTimer = setInterval(() => {
 			let got = hm.get(thisClientID);
@@ -110,6 +120,7 @@ IO.on('connection', (client: any) => {
 	});
 	
 	var busTimer: any = undefined;
+	//Executes when the client asks the server to track a single bus in real-time
 	client.on('subscribeToBus', (param: any) => {
 		boolObj = {bus: true, stop: false};
 		hm.set(thisClientID, boolObj);
@@ -122,11 +133,11 @@ IO.on('connection', (client: any) => {
 		// pseudo-do-while loop
 		if (numClicks < clickLimit)
 			getBus(param.busID, client, thisClientID);
-		busTimer = setInterval(() => {
+		busTimer = setInterval(() => {	//Starts an infinite loop that is used to update tracking info
 			let got = hm.get(thisClientID);
 			console.log(JSON.stringify(got));
 			if (got == undefined || got.bus == false)
-				clearInterval(busTimer);
+				clearInterval(busTimer);	//Stops the current tracking loop if the user subscribes to something else
 			getBus(param.busID, client, thisClientID);
 			numClicks = 0;
 		}, param.interval);
@@ -147,6 +158,7 @@ IO.on('connection', (client: any) => {
 		getStopsFromBus(busID, client);
 	});
 
+	//Deletes the client from the hashMap when they disconnect
 	client.on('disconnect', () => {
 		console.log('disconnecting ' + thisClientID);
 		hm.delete(thisClientID);
@@ -176,6 +188,7 @@ function getStop(stopID: any, client: any) {
 }
 
 var busLoc = {lat: 0, lng: 0};
+//Used when subsribing to a bus; every update interval, this function is called, updating the tracked bus's location
 function getBus(busID: any, client: any, clientID: any) {
 	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
@@ -197,6 +210,7 @@ function getBus(busID: any, client: any, clientID: any) {
 }
 
 var busLocArray = [{location: {lat: 0, lng: 0}, ID: 'nil'}];
+//Used when tracking a stop; Updates all of the bus locations that run for this stop
 function getBussesFromStop(stopID: any, client: any, clientID: any) {
 	request(URL + 'siri/stop-monitoring.json?key=' + KEY + '&MonitoringRef=' + stopID, function (error: any, response: any, body: any) {
 		if (!error && response.statusCode == 200) {
@@ -224,6 +238,7 @@ function getBussesFromStop(stopID: any, client: any, clientID: any) {
 }
 
 var stopLocArray = [{location: {lat: 0, lng: 0}, ID: 'nil'}];
+//Returns all of the stops that a single bus serves
 function getStopsFromBus(busID: any, client : any) {
 	request(URL + 'siri/vehicle-monitoring.json?key=' + KEY + '&VehicleRef=' + busID, function (error : any, response : any, body : any) {
 		if (!error && response.statusCode == 200) {

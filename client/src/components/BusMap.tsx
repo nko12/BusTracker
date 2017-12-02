@@ -9,7 +9,6 @@ const IMG = 'https://i.imgur.com/7f5HCOn.png';
 
 const ORIGIN = {lat: 0.0, lng: 0.0};
 const NYC = {lat: 40.7588528, lng: -73.9852625};
-
 const INTERVAL = 10000;
 
 export interface BusType {
@@ -67,6 +66,16 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		BusTrackerEvents.map.mapDisplayChangeRequested.add(this.displayChangeRequested);
 	}
 
+	// upon mounting, google is no longer undefined, so create the necessary empty arrays
+	componentDidMount(): void {
+		this.setState({
+			busMarkers: [] as google.maps.Marker[],
+			stopMarkers: [] as google.maps.Marker[],
+			polyLine: null
+		});
+	}
+
+	// converts an encoded polyString into an array of lat/lng's, which Google Maps can understand
 	convert(encoded: string) {
 		let len = encoded.length, index = 0, array = [], lat = 0, lng = 0;
 
@@ -96,21 +105,20 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		return array;
 	}
 
-	componentDidMount(): void {
-		this.setState({
-			busMarkers: [] as google.maps.Marker[],
-			stopMarkers: [] as google.maps.Marker[],
-			polyLine: null
-		});
-	}
-
+	// called when calling `BusTrackerEvents.map.mapDisplayChangeRequested.dispatch()`
+	// this is how the SideBar sends data to the BusMap for displaying
 	displayChangeRequested = (args: MapDisplayChangeArguments) => {
 		switch (args.type) {
+			// TODO: currently, the app doesn't have support for tracking individual busses.
+			// The BusMap component can handle it though.
+			// The main issue was time constraints, so storing individual bus data such as
+			// user favorites was never implemented on the DataBase or SideBar side.
 			case SelectedObjectType.Bus: // BUS
 				// cancel realTime subscription if fake
 				if (args.ID.split('_')[0] == 'FAKE')
 					cancelSubscriptions();
 
+				// get realtime bus data from socket
 				subscribeToBus({interval: INTERVAL, busID: args.ID.split('_')[1]}, (err: any, busLoc: GoogleMapReact.Coords) => {
 					this.updateBusses([{location: busLoc, ID: args.ID}]);
 				});
@@ -142,7 +150,8 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 				else
 					console.log('error: args.polyString is ' + JSON.stringify(args.polyString) + ' in displayChangeRequested()');
 				break;
-			case SelectedObjectType.None:
+
+			case SelectedObjectType.None: // NONE
 				// stop getting updates
 				cancelSubscriptions();
 
@@ -169,6 +178,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		}
 	}
 
+	// Update the busses displayed on the map.
 	updateBusses = (newBusses: BusType[]) => {
 		// ignore busses at the origin
 		if (newBusses.length > 0 && JSON.stringify(newBusses[0].location) == JSON.stringify(ORIGIN))
@@ -194,6 +204,9 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			oldMarkers[i].setMap(null);
 	}
 
+	// Update the stops displayed on the map.
+	// TODO: currently the BusMap component can handle displaying more than one Stop. In order to get this functionality
+	// in the full app though, more implementation is required on the DataBase and SideBar side.
 	updateStops = (newStops: StopType[]) => {
 		// ignore stops at the origin
 		if (newStops.length == 0 || newStops.length > 0 && JSON.stringify(newStops[0].location) == JSON.stringify(ORIGIN))
@@ -230,6 +243,9 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 			oldMarkers[i].setMap(null);
 	}
 
+	// Update the polyline displayed on the map.
+	// TODO: the BusMap does not yet have functionality for more than one PolyLine on the map at a time.
+	// That should be easy to implement, but more functionality is required on the DataBase and SideBar side first.
 	updatePolyline(newPolyString: string) {
 		// ignore if the same
 		if (newPolyString == this.state.polyString)
@@ -256,6 +272,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		this.setState({polyString: newPolyString, polyLine: newPolyLine});
 	}
 
+	// Utility function for getting the midpoint of two lat/lng's.
 	midPoint(a: GoogleMapReact.Coords, b: GoogleMapReact.Coords) {
 		return {
 			lat: (a.lat + b.lat) / 2,
@@ -263,6 +280,7 @@ export class BusMap extends React.Component<BusMapProps, BusMapState> {
 		};
 	}
 
+	// Render the GoogleMapReact.GoogleMap
 	render() {
 		return (
 			<GoogleMap

@@ -15,9 +15,6 @@ const favorite = <FontIcon>star</FontIcon>;
 const unfavorite = <FontIcon>star_border</FontIcon>;
 
 export interface SideBarState {
-	// detectedBusses: Bus[];
-	// favoriteBusses: Bus[];
-
 	detectedStops: Stop[];
 	favoriteStops: Stop[];
 
@@ -36,8 +33,6 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 	public constructor(props: SideBarProps) {
 		super(props);
 		this.state = {
-			// detectedBusses: [] as Bus[],
-			// favoriteBusses: [] as Bus[],
 
 			detectedStops: [] as Stop[],
 			favoriteStops: [] as Stop[],
@@ -78,8 +73,6 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 		// TODO: Remove duplicates between what is nearby and what the user has favorited.
 		this.setState({
-			// detectedBusses: busResult.data,
-			// favoriteBusses: favoriteBusResult.data,
 
 			detectedStops: stopResult.data,
 			favoriteStops: favoriteStopResult.data,
@@ -108,12 +101,12 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 			// Modify the list to add this favorite.
 			setTimeout(() => {
 
-				// remove stop from detected list
+				// Remove stop from detected list
 				let stops = this.state.detectedStops.slice(); // slice() performs shallow copy
 				stops.splice(stops.indexOf(stop), 1);
 				this.setState({detectedStops: stops});
 
-				// add it to favorites list
+				// Add it to favorites list
 				stops = this.state.favoriteStops.slice();
 				stops.push(stop);
 				this.setState({favoriteStops: stops});
@@ -134,12 +127,12 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 			// Modify the list to remove the favorite.
 			setTimeout(() => {
-				// remove stop from favorite list
+				// Remove stop from favorite list
 				let stops = this.state.favoriteStops.slice(); // slice() performs shallow copy
 				stops.splice(stops.indexOf(stop), 1);
 				this.setState({favoriteStops: stops});
 
-				// add it to detected list
+				// Add it to detected list
 				stops = this.state.detectedStops.slice();
 				stops.push(stop);
 				this.setState({detectedStops: stops});
@@ -192,12 +185,12 @@ export class SideBar extends React.Component<SideBarProps, SideBarState> {
 
 			// Modify the list to remove the favorite.
 			setTimeout(() => {
-				// remove stop from favorite list
+				// Remove stop from favorite list
 				let routes = this.state.favoriteRoutes.slice(); // slice() performs shallow copy
 				routes.splice(routes.indexOf(route), 1);
 				this.setState({favoriteRoutes: routes});
 
-				// add it to detected list
+				// Add it to detected list
 				routes = this.state.detectedRoutes.slice();
 				routes.push(route);
 				this.setState({detectedRoutes: routes});

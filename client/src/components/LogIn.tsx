@@ -1,3 +1,4 @@
+// Imports: 
 import * as React from 'react';
 import * as cookies from 'js-cookie';
 import * as md5 from 'md5';
@@ -8,6 +9,7 @@ import {BusTrackerApi} from '../api/BusTrackerApi';
 import {User} from '../models/User';
 import {TypedResult} from '../Result';
 
+// States: 
 interface LogInState {
 	active: boolean;
 	username: string;
@@ -16,6 +18,7 @@ interface LogInState {
 
 interface LogInProps {}
 
+// This function holds the functions for the login screen
 export class LogIn extends React.Component<LogInProps, LogInState> {
 	private readonly api: BusTrackerApi;
 
@@ -31,7 +34,7 @@ export class LogIn extends React.Component<LogInProps, LogInState> {
 	}
 
 	public async loginOrRegisterUser(loginOrRegister: string): Promise<void> {
-		// do not accept the empty string
+		// Do not accept the empty string
 		if (this.state.username == '' || this.state.password == '') {
 			alert('Username and/or password cannot be empty');
 			return;
@@ -49,24 +52,25 @@ export class LogIn extends React.Component<LogInProps, LogInState> {
 			// Store the user object to the state and alert the rest of the UI that login has occurred.
 			appState.user = Object.assign({}, loginRegisterResult.data);
 			BusTrackerEvents.login.loginSucceeded.dispatch();
-			// this.props.sendToParent(stopResult.data);
 		} else
 			alert(loginRegisterResult.message);
 	}
 
 	public hideLogin = () => {
-		// get rid of the blurr once buttons 
+		// Get rid of the blurr once buttons 
 		document.getElementsByClassName('blurr')[0].classList.remove('blurr');
 
-		// janky way to stop this from rendering
+		// Set active to false
 		this.setState({active: false});
 	}
 
 	render() {
-		// janky way to get this component to stop rendering
+		// Set the active state
 		if (!this.state.active)
 			return <div/>;
 
+	// The return function holds text fields for the username and password.
+	// It also holds the buttons Login and Register and the logic for them. 
 		return (
 			<div className='blocker'>
 				<Card className='login' >
